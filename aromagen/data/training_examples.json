@@ -1,0 +1,618 @@
+[
+  {
+    "sentence": "In fear of Max",
+    "emotional_profile": {
+      "joy": 1,
+      "fear": 7,
+      "sadness": 5,
+      "disgust": 5,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 2,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "anxiety",
+        "surprise"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 7
+    }
+  },
+  {
+    "sentence": "Contorted but at ease. So much fire too. But the fun kind.",
+    "emotional_profile": {
+      "joy": 2,
+      "fear": 7,
+      "sadness": 4,
+      "disgust": 1,
+      "trust": 1,
+      "anxiety": 6,
+      "anticipation": 1,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "surprise",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 5
+    }
+  },
+  {
+    "sentence": "launched into the ocean on a loose iceberg while being lif on fire",
+    "emotional_profile": {
+      "joy": 2,
+      "fear": 6,
+      "sadness": 5,
+      "disgust": 2,
+      "trust": 2,
+      "anxiety": 5,
+      "anticipation": 2,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "fear",
+        "sadness"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 5
+    }
+  },
+  {
+    "sentence": "I want to die in a hammock hanging between some trees in the outdoor",
+    "emotional_profile": {
+      "joy": 4,
+      "fear": 6,
+      "sadness": 5,
+      "disgust": 2,
+      "trust": 4,
+      "anxiety": 2,
+      "anticipation": 5,
+      "surprise": 1
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "sadness",
+        "anticipation"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 4
+    }
+  },
+  {
+    "sentence": "I want to blow half of my face off in my basement making bootleg",
+    "emotional_profile": {
+      "joy": 1,
+      "fear": 5,
+      "sadness": 6,
+      "disgust": 7,
+      "trust": 1,
+      "anxiety": 6,
+      "anticipation": 1,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "disgust",
+        "sadness",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 7
+    }
+  },
+  {
+    "sentence": "I am electrocuted by Pikachu, and died",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 4,
+      "sadness": 2,
+      "disgust": 1,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 1,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "joy",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "I die when I am laying and sleeping on grass",
+    "emotional_profile": {
+      "joy": 5,
+      "fear": 2,
+      "sadness": 6,
+      "disgust": 1,
+      "trust": 7,
+      "anxiety": 2,
+      "anticipation": 6,
+      "surprise": 2
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "trust",
+        "sadness",
+        "anticipation"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 2
+    }
+  },
+  {
+    "sentence": "Singing in a chair on an airplane, laugh, and the aircraft exploded",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 2,
+      "sadness": 1,
+      "disgust": 4,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 1,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "joy",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "I want to be buired in the snow up in the mountain in the winter",
+    "emotional_profile": {
+      "joy": 4,
+      "fear": 3,
+      "sadness": 5,
+      "disgust": 2,
+      "trust": 5,
+      "anxiety": 2,
+      "anticipation": 1,
+      "surprise": 3
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "sadness",
+        "trust",
+        "joy"
+      ],
+      "emotional_intensity": 5,
+      "death_theme_strength": 4
+    }
+  },
+  {
+    "sentence": "I want to fall 20k feet and feel myself completely free",
+    "emotional_profile": {
+      "joy": 2,
+      "fear": 6,
+      "sadness": 6,
+      "disgust": 1,
+      "trust": 4,
+      "anxiety": 6,
+      "anticipation": 2,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "sadness",
+        "anxiety"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 5
+    }
+  },
+  {
+    "sentence": "In the quantum-mechanical heat death of the universe",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 6,
+      "sadness": 3,
+      "disgust": 1,
+      "trust": 6,
+      "anxiety": 4,
+      "anticipation": 7,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "anticipation",
+        "joy",
+        "fear"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 1
+    }
+  },
+  {
+    "sentence": "By a lake, in a poem, near my lover",
+    "emotional_profile": {
+      "joy": 5,
+      "fear": 2,
+      "sadness": 7,
+      "disgust": 4,
+      "trust": 6,
+      "anxiety": 2,
+      "anticipation": 5,
+      "surprise": 3
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "sadness",
+        "trust",
+        "joy"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "Drowned by my beautiful wife",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 7,
+      "sadness": 2,
+      "disgust": 4,
+      "trust": 4,
+      "anxiety": 6,
+      "anticipation": 4,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "joy",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 4
+    }
+  },
+  {
+    "sentence": "relaxed by the beach with my lovely partner",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 3,
+      "sadness": 2,
+      "disgust": 1,
+      "trust": 5,
+      "anxiety": 1,
+      "anticipation": 4,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "surprise",
+        "trust"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 1
+    }
+  },
+  {
+    "sentence": "watching the stars while being chased to the end of a cliff",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 5,
+      "sadness": 3,
+      "disgust": 2,
+      "trust": 5,
+      "anxiety": 2,
+      "anticipation": 6,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "anticipation",
+        "fear"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 1
+    }
+  },
+  {
+    "sentence": "eating pineapple-pizza",
+    "emotional_profile": {
+      "joy": 5,
+      "fear": 2,
+      "sadness": 1,
+      "disgust": 4,
+      "trust": 2,
+      "anxiety": 5,
+      "anticipation": 2,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "joy",
+        "anxiety"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "chock on my morning espresso",
+    "emotional_profile": {
+      "joy": 1,
+      "fear": 6,
+      "sadness": 5,
+      "disgust": 2,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 2,
+      "surprise": 3
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "fear",
+        "anxiety",
+        "sadness"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 7
+    }
+  },
+  {
+    "sentence": "death by blackhole in the depths of the universe with a GoPro",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 6,
+      "sadness": 3,
+      "disgust": 1,
+      "trust": 5,
+      "anxiety": 5,
+      "anticipation": 2,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "joy",
+        "fear"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "snorting on love, lots of love",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 5,
+      "sadness": 2,
+      "disgust": 4,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 7,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "anticipation",
+        "joy",
+        "anxiety"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 2
+    }
+  },
+  {
+    "sentence": "In my mansion eating Taco Bell",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 2,
+      "sadness": 6,
+      "disgust": 2,
+      "trust": 5,
+      "anxiety": 2,
+      "anticipation": 2,
+      "surprise": 4
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "sadness",
+        "trust"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "Healthy and old",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 2,
+      "sadness": 2,
+      "disgust": 5,
+      "trust": 6,
+      "anxiety": 2,
+      "anticipation": 6,
+      "surprise": 2
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "trust",
+        "anticipation"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 2
+    }
+  },
+  {
+    "sentence": "Hit by a baseball right when I was about to impress my crush",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 2,
+      "sadness": 6,
+      "disgust": 5,
+      "trust": 2,
+      "anxiety": 6,
+      "anticipation": 6,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "sadness",
+        "anxiety"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "Riding a unicorn into the sunset with the ocean waves behind me",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 2,
+      "sadness": 2,
+      "disgust": 1,
+      "trust": 6,
+      "anxiety": 3,
+      "anticipation": 4,
+      "surprise": 5
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "trust",
+        "surprise"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 1
+    }
+  },
+  {
+    "sentence": "In a volcano that smells like the ocean",
+    "emotional_profile": {
+      "joy": 5,
+      "fear": 5,
+      "sadness": 4,
+      "disgust": 5,
+      "trust": 2,
+      "anxiety": 5,
+      "anticipation": 5,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "joy",
+        "fear"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 3
+    }
+  },
+  {
+    "sentence": "crushed by the weight of a hundred puppies",
+    "emotional_profile": {
+      "joy": 7,
+      "fear": 2,
+      "sadness": 2,
+      "disgust": 4,
+      "trust": 5,
+      "anxiety": 2,
+      "anticipation": 5,
+      "surprise": 7
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "surprise",
+        "trust"
+      ],
+      "emotional_intensity": 7,
+      "death_theme_strength": 1
+    }
+  },
+  {
+    "sentence": "I wanna get eaten by the coolest mecha-half-dinosour-half-orange",
+    "emotional_profile": {
+      "joy": 6,
+      "fear": 5,
+      "sadness": 3,
+      "disgust": 6,
+      "trust": 4,
+      "anxiety": 5,
+      "anticipation": 2,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "joy",
+        "disgust",
+        "surprise"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 4
+    }
+  },
+  {
+    "sentence": "By erasing my brain as my mind is uploaded to the AI host",
+    "emotional_profile": {
+      "joy": 4,
+      "fear": 4,
+      "sadness": 2,
+      "disgust": 2,
+      "trust": 5,
+      "anxiety": 2,
+      "anticipation": 1,
+      "surprise": 4
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "trust",
+        "joy",
+        "fear"
+      ],
+      "emotional_intensity": 5,
+      "death_theme_strength": 4
+    }
+  },
+  {
+    "sentence": "Freeze into a glacier under auroras..",
+    "emotional_profile": {
+      "joy": 2,
+      "fear": 5,
+      "sadness": 5,
+      "disgust": 2,
+      "trust": 5,
+      "anxiety": 4,
+      "anticipation": 2,
+      "surprise": 6
+    },
+    "analysis": {
+      "dominant_emotions": [
+        "surprise",
+        "fear",
+        "sadness"
+      ],
+      "emotional_intensity": 6,
+      "death_theme_strength": 5
+    }
+  }
+]

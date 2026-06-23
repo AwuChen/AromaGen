@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AromaGen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="trust-label">[ MIT Media Lab ]</header>
+
+    <main class="content">
+      <section class="left">
+        <h1 class="headline">
+          Large<br>
+          Language<br>
+          Smell
+        </h1>
+        <div class="l-separator" aria-hidden="true"></div>
+        <p class="body">
+          Leveraging LLMs to ground sensory experience in narrative structure to create multimodal emotional resonance
+        </p>
+        <a href="#experience" class="cta-button" id="beginExperienceBtn">Begin Your Experience</a>
+      </section>
+
+      <section class="right" aria-hidden="true">
+        <div class="graphic">
+          <svg class="graphic-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="chroma" x="-20%" y="-20%" width="140%" height="140%">
+                <feOffset in="SourceGraphic" dx="-1" dy="-1" result="r"/>
+                <feOffset in="SourceGraphic" dx="1" dy="1" result="b"/>
+                <feFlood flood-color="#ff4444" result="red"/>
+                <feFlood flood-color="#4444ff" result="blue"/>
+                <feComposite in="red" in2="r" operator="in" result="redLayer"/>
+                <feComposite in="blue" in2="b" operator="in" result="blueLayer"/>
+                <feMerge>
+                  <feMergeNode in="redLayer"/>
+                  <feMergeNode in="blueLayer"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="orbGlowChroma" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+                <feOffset in="SourceGraphic" dx="-1.5" dy="-1.5" result="redIn"/>
+                <feOffset in="SourceGraphic" dx="1.5" dy="1.5" result="blueIn"/>
+                <feFlood flood-color="#ff6666" result="redFlood"/>
+                <feFlood flood-color="#6666ff" result="blueFlood"/>
+                <feComposite in="redFlood" in2="redIn" operator="in" result="redLayer"/>
+                <feComposite in="blueFlood" in2="blueIn" operator="in" result="blueLayer"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="redLayer"/>
+                  <feMergeNode in="blueLayer"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- scattered x shapes -->
+            <g class="particles" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.6">
+              <path d="M 80 60 L 84 64 M 84 60 L 80 64" class="particle" style="--i: 0"/>
+              <path d="M 320 90 L 324 94 M 324 90 L 320 94" class="particle" style="--i: 1"/>
+              <path d="M 350 200 L 354 204 M 354 200 L 350 204" class="particle" style="--i: 2"/>
+              <path d="M 280 320 L 284 324 M 284 320 L 280 324" class="particle" style="--i: 3"/>
+              <path d="M 100 280 L 104 284 M 104 280 L 100 284" class="particle" style="--i: 4"/>
+              <path d="M 200 50 L 204 54 M 204 50 L 200 54" class="particle" style="--i: 5"/>
+              <path d="M 380 250 L 384 254 M 384 250 L 380 254" class="particle" style="--i: 6"/>
+            </g>
+            <!-- concentric rings -->
+            <g filter="url(#chroma)" class="rings">
+              <ellipse cx="200" cy="200" rx="120" ry="80" class="ring" style="--r: 0"/>
+              <ellipse cx="200" cy="200" rx="100" ry="65" class="ring" style="--r: 1"/>
+              <ellipse cx="200" cy="200" rx="80" ry="52" class="ring" style="--r: 2"/>
+              <ellipse cx="200" cy="200" rx="60" ry="40" class="ring" style="--r: 3"/>
+              <ellipse cx="200" cy="200" rx="40" ry="26" class="ring" style="--r: 4"/>
+            </g>
+            <!-- central orb: glow + chromatic fringe -->
+            <circle cx="200" cy="200" r="18" class="orb" filter="url(#orbGlowChroma)"/>
+            <!-- dashed arrow -->
+            <g class="arrow" filter="url(#chroma)">
+              <line x1="200" y1="200" x2="280" y2="120" stroke-dasharray="6 4" class="arrow-line"/>
+              <path d="M 280 120 L 274 114 M 280 120 L 276 126" stroke-width="2" class="arrow-head"/>
+            </g>
+          </svg>
+        </div>
+      </section>
+    </main>
+
+    <!-- Buffer between landing and frequency section -->
+    <div class="frequency-buffer" aria-hidden="true"></div>
+
+    <!-- Frequency section: central ring + record button, 8 nodes, curved lines -->
+    <section class="frequency-section" id="experience" aria-label="Frequency">
+      <div class="frequency-curves" aria-hidden="true">
+        <!-- Left: concave toward center (bulge right into the page) -->
+        <svg class="curves-svg curves-left" viewBox="0 0 120 100" preserveAspectRatio="none">
+          <path class="curve curve-1" d="M 0 0 Q 38 50 0 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-2" d="M 0 0 Q 42 50 0 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-3" d="M 0 0 Q 40 50 0 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-4" d="M 0 0 Q 36 50 0 100" fill="none" stroke="currentColor"/>
+        </svg>
+        <!-- Right: concave toward center (bulge left into the page) -->
+        <svg class="curves-svg curves-right" viewBox="0 0 120 100" preserveAspectRatio="none">
+          <path class="curve curve-1" d="M 120 0 Q 82 50 120 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-2" d="M 120 0 Q 78 50 120 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-3" d="M 120 0 Q 80 50 120 100" fill="none" stroke="currentColor"/>
+          <path class="curve curve-4" d="M 120 0 Q 84 50 120 100" fill="none" stroke="currentColor"/>
+        </svg>
+      </div>
+
+      <div class="frequency-progress" id="frequencyProgress" aria-hidden="true">
+        <p class="frequency-progress-label" id="frequencyProgressLabel"></p>
+        <div class="frequency-progress-bar">
+          <div class="frequency-progress-fill" id="frequencyProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="frequency-diagram">
+        <svg class="frequency-circle-svg" viewBox="0 0 400 400" aria-hidden="true">
+          <circle class="frequency-big-circle" cx="200" cy="200" r="130" fill="none" stroke="currentColor"/>
+          <circle class="frequency-dot" cx="200" cy="70" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="292" cy="108" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="330" cy="200" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="292" cy="292" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="200" cy="330" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="108" cy="292" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="70" cy="200" r="4" fill="currentColor"/>
+          <circle class="frequency-dot" cx="108" cy="108" r="4" fill="currentColor"/>
+        </svg>
+        <div class="frequency-center">
+          <div class="frequency-ring" aria-hidden="true"></div>
+          <button type="button" class="frequency-record-btn" id="frequencyRecordBtn" aria-label="Record audio">
+            <img src="assets/microphone.png" alt="" class="record-icon record-mic-icon" width="48" height="48">
+            <img src="assets/stop-button.png" alt="" class="record-icon record-stop-icon" width="48" height="48">
+            <span class="record-label" aria-hidden="true">Record</span>
+            <span class="record-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="frequency-nodes">
+          <div class="frequency-node frequency-node-12"><span class="node-label">Scent 1</span></div>
+          <div class="frequency-node frequency-node-130"><span class="node-label">Scent 2</span></div>
+          <div class="frequency-node frequency-node-3"><span class="node-label">Scent 3</span></div>
+          <div class="frequency-node frequency-node-430"><span class="node-label">Scent 4</span></div>
+          <div class="frequency-node frequency-node-6"><span class="node-label">Scent 5</span></div>
+          <div class="frequency-node frequency-node-730"><span class="node-label">Scent 6</span></div>
+          <div class="frequency-node frequency-node-9"><span class="node-label">Scent 7</span></div>
+          <div class="frequency-node frequency-node-1030"><span class="node-label">Scent 8</span></div>
+        </div>
+      </div>
+
+      <div class="frequency-controls" id="frequencyControls" aria-live="polite">
+        <p class="frequency-transcription-text" id="frequencyTranscriptionText"></p>
+        <p class="frequency-transcription-status" id="frequencyTranscriptionStatus"></p>
+
+        <div class="frequency-controls-row frequency-controls-row-secondary">
+          <label class="frequency-control-btn frequency-image-upload-label">
+            Upload image
+            <input
+              type="file"
+              id="frequencyImageInput"
+              class="frequency-image-input"
+              accept="image/*"
+            >
+          </label>
+        </div>
+
+        <div class="frequency-controls-row">
+          <input
+            type="text"
+            id="frequencyDirectTextInput"
+            class="frequency-direct-text-input"
+            placeholder="Describe a scent experience..."
+            aria-label="Direct text input"
+          >
+          <button type="button" id="frequencyDirectSubmitBtn" class="frequency-control-btn">Submit</button>
+          <button type="button" id="playSequenceBtn" class="frequency-control-btn frequency-control-btn-primary" onclick="playSequenceOnDevice()">Play</button>
+          <button type="button" id="acceptSequenceBtn" class="frequency-control-btn frequency-control-btn-primary">This works</button>
+        </div>
+
+        <p class="cartridge-line" id="cartridgeStatusText"></p>
+        <div class="cartridge-swap" id="cartridgeSwapBlock" hidden>
+          <p class="cartridge-swap-notice" id="cartridgeSwapNotice"></p>
+          <button type="button" id="cartridgeConfirmSwapBtn" class="frequency-control-btn">Cartridge swapped</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+  <script src="script.js?v=3"></script>
+</body>
+</html>
