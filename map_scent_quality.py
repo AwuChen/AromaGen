@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 CSV_PATH = ROOT / "feedback_coding.csv"
 
-# Static odor-quality mapping, from the researcher's own scent guide, plus
+# Static odor-quality mapping, from scent guide, plus
 # "Spicy" added as an 11th category - the guide has no clean bucket for
 # food-spice feedback ("more spicy", "touch of pepper"), and it's common
 # enough in this corpus (food is the largest theme) to warrant its own tag

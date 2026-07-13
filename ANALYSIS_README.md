@@ -111,4 +111,4 @@ The `code` column in `feedback_coding.csv` as currently committed reflects one r
 ## Outstanding
 
 - Feedback coding needs a second independent coder for inter-rater reliability (study protocol section 14).
-- `prepare_finetune.py` / `eval_models.py` — IRB/consent cleared; still blocked on an OpenAI API key with fine-tuning access.
+- `prepare_finetune.py` / `eval_models.py`
