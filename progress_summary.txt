@@ -1,0 +1,123 @@
+AromaGen Data Analysis - Progress Summary
+
+Corpus: 7 dialogue log files, June 3-17 2026 demo sessions. 99 compose events = 99 sessions (one compose per session, no re-composing in this corpus).
+
+===========================================
+PIPELINE / METHODOLOGY
+===========================================
+
+1. extract.py - reads the raw dialogue_*.jsonl logs (filtered to compose events via compose.txt), produces:
+   - human_input.txt: one sentence per session (input to word cloud + theme taxonomy)
+   - scent_usage.csv: one row per scent occurrence (session_id, timestamp, scent_name), input to scent usage analysis
+
+2. word_cloud.py - generates a word cloud from human_input.txt, with a manually tuned stopword list (removed conversational filler like "really," "yeah," "was," "like," contractions).
+
+3. theme_taxonomy.py - classifies each session's first-compose sentence into food / nature / place / memory / other, or flags it as noise. Combines automatic rules (keyword matching, facilitator-question pattern, repetition detection, filler-word ratio, single-word check) with 33 manual corrections from a full line-by-line review of all 99 rows, applied as an override table for cases the automatic rules couldn't get right (holistic judgment calls, true transcription incoherence).
+
+4. scent_usage.py - tallies scent usage from scent_usage.csv: corpus-wide scent frequency, per-session scent sets, per-day totals, and floral-default bias.
+
+5. session_funnel.py - reads compose, feedback, and accept events directly from the raw dialogue_*.jsonl logs. Builds a daily funnel (composes -> feedback rounds -> accepts, with acceptance rate) and, for each accepted session, the number of feedback rounds it took to get there (pulled directly from the accept event's own request.feedback_rounds field).
+
+6. feedback_coding.py - extracts all 85 feedback rounds (session_id, day, original sentence, feedback text, changes made) into feedback_coding.csv for manual qualitative coding. suggest_feedback_codes.py added keyword-based code suggestions for uncoded rows, based on the coder's own established vocabulary, to speed up (not replace) manual review. map_scent_quality.py then maps each hand-assigned code onto a published odor-quality taxonomy (Fragrant, Fruity, Citrus, Woody and resinous, Sweet, Minty, Toasted/nutty, Chemical, Pungent, Decayed), plus a locally-added "Spicy" category and a "direction" (increase/decrease) dimension. feedback_quality_chart.py visualizes the resulting quality-category counts.
+
+All scripts are reproducible from the raw dialogue logs - no manual data manipulation outside of the documented override tables.
+
+===========================================
+FINDINGS
+===========================================
+
+--- Word cloud (wordcloud_filtered2.png) ---
+After filtering conversational filler, the dominant terms are genuinely about the sensory/memory content people described: scent, smell, Singapore, time, moment, food, memory, feel, coffee, air, flower, warm, beautiful, walking, joy, texture, remember, sweetness, atmosphere, fish, Lavender. "Singapore" and related place terms (Marina Bay, City) are strikingly prominent - most demo sessions were location-specific to where the deployment happened, which is worth noting as a corpus characteristic rather than a general finding about the system.
+
+--- Theme taxonomy (theme_taxonomy.csv, theme_pie_chart.png) ---
+CORRECTION (2026-07-10): an earlier version of this analysis deduplicated by
+exact text match, on the assumption that 5 pairs of identical-text sessions
+were logging duplicates. They are not - each pair has a different session_id,
+meaning they are 5 genuinely distinct real sessions that happened to produce
+identical text/output. The earlier "99 -> 94 unique sessions" dedup wrongly
+discarded 5 real sessions and understated every count below it. This has been
+fixed: theme_taxonomy.py now reads session_id directly from compose.txt
+instead of the de-duplicated human_input.txt, so all 99 sessions are counted
+correctly. See dedup_note.txt for the corrected explanation.
+
+Full manual review, all 99 sessions:
+
+  Nature         - 23
+  Food           - 20
+  Place          - 16
+  Memory         - 10
+  Other          - 8
+  Place & memory - 1
+  Noise (excluded from chart) - 21
+
+The previously-pending row (a stylized, atmospheric "polished wood... spirit
+of unity..." description) was resolved with Awu as jointly place
+AND memory, not a single theme - it describes both a specific setting and a
+nostalgic/reflective mood equally strongly. Rather than force it into one
+category, it's kept as its own small "place & memory" slice (1 session).
+
+--- Noise audit (noise rows within theme_taxonomy.csv, reason column) ---
+The noise-detection logic built into theme_taxonomy.py doubles as the noise audit deliverable. Breakdown of the 21 flagged rows by detection reason:
+
+  Facilitator question pattern           - 6
+  Single word, no theme match            - 5
+  Repeated-phrase (Whisper glitch)        - 4
+  Manual override (holistic judgment)     - 3
+  High filler-word ratio                  - 2
+  Manual exclude list (off-topic content) - 1
+
+Mapped to the original task wording: "flag facilitator talk" and "meta questions" are covered by the facilitator-question-pattern rule (plus several manual overrides where facilitator scaffolding was mixed with real content). "Transcripts <20 chars" was deliberately replaced with coherence-based rules after early manual review found clear counterexamples in both directions (short-but-valid answers like "Lavender.", and long-but-noisy facilitator paragraphs) - a length cutoff alone was too blunt. "Cross-check with manual review of JSONL files" was done directly - the whole taxonomy was built from real examples read across multiple log files, not designed blind.
+
+--- Theme vs. acceptance rate (theme_acceptance_rate.csv, theme_acceptance_rate_bar.png) ---
+cross-referencing theme classification against which sessions were ultimately accepted, to see whether the system performs differently by theme. Noise-flagged sessions excluded (no meaningful theme to test). Results:
+
+  Memory         - 5/10 accepted (50.0%)
+  Food           - 3/20 accepted (15.0%)
+  Other          - 1/8  accepted (12.5%)
+  Place          - 1/16 accepted (6.2%)
+  Nature         - 1/23 accepted (4.3%)
+  Place & memory - 0/1  accepted (0.0%)
+
+Memory-themed sessions accept at a notably higher rate than any other theme, despite nature being the largest theme by volume and accepting least often. Caveat: sample sizes per theme are small (10 and under for most categories except food/nature), so these percentages are suggestive, not statistically robust - worth noting as a candidate finding rather than a confirmed effect.
+
+--- Scent usage (scent_usage.csv, scent_counts_bar.png, scent_by_day_bar.png) ---
+Most-used scents: Citronelly acet (48), Lavendar oil (48), Garlic (33), Sweet Potato (30), Eucalipto (30), Cilantro (29), Benz sal (27), Mate NHS (23), Spearmint (21), Angelica (15), and smaller counts below that.
+
+Floral-default bias: 62.6% (62/99 sessions) include at least one of the fixed "default floral" scents (Citronelly, Lavender, Eucalipto - this exact trio is defined in the study protocol as a generic-floral distractor for testing palette bias). This is a notable finding: the two floral defaults are literally the two most-used scents corpus-wide, suggesting the system may lean on a "safe" floral fallback fairly often rather than composing distinctively per memory. Worth flagging as a candidate concern, not just a background stat.
+
+Day-by-day usage: heavily concentrated on June 15 (151 scent occurrences vs. 56-59 on the next-busiest days, 3-23 on the others) - consistent with June 15 being the richest/most active session day in the raw logs.
+
+--- Session funnel (session_funnel.csv, accept_iterations.csv, session_funnel_bar.png, accept_iterations_bar.png) ---
+Total composes (99) and total feedback rounds (85) match the corpus stats in the README exactly, confirming the extraction is correct. Daily acceptance rate declines across the three busiest days: 12.8% (06-15) -> 10.5% (06-16) -> 5.9% (06-17), matching the study protocol's own documented "accept rate fell" finding almost exactly.
+
+Of the 11 total accepted sessions: 3 were accepted on the first try (no revisions), 5 took one feedback round, and 3 took two rounds. So most accepted sessions needed at least one round of iteration, but very few needed more than two - the feedback loop appears to converge quickly when it works, rather than dragging on.
+
+--- Feedback coding (feedback_coding.csv, feedback_quality_bar.png) ---
+All 85 feedback rounds reviewed and fully accounted for: 60 coded with a scent quality, 25 flagged as noise (facilitator talk, off-topic content, or thank-you/sign-off remarks with no scent content). Coding scheme combines open/emergent codes (invented from patterns in the data, per standard qualitative practice) with a published odor-quality taxonomy found during coding, extended with a "Spicy" category since food-spice feedback ("more spicy," "touch of pepper") was common enough in this corpus to warrant its own bucket rather than being forced into the closest existing category ("Pungent"). "Sour" was mapped to Citrus rather than the taxonomy's own "Decayed" example, based on consistent context in the data (paired with "citrus"/"fruity," meaning tartness, not spoilage). "Salty" appeared once, with no home in the published guide - logged as its own tag but marked unvalidated (n=1), not treated as a real category the way Spicy was.
+
+Quality-category counts: Noise 25, Sweet 21, Fragrant 19, Spicy 9, Citrus 7, Pungent 4, Woody and resinous 4, Decayed 1, Salty (unvalidated) 1, Fruity 1, Non-scent/hardware complaint 1. Sweet and Fragrant dominate the genuine scent feedback, consistent with the floral-default bias already found in the scent usage analysis.
+
+Per the study protocol's own guidance (section 14), this should get a second, independent coder on a subset to check inter-rater agreement before treating it as final - not yet done.
+
+--- Data quality note ---
+5 pairs of sessions share identical human_input text and scent_sequence output, but each pair has two different session_id values - genuinely distinct sessions, not logging duplicates (see correction above). All 99 are kept. Worth a follow-up look at whether this coincidence reflects something about how the system handles short/generic inputs, or is unrelated repeat participants. Documented in dedup_note.txt, generated automatically by theme_taxonomy.py - not a manual edit.
+
+===========================================
+DELIVERABLES (FILES)
+===========================================
+
+- wordcloud_filtered2.png - word cloud
+- theme_taxonomy.csv, theme_pie_chart.png - theme classification + chart
+- scent_usage.csv, scent_counts_bar.png, scent_by_day_bar.png - scent usage analysis
+- dedup_note.txt - duplicate-line documentation
+- session_funnel.csv, accept_iterations.csv, session_funnel_bar.png, accept_iterations_bar.png - session funnel analysis
+- feedback_coding.csv, feedback_quality_bar.png - feedback coding (complete)
+- theme_acceptance_rate.csv, theme_acceptance_rate_bar.png - theme vs. acceptance rate cross-reference
+- extract.py, word_cloud.py, theme_taxonomy.py, scent_usage.py, session_funnel.py, feedback_coding.py, suggest_feedback_codes.py, map_scent_quality.py, feedback_quality_chart.py, theme_acceptance_rate.py - reproducible pipeline scripts
+
+===========================================
+OUTSTANDING / OPEN QUESTIONS
+===========================================
+
+- Feedback coding: complete, all 85 rounds accounted for (60 coded, 25 flagged noise). Needs a second independent coder on a subset for inter-rater reliability (per study protocol section 14) before treating results as final.
+- prepare_finetune.py / eval_models.py
