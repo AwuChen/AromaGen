@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-CSV_PATH = ROOT / "feedback_coding.csv"
+CSV_PATH = ROOT.parent / "outputs" / "feedback_coding" / "feedback_coding.csv"
 
 # Static odor-quality mapping, from scent guide, plus
 # "Spicy" added as an 11th category - the guide has no clean bucket for

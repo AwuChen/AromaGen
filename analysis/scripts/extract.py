@@ -27,9 +27,9 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-COMPOSE_PATH = ROOT / "aromagen" / "data" / "dialogue" / "compose.txt"
+COMPOSE_PATH = ROOT.parent.parent / "aromagen" / "data" / "dialogue" / "compose.txt"
 OUT_PATH = COMPOSE_PATH.parent / "human_input.txt"
-CSV_OUT_PATH = ROOT / "scent_usage.csv"
+CSV_OUT_PATH = ROOT.parent / "outputs" / "scent_usage" / "scent_usage.csv"
 
 with open(COMPOSE_PATH, "r", encoding="utf-8") as infile, open(OUT_PATH, "w", encoding="utf-8") as outfile:
     for line in infile:

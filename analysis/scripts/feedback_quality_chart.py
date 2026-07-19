@@ -5,8 +5,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent
-CSV_PATH = ROOT / "feedback_coding.csv"
-CHART_PATH = ROOT / "feedback_quality_bar.png"
+OUT_DIR = ROOT.parent / "outputs" / "feedback_coding"
+CSV_PATH = OUT_DIR / "feedback_coding.csv"
+CHART_PATH = OUT_DIR / "feedback_quality_bar.png"
 
 with open(CSV_PATH, "r", encoding="utf-8") as f:
     rows = list(csv.DictReader(f))

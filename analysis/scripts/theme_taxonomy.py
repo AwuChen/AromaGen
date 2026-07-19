@@ -6,10 +6,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent
-INPUT_PATH = ROOT / "aromagen" / "data" / "dialogue" / "compose.txt"
-CSV_OUT_PATH = ROOT / "theme_taxonomy.csv"
-CHART_OUT_PATH = ROOT / "theme_pie_chart.png"
-DEDUP_NOTE_PATH = ROOT / "dedup_note.txt"
+INPUT_PATH = ROOT.parent.parent / "aromagen" / "data" / "dialogue" / "compose.txt"
+OUT_DIR = ROOT.parent / "outputs" / "theme_taxonomy"
+CSV_OUT_PATH = OUT_DIR / "theme_taxonomy.csv"
+CHART_OUT_PATH = OUT_DIR / "theme_pie_chart.png"
+DEDUP_NOTE_PATH = OUT_DIR / "dedup_note.txt"
 
 # Keyword buckets pulled from words actually seen across the dialogue logs
 # (word cloud + manual noise-audit review), not guessed generically.
@@ -184,10 +185,7 @@ def main() -> None:
             }
         )
 
-    # Sanity check: session_id should be unique per row - if any repeat, that
-    # WOULD be a true logging duplicate (unlike the earlier, incorrect
-    # text-based dedup, which discarded 5 real distinct sessions that just
-    # happened to produce identical text/output - see dedup_note.txt).
+   
     session_id_counts = Counter(s["session_id"] for s in sessions)
     true_duplicates = {sid: count for sid, count in session_id_counts.items() if count > 1}
 

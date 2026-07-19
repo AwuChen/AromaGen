@@ -5,10 +5,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent
-THEME_CSV = ROOT / "theme_taxonomy.csv"
-ACCEPT_CSV = ROOT / "accept_iterations.csv"
-OUT_CSV = ROOT / "theme_acceptance_rate.csv"
-CHART_PATH = ROOT / "theme_acceptance_rate_bar.png"
+OUTPUTS = ROOT.parent / "outputs"
+# Cross-references two other analysis types' output folders.
+THEME_CSV = OUTPUTS / "theme_taxonomy" / "theme_taxonomy.csv"
+ACCEPT_CSV = OUTPUTS / "session_funnel" / "accept_iterations.csv"
+OUT_DIR = OUTPUTS / "theme_acceptance_rate"
+OUT_CSV = OUT_DIR / "theme_acceptance_rate.csv"
+CHART_PATH = OUT_DIR / "theme_acceptance_rate_bar.png"
 
 with open(THEME_CSV, "r", encoding="utf-8") as f:
     theme_rows = list(csv.DictReader(f))

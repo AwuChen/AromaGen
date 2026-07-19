@@ -16,4 +16,4 @@ __pycache__/
 # aromagen/data/dialogue/dialogue_*.jsonl
 
 #personal notes
-finetune_learning_guide.txt
+analysis/finetune_learning_guide.txt

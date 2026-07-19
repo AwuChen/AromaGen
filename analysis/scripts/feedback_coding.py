@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DIALOGUE_DIR = ROOT / "aromagen" / "data" / "dialogue"
-OUT_PATH = ROOT / "feedback_coding.csv"
+DIALOGUE_DIR = ROOT.parent.parent / "aromagen" / "data" / "dialogue"
+OUT_PATH = ROOT.parent / "outputs" / "feedback_coding" / "feedback_coding.csv"
 
 
 def load_events():

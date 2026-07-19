@@ -22,9 +22,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent
-CSV_PATH = ROOT / "scent_usage.csv"
-SCENT_CHART_PATH = ROOT / "scent_counts_bar.png"
-DAILY_CHART_PATH = ROOT / "scent_by_day_bar.png"
+OUT_DIR = ROOT.parent / "outputs" / "scent_usage"
+CSV_PATH = OUT_DIR / "scent_usage.csv"
+SCENT_CHART_PATH = OUT_DIR / "scent_counts_bar.png"
+DAILY_CHART_PATH = OUT_DIR / "scent_by_day_bar.png"
 
 # Substring stems, not exact names: the catalog stores these as "Citronelly acet"
 # and "Lavendar oil" (note the "Lavendar" spelling in the actual data), not the

@@ -6,8 +6,9 @@ from wordcloud import WordCloud
 
 
 ROOT = Path(__file__).resolve().parent
-COMPOSE_PATH = ROOT / "aromagen" / "data" / "dialogue" / "compose.txt"
+COMPOSE_PATH = ROOT.parent.parent / "aromagen" / "data" / "dialogue" / "compose.txt"
 textFile = COMPOSE_PATH.parent / "human_input.txt"
+OUT_DIR = ROOT.parent / "outputs" / "word_cloud"
 
 '''the path would have to go to the jsonl files
 aromagen/agents/data/dialogue/ (the 6 dialogue files that ends with .jsonl)
@@ -44,6 +45,6 @@ plt.figure(figsize=(10, 5))
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis('off')
 plt.tight_layout(pad=0)
-plt.savefig('wordcloud_filtered2.png', dpi=300, bbox_inches='tight')
+plt.savefig(OUT_DIR / 'wordcloud_filtered2.png', dpi=300, bbox_inches='tight')
 plt.show()
 

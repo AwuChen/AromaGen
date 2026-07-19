@@ -6,12 +6,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent
-DIALOGUE_DIR = ROOT / "aromagen" / "data" / "dialogue"
+DIALOGUE_DIR = ROOT.parent.parent / "aromagen" / "data" / "dialogue"
+OUT_DIR = ROOT.parent / "outputs" / "session_funnel"
 
-FUNNEL_CSV_PATH = ROOT / "session_funnel.csv"
-ITERATIONS_CSV_PATH = ROOT / "accept_iterations.csv"
-FUNNEL_CHART_PATH = ROOT / "session_funnel_bar.png"
-ITERATIONS_CHART_PATH = ROOT / "accept_iterations_bar.png"
+FUNNEL_CSV_PATH = OUT_DIR / "session_funnel.csv"
+ITERATIONS_CSV_PATH = OUT_DIR / "accept_iterations.csv"
+FUNNEL_CHART_PATH = OUT_DIR / "session_funnel_bar.png"
+ITERATIONS_CHART_PATH = OUT_DIR / "accept_iterations_bar.png"
 
 
 def load_events():
