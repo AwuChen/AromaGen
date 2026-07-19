@@ -14,3 +14,6 @@ __pycache__/
 # Local overrides (keep committed defaults in aromagen/data/)
 # Uncomment if you do not want to log new sessions locally:
 # aromagen/data/dialogue/dialogue_*.jsonl
+
+#personal notes
+analysis/finetune_learning_guide.txt

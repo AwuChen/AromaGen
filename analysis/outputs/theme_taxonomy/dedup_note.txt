@@ -1,0 +1,13 @@
+Correction (2026-07-10): the earlier version of this script deduplicated
+by exact text match, which incorrectly treated 5 pairs of DIFFERENT
+sessions (different session_id) as duplicates and discarded one from
+each pair. All 99 compose sessions have unique session_id values - none
+are true logging duplicates. The pairs below share identical text/output
+by coincidence (or a system behavior worth investigating separately),
+not because of a data error, and are now both kept:
+
+  x2: you
+  x2: I have a memory of going to McDonald's and have a French fries and a Big Mac.
+  x2: the scent of an ocean
+  x2: The vibrant yellow item held right up to the woman's face is the focal point of the sensory experien...
+  x2: The Scent of Fresh Fruit: The vibrant yellow item held right up to the woman's face is the focal poi...

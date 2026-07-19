@@ -23,6 +23,7 @@ AromaGen/
 ├── backend.py                # BLE device server (port 5001)
 ├── scripts/                  # Startup & data export utilities
 ├── docs/                     # Study protocol & documentation
+├── analysis/                 # Demo corpus analysis: themes, noise, scent usage, feedback coding
 └── requirements.txt          # BLE backend dependencies
 ```
 
@@ -147,6 +148,7 @@ Multi-device sync (optional): `./start_sync_server.sh` + `SYNC_SERVER_URL=ws://.
 - [`aromagen/data/README.md`](aromagen/data/README.md) — Dataset schema & stats
 - [`docs/STUDY_PROTOCOL.md`](docs/STUDY_PROTOCOL.md) — CHI user study protocol (MFC evaluation)
 - [`docs/SETUP.md`](docs/SETUP.md) — Extended setup & troubleshooting
+- [`analysis/README.md`](analysis/README.md) — June demo corpus analysis (themes, noise audit, scent usage, feedback coding)
 
 ---
 
