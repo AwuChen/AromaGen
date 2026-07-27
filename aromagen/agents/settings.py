@@ -21,9 +21,6 @@ class Settings:
     cartridge_sets_path: Path = Path(
         os.getenv("CARTRIDGE_SETS_PATH", PROJECT_ROOT / "cartridge_sets.json")
     )
-    cartridge_state_path: Path = Path(
-        os.getenv("CARTRIDGE_STATE_PATH", PROJECT_ROOT / "cartridge_state.json")
-    )
     prompts_dir: Path = PROJECT_ROOT / "agents" / "prompts"
     dialogue_log_dir: Path = Path(
         os.getenv("DIALOGUE_LOG_DIR", DATA_ROOT / "dialogue")
@@ -36,6 +33,7 @@ class Settings:
     learned_examples_top_k: int = int(os.getenv("LEARNED_EXAMPLES_TOP_K", "3"))
     sequence_total_seconds: int = int(os.getenv("SEQUENCE_TOTAL_SECONDS", "30"))
     scent_duration_max: int = int(os.getenv("SCENT_DURATION_MAX", "15"))
+    descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "8"))
 
 
 settings = Settings()

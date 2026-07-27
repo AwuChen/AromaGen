@@ -1,158 +1,74 @@
 {
-    "Peanuts": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Lavender": {
         "location": "1",
-        "volatility": 4,
-        "note": "Nutty, roasted, earthy, warm"
+        "category": "Floral",
+        "volatility": 6,
+        "note": "Floral, herbaceous-sweet, calming"
     },
-    "Almonds": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Lemon": {
         "location": "2",
-        "volatility": 5,
-        "note": "Sweet, nutty, marzipan, delicate"
+        "category": "Citrus",
+        "volatility": 8,
+        "note": "Bright, citrus, sharp, fresh top note"
     },
-    "Hazelnuts": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Cypress": {
         "location": "3",
+        "category": "Woody & Resinous",
         "volatility": 4,
-        "note": "Rich, sweet, nutty, warm"
+        "note": "Woody, resinous, dry, coniferous"
     },
-    "Cumin": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Eucalyptus": {
         "location": "4",
-        "volatility": 6,
-        "note": "Smoky, spicy, earthy"
+        "category": "Herbal / Cooling",
+        "volatility": 7,
+        "note": "Camphorous, cooling, medicinal-fresh"
     },
-    "Star Anise": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Clove bud oil": {
         "location": "5",
-        "volatility": 5,
-        "note": "Sweet, licorice, warm spice"
+        "category": "Spice",
+        "volatility": 6,
+        "note": "Warm, pungent, spicy"
     },
-    "Cloves": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
+    "Vanilla extract": {
         "location": "6",
-        "volatility": 6,
-        "note": "Warm, pungent, sweet spice"
-    },
-    "Angelica": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "7",
-        "volatility": 5,
-        "note": "Herbal, earthy, musky, green"
-    },
-    "Garlic": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "8",
-        "volatility": 7,
-        "note": "Pungent, savory, sharp, umami"
-    },
-    "Cilantro": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "9",
-        "volatility": 6,
-        "note": "Fresh, herbal, citrusy, green"
-    },
-    "Spearmint": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "10",
-        "volatility": 7,
-        "note": "Fresh, cool, sweet mint"
-    },
-    "Mugwort": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "11",
-        "volatility": 5,
-        "note": "Herbal, earthy, slightly bitter"
-    },
-    "Sweet Potato": {
-        "joy": "nan",
-        "fear": "nan",
-        "sadness": "nan",
-        "disgust": "nan",
-        "trust": "nan",
-        "anxiety": "nan",
-        "anticipation": "nan",
-        "surprise": "nan",
-        "location": "12",
+        "category": "Sweet / Gourmand",
         "volatility": 3,
-        "note": "Sweet, earthy, warm, roasted"
+        "note": "Sweet, creamy, warm, gourmand"
+    },
+    "Birch tar oil": {
+        "location": "7",
+        "category": "Roasted / Smoky",
+        "volatility": 3,
+        "note": "Smoky, tarry, leathery, medicinal-burnt"
+    },
+    "Distilled white vinegar": {
+        "location": "8",
+        "category": "Fermented & Sour",
+        "volatility": 8,
+        "note": "Sour, sharp, acetic, pungent"
+    },
+    "Baker's ammonia": {
+        "location": "9",
+        "category": "Chemical / Solvent",
+        "volatility": 9,
+        "note": "Sharp, pungent, ammoniacal"
+    },
+    "Hydrogen sulfide": {
+        "location": "10",
+        "category": "Putrid / Decay",
+        "volatility": 10,
+        "note": "Rotten-egg, sulfurous, putrid"
+    },
+    "Isovaleric acid": {
+        "location": "11",
+        "category": "Animal / Body",
+        "volatility": 7,
+        "note": "Sweaty, cheesy, animalic"
+    },
+    "Eau de Cologne": {
+        "location": "12",
+        "category": "Perfumed / Clean",
+        "volatility": 9,
+        "note": "Clean, alcoholic, bright"
     }
 }

@@ -1,113 +1,76 @@
 {
-  "sides": {
-    "left": {
-      "label": "Left half",
-      "slots": [1, 2, 3, 4, 5, 6]
+  "odorants": {
+    "Lavender": {
+      "location": "1",
+      "category": "Floral",
+      "note": "Floral, herbaceous-sweet, calming",
+      "volatility": 6
     },
-    "right": {
-      "label": "Right half",
-      "slots": [7, 8, 9, 10, 11, 12]
+    "Lemon": {
+      "location": "2",
+      "category": "Citrus",
+      "note": "Bright, citrus, sharp, fresh top note",
+      "volatility": 8
+    },
+    "Cypress": {
+      "location": "3",
+      "category": "Woody & Resinous",
+      "note": "Woody, resinous, dry, coniferous",
+      "volatility": 4
+    },
+    "Eucalyptus": {
+      "location": "4",
+      "category": "Herbal / Cooling",
+      "note": "Camphorous, cooling, medicinal-fresh",
+      "volatility": 7
+    },
+    "Clove bud oil": {
+      "location": "5",
+      "category": "Spice",
+      "note": "Warm, pungent, spicy",
+      "volatility": 6
+    },
+    "Vanilla extract": {
+      "location": "6",
+      "category": "Sweet / Gourmand",
+      "note": "Sweet, creamy, warm, gourmand",
+      "volatility": 3
+    },
+    "Birch tar oil": {
+      "location": "7",
+      "category": "Roasted / Smoky",
+      "note": "Smoky, tarry, leathery, medicinal-burnt",
+      "volatility": 3
+    },
+    "Distilled white vinegar": {
+      "location": "8",
+      "category": "Fermented & Sour",
+      "note": "Sour, sharp, acetic, pungent",
+      "volatility": 8
+    },
+    "Baker's ammonia": {
+      "location": "9",
+      "category": "Chemical / Solvent",
+      "note": "Sharp, pungent, ammoniacal",
+      "volatility": 9
+    },
+    "Hydrogen sulfide": {
+      "location": "10",
+      "category": "Putrid / Decay",
+      "note": "Rotten-egg, sulfurous, putrid",
+      "volatility": 10
+    },
+    "Isovaleric acid": {
+      "location": "11",
+      "category": "Animal / Body",
+      "note": "Sweaty, cheesy, animalic",
+      "volatility": 7
+    },
+    "Eau de Cologne": {
+      "location": "12",
+      "category": "Perfumed / Clean",
+      "note": "Clean, alcoholic, bright",
+      "volatility": 9
     }
-  },
-  "sets": {
-    "food_left": {
-      "label": "Food palette (left)",
-      "side": "left",
-      "category": "food",
-      "scents": {
-        "Peanuts": {
-          "volatility": 4,
-          "note": "Nutty, roasted, earthy, warm"
-        },
-        "Almonds": {
-          "volatility": 5,
-          "note": "Sweet, nutty, marzipan, delicate"
-        },
-        "Hazelnuts": {
-          "volatility": 4,
-          "note": "Rich, sweet, nutty, warm"
-        },
-        "Cumin": {
-          "volatility": 6,
-          "note": "Smoky, spicy, earthy"
-        },
-        "Star Anise": {
-          "volatility": 5,
-          "note": "Sweet, licorice, warm spice"
-        },
-        "Cloves": {
-          "volatility": 6,
-          "note": "Warm, pungent, sweet spice"
-        }
-      }
-    },
-    "food_right": {
-      "label": "Food palette (right)",
-      "side": "right",
-      "category": "food",
-      "scents": {
-        "Angelica": {
-          "volatility": 5,
-          "note": "Herbal, earthy, musky, green"
-        },
-        "Garlic": {
-          "volatility": 7,
-          "note": "Pungent, savory, sharp, umami"
-        },
-        "Cilantro": {
-          "volatility": 6,
-          "note": "Fresh, herbal, citrusy, green"
-        },
-        "Spearmint": {
-          "volatility": 7,
-          "note": "Fresh, cool, sweet mint"
-        },
-        "Mugwort": {
-          "volatility": 5,
-          "note": "Herbal, earthy, slightly bitter"
-        },
-        "Sweet Potato": {
-          "volatility": 3,
-          "note": "Sweet, earthy, warm, roasted"
-        }
-      }
-    },
-    "perfume": {
-      "label": "Abstract / floral perfume palette",
-      "side": "alternate",
-      "category": "perfume",
-      "description": "Citronelly acet, benzyl salicylate, mate, lavender, sichuan pepper oil, eucalyptus — suited to abstract, floral, and perfume-like compositions.",
-      "scents": {
-        "Citronelly acet": {
-          "volatility": 7,
-          "note": "Rosy, citrus-floral, fresh, bright perfume top note"
-        },
-        "Benz sal": {
-          "volatility": 5,
-          "note": "Sweet, balsamic, soft floral, powdery perfume heart"
-        },
-        "Mate NHS": {
-          "volatility": 6,
-          "note": "Herbal, green tea, earthy, abstract botanical"
-        },
-        "Lavendar oil": {
-          "volatility": 6,
-          "note": "Floral, lavender, calming, classic perfume heart"
-        },
-        "Sichuan oil": {
-          "volatility": 4,
-          "note": "Spicy, numbing pepper, warm aromatic accent"
-        },
-        "Eucalipto": {
-          "volatility": 7,
-          "note": "Fresh, camphorous, clean, spa-like top note"
-        }
-      }
-    }
-  },
-  "default_state": {
-    "left_set": "food_left",
-    "right_set": "food_right"
-  },
-  "disabled_sets": ["food_left"]
+  }
 }
