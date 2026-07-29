@@ -131,11 +131,7 @@ function bindImageUploadHandler(onImageSelected) {
         }
         currentSequence = sequence;
         renderProfile(sequence);
-        if (pendingCartridgeSwap && pendingCartridgeSwap.required) {
-          updateProgress('Cartridge swap required', 100);
-        } else {
-          updateProgress('Complete', 100);
-        }
+        updateProgress('Complete', 100);
         setTimeout(hideProgress, 800);
         return Promise.resolve();
       }
@@ -301,8 +297,6 @@ Below is the original code for scent composition from death_sentence/script.js, 
 // Base notes are loaded from the cartridge API; fallback to scent_classification.json
 const baseNotes = [];
 let scentsData = {};
-let cartridgeStatus = null;
-let pendingCartridgeSwap = null;
 let currentSequence = null; // Store the last generated sequence for playback
 
 // Feedback loop session state
@@ -312,7 +306,7 @@ let sessionHistory = []; // Array of {feedback_text, changes_made, resulting_seq
 let sessionId = null;
 let isInFeedbackMode = false;
 
-// Load active cartridge scents (slot locations reflect what is physically loaded)
+// Load the fixed 12-odorant catalog (slot locations for device playback)
 function loadActiveCartridgeScents() {
   return fetch(API_BASE + '/cartridge/active')
     .then(function (res) {
@@ -321,10 +315,8 @@ function loadActiveCartridgeScents() {
     })
     .then(function (data) {
       scentsData = data.scents || {};
-      cartridgeStatus = data.status || null;
       const names = Object.keys(scentsData);
       baseNotes.splice(0, baseNotes.length, ...names);
-      renderCartridgeStatus();
       return data;
     })
     .catch(function (err) {
@@ -342,87 +334,9 @@ function loadActiveCartridgeScents() {
 
 loadActiveCartridgeScents();
 
-function cartridgeShortLabel(label, setId) {
-  if (!label) return setId || '';
-  if (setId === 'perfume' || /perfume/i.test(label)) return 'Perfume';
-  if (/food/i.test(label)) return 'Food';
-  return label.replace(/\s*\(.*\)\s*/g, '').trim();
-}
-
-function renderCartridgeStatus() {
-  var statusEl = document.getElementById('cartridgeStatusText');
-  if (!statusEl || !cartridgeStatus) return;
-  var left = cartridgeShortLabel(cartridgeStatus.left_label, cartridgeStatus.left_set);
-  var right = cartridgeShortLabel(cartridgeStatus.right_label, cartridgeStatus.right_set);
-  statusEl.textContent = 'L · ' + left + '  ·  R · ' + right;
-}
-
-function showCartridgeSwapNotice(swapInfo) {
-  pendingCartridgeSwap = swapInfo || null;
-  var blockEl = document.getElementById('cartridgeSwapBlock');
-  var noticeEl = document.getElementById('cartridgeSwapNotice');
-  var confirmBtn = document.getElementById('cartridgeConfirmSwapBtn');
-  if (!blockEl || !noticeEl) return;
-
-  if (!swapInfo || !swapInfo.required) {
-    blockEl.hidden = true;
-    noticeEl.textContent = '';
-    return;
-  }
-
-  blockEl.hidden = false;
-  noticeEl.textContent = swapInfo.instruction;
-  if (confirmBtn) {
-    confirmBtn.dataset.side = swapInfo.side_to_swap;
-    confirmBtn.dataset.swapTo = swapInfo.swap_to_set;
-  }
-}
-
-function applyCartridgeSwapState(side, swapToSet) {
-  var leftSet = (cartridgeStatus && cartridgeStatus.left_set) || 'food_left';
-  var rightSet = (cartridgeStatus && cartridgeStatus.right_set) || 'food_right';
-  if (side === 'left') {
-    leftSet = swapToSet;
-  } else if (side === 'right') {
-    rightSet = swapToSet;
-  }
-
-  return fetch(API_BASE + '/cartridge/state', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ left_set: leftSet, right_set: rightSet })
-  })
-    .then(function (res) {
-      if (!res.ok) return res.json().then(function (body) { throw new Error(body.detail || res.statusText); });
-      return res.json();
-    })
-    .then(function (data) {
-      scentsData = data.scents || {};
-      cartridgeStatus = data.status || null;
-      renderCartridgeStatus();
-      showCartridgeSwapNotice(null);
-      alert('Cartridge state updated. You can play the sequence now.');
-    })
-    .catch(function (err) {
-      alert('Could not update cartridge state: ' + err.message);
-    });
-}
-
-document.getElementById('cartridgeConfirmSwapBtn')?.addEventListener('click', function () {
-  var side = this.dataset.side;
-  var swapTo = this.dataset.swapTo;
-  if (!side || !swapTo) return;
-  applyCartridgeSwapState(side, swapTo);
-});
-
 function handleComposeResponse(data) {
   if (data.session_id) sessionId = data.session_id;
   console.log('[Compose] Justification:', data.justification);
-  if (data.cartridge_swap && data.cartridge_swap.required) {
-    showCartridgeSwapNotice(data.cartridge_swap);
-  } else {
-    showCartridgeSwapNotice(null);
-  }
   return data.scent_sequence || null;
 }
 
@@ -476,11 +390,6 @@ async function feedbackScent(feedbackText) {
     }
     console.log('[Feedback] Justification:', data.justification);
     console.log('[Feedback] Changes made:', data.changes_made);
-    if (data.cartridge_swap && data.cartridge_swap.required) {
-      showCartridgeSwapNotice(data.cartridge_swap);
-    } else {
-      showCartridgeSwapNotice(null);
-    }
     return data.scent_sequence || null;
   } catch (err) {
     console.error(err);
@@ -604,12 +513,7 @@ async function playSequenceOnDevice() {
     return;
   }
 
-  if (pendingCartridgeSwap && pendingCartridgeSwap.required) {
-    alert('Cartridge swap required before playback:\n\n' + pendingCartridgeSwap.instruction);
-    return;
-  }
-
-  // Refresh active scents so slot locations match the loaded cartridge halves
+  // Refresh the catalog so slot locations are current
   try {
     await loadActiveCartridgeScents();
   } catch (e) {

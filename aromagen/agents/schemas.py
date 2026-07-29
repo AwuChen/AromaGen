@@ -24,20 +24,10 @@ class ScentItem(BaseModel):
     scent_duration: int = Field(ge=1, le=SCENT_DURATION_MAX)
 
 
-class CartridgeSwapInfo(BaseModel):
-    required: bool = True
-    side_to_swap: str
-    swap_to_set: str
-    missing_scents: List[str]
-    instruction: str
-
-
 class ComposeResponse(BaseModel):
     scent_sequence: List[ScentItem]
     justification: str
     session_id: str = ""
-    cartridge_swap: Optional[CartridgeSwapInfo] = None
-    playable_now: bool = True
 
     @field_validator("scent_sequence")
     @classmethod
@@ -69,8 +59,6 @@ class FeedbackResponse(BaseModel):
     justification: str
     changes_made: str
     session_id: str = ""
-    cartridge_swap: Optional[CartridgeSwapInfo] = None
-    playable_now: bool = True
 
     @field_validator("scent_sequence")
     @classmethod
@@ -106,9 +94,4 @@ class AcceptResponse(BaseModel):
     example_id: str
     session_id: str = ""
     message: str = "Composition saved for future learning"
-
-
-class CartridgeStateUpdate(BaseModel):
-    left_set: str
-    right_set: str
 

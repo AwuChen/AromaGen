@@ -31,7 +31,8 @@ def _similarity_score(query: str, example_sentence: str) -> float:
     if not example_tokens:
         return 0.0
     overlap = len(query_tokens & example_tokens)
-    return overlap / len(query_tokens)
+    union = len(query_tokens | example_tokens)
+    return overlap / union
 
 
 def _ensure_file(path: Path) -> None:

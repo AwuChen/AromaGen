@@ -1,0 +1,264 @@
+[
+  {
+    "id": "f4342f98-b9dc-46bc-b7f4-1682223e640c",
+    "timestamp": "2026-06-14T09:37:27.263014+00:00",
+    "sentence": "I want the smell of walking through Chinatown in Singapore and smelling the chiffon cakes.",
+    "scent_sequence": [
+      {
+        "scent_name": "Sweet Potato",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Almonds",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Peanuts",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [
+      "The smells were quite sharp. I wish there were less spices. I think the smell of garlic and cloves was maybe, yeah, a little too intense. I wish it were a bit sweeter. → Removed Cloves and Garlic; added Peanuts while keeping Sweet Potato and Almonds."
+    ],
+    "rounds": 1
+  },
+  {
+    "id": "a78e6ed3-7131-4f0c-8d54-4913d9b7c6a1",
+    "timestamp": "2026-06-14T23:27:08.724126+00:00",
+    "sentence": "of Korean BBQ.",
+    "scent_sequence": [
+      {
+        "scent_name": "Garlic",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Angelica",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Spearmint",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [],
+    "rounds": 0
+  },
+  {
+    "id": "cfa4671a-4efb-4c99-898e-ac6881acfa26",
+    "timestamp": "2026-06-15T03:21:14.522689+00:00",
+    "sentence": "When I was in Singapore I was on a really breezy bright rooftop overlooking the skyline and I was having a very sweet and fruity cocktail.",
+    "scent_sequence": [
+      {
+        "scent_name": "Eucalipto",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Sweet Potato",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [
+      "It was a little too, like, spice heavy. I'm wondering if maybe it can focus more on, like, airy, airy smells, like less cilantro. → Replaced Cilantro with Eucalipto and added Citronelly acet for an airy feel while retaining Sweet Potato."
+    ],
+    "rounds": 1
+  },
+  {
+    "id": "564928b0-397d-43bf-8b61-a749baaee8f7",
+    "timestamp": "2026-06-15T04:09:04.902201+00:00",
+    "sentence": "Vesa was at the garden in Marina Bay and out of nowhere it started to rain super heavily and we were trapped under that roof for at least half an hour and we were at the beginning a bit annoyed because we wanted to explore everything, we were on holiday for a conference and yeah, but then I realized that I don't have to do any work, I took deep breaths and I could smell all the noise, the rain and it was nice, it was like a warm clove around me and I really enjoyed that day and after that it got sunny again, we had an amazing time but that was the closing point and I realized it was nice. Thank you. Let's do it.",
+    "scent_sequence": [
+      {
+        "scent_name": "Eucalipto",
+        "scent_duration": 8
+      },
+      {
+        "scent_name": "Mate NHS",
+        "scent_duration": 7
+      },
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 7
+      },
+      {
+        "scent_name": "Lavendar oil",
+        "scent_duration": 8
+      }
+    ],
+    "feedback_summary": [],
+    "rounds": 0
+  },
+  {
+    "id": "c58bc864-4e63-4439-bb77-f7b4efd726ed",
+    "timestamp": "2026-06-15T04:12:56.397890+00:00",
+    "sentence": "One of the best moments in Singapore was actually working through the Marina Bay and exploring the nature and the new technology applied to the nature as well. And one of my most beautiful experiences in Singapore is actually smelling the flowers. Wherever there are parks, there is this beautiful sense of flowers that I didn't experience before in other places.",
+    "scent_sequence": [
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Lavendar oil",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Benz sal",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [],
+    "rounds": 0
+  },
+  {
+    "id": "055b49d6-2991-489a-b10b-b51b879d790d",
+    "timestamp": "2026-06-15T05:21:41.045490+00:00",
+    "sentence": "You should tell us about your memory or your thing. You can describe it using words. The smell that you would like to recreate. The smell I would like to recreate. Can you recreate the Joe Malone orange blossom smell for me?",
+    "scent_sequence": [
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 15
+      },
+      {
+        "scent_name": "Spearmint",
+        "scent_duration": 15
+      }
+    ],
+    "feedback_summary": [
+      "Or citrus, if you can add the smell of, say, a, I don't know what's the English word for it, but it's fo shou gan. It's a specific kind of citrus. I knew it was a raw ingredient in that particular view. Maybe a slight touch of pepper. → Replaced 'Lavendar oil' with 'Eucalipto' for a fresher dimension; added 'Sichuan oil' for a touch of pepper.",
+      "What will your notes look like? For some reason it has a very industrial smell, I'm not sure if it's from the benzo, but if you can remove that, and just smell more purely focused on the citrus, citrus and sour, fruity smells, that would be great. → Removed 'Eucalipto' and 'Sichuan oil' to eliminate industrial notes, added 'Spearmint' for a fresher finish."
+    ],
+    "rounds": 2
+  },
+  {
+    "id": "f5e82107-de72-4e9e-9e41-2a3e64e571ba",
+    "timestamp": "2026-06-15T07:38:11.528461+00:00",
+    "sentence": "I have a memory of going to McDonald's and have a French fries and a Big Mac.",
+    "scent_sequence": [
+      {
+        "scent_name": "Garlic",
+        "scent_duration": 7
+      },
+      {
+        "scent_name": "Sweet Potato",
+        "scent_duration": 5
+      },
+      {
+        "scent_name": "Cilantro",
+        "scent_duration": 6
+      },
+      {
+        "scent_name": "Angelica",
+        "scent_duration": 7
+      },
+      {
+        "scent_name": "Mugwort",
+        "scent_duration": 5
+      }
+    ],
+    "feedback_summary": [
+      "You may say other stuff, or like how you would make this one better, to make it closer to what you had in mind. I want to add more scent of french fries. More french fries. Maybe more salty also. → Adjusted durations and added 'Angelica' and 'Mugwort' while lowering the durations of 'Garlic,' 'Sweet Potato,' and 'Cilantro' for better balance."
+    ],
+    "rounds": 1
+  },
+  {
+    "id": "928392b8-0106-46e7-b851-8883ee78cff0",
+    "timestamp": "2026-06-15T09:21:13.891556+00:00",
+    "sentence": "My favorite moment in Singapore would be the early mornings, where it's not so hot yet and you can smell the humidity in the air, but I'm not necessarily sweating because of that. Does that work?",
+    "scent_sequence": [
+      {
+        "scent_name": "Eucalipto",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Cilantro",
+        "scent_duration": 8
+      },
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 12
+      }
+    ],
+    "feedback_summary": [
+      "That's more fragrant or it needs to be like it doesn't smell like this you can give it feedback. It's more refreshing than this. → Replaced 'Mate NHS' with 'Cilantro' for a fresher herbaceous scent and 'Lavendar oil' with 'Citronelly acet' for a brighter, refreshing top note."
+    ],
+    "rounds": 1
+  },
+  {
+    "id": "25923ea6-b9ff-4c5f-8566-6bb0efb7aeec",
+    "timestamp": "2026-06-16T03:01:17.651576+00:00",
+    "sentence": "他會問我問題是嗎? 喔不用 你就直接開始講就可以了 就是moment 講中文也可以 好 有些什麼example嗎? 我突然不知道要講什麼 比如說去哪裡吃了什麼東西啊 有什麼味道啊 你可以去形容一下 嗯 我想一下 喔今天早上我們去了雅昆吃早餐 然後跟我們在荷蘭吃的東西比起來 它就是更甜 然後有一種很久沒有吃到這種味道的感覺 跟荷蘭吃的東西比起來 感覺雖然沒有那麼健康 但是更幸福 完美",
+    "scent_sequence": [
+      {
+        "scent_name": "Sweet Potato",
+        "scent_duration": 15
+      },
+      {
+        "scent_name": "Angelica",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Garlic",
+        "scent_duration": 5
+      }
+    ],
+    "feedback_summary": [
+      "所謂像你聞的這個味道跟你想像中的那個味道有什麼差別嗎? 然後它會一直去改變它 嗯,現在聞起來更像 植物的味道的感覺 所以它還在 它會慢慢去改變我們的味道 嗯,有有有 → Replaced Cilantro with Mate NHS for a more herbal representation; added Garlic to increase savory depth.",
+      "突然還是說我習慣那個味道 喔有可能 嗯好像跟一開始的味道比較像 然後有一點習慣這個味道 有點聞不出區別 但是還是比較像植物的味道 沒有食物的味道 對沒有食物的味道 啊現在有現在有 現在有食物的味道 對對對現在有 嗯有厲害厲害 什麼種食物的味道 嗯有一種突然很 我不知道怎麼去形容 但是有一種很強烈的味道 但是你不是說有需要有一點甜的東西對不對 對對對 那要不要更甜還是更鹹 我覺得應該是更甜的味道 → Replaced Mate NHS with Angelica for a stronger plant-like scent, kept Sweet Potato for sweetness, retained Garlic for savory depth, and adjusted durations to meet 30 seconds."
+    ],
+    "rounds": 2
+  },
+  {
+    "id": "cce4dd46-008a-4d62-b9ff-4db660ac1c11",
+    "timestamp": "2026-06-16T09:15:57.199613+00:00",
+    "sentence": "Laughter hangs in the air like the sweet aroma of freshly baked pastries, warm and inviting, wrapping around you like a familiar embrace. The rich scent of citrus zest dances playfully, mingling with the soft chatter of friends, creating an atmosphere pulsing with joy and camaraderie. Textures of softness and warmth radiate from cozy surroundings, where every smile feels like a sunbeam, brightening even the most mundane corners of the day.",
+    "scent_sequence": [
+      {
+        "scent_name": "Sweet Potato",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Angelica",
+        "scent_duration": 10
+      },
+      {
+        "scent_name": "Citronelly acet",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [
+      "smelled interesting it smelled sweet it was comforting I could feel the citrusy but I want something that is a bit more kind of warm and savory → Replaced 'Cilantro' with 'Angelica' to add warmth and savory depth."
+    ],
+    "rounds": 1
+  },
+  {
+    "id": "5f6326dc-7cd4-427b-9893-fe26a92c3694",
+    "timestamp": "2026-06-17T05:19:12.848848+00:00",
+    "sentence": "And then we'll start cooking. The first time I met my boyfriend was five years ago. It's recording, right? Mm-hmm. We were both college students, and I was running away from my very boring room because I didn't want to do my computer science homework, and I just saw a boy on Tinder, and he was like, let's meet in the nearby Indian restaurant. And we talked about the French language while eating prata and mutton curry. And I felt so embarrassed because I was messy, but a few years later he told me he liked that I was brave to be messy in front of him in our first date, because I was just a curry all over my fingers and stuff. But yeah, I remember that every time I smelled mutton curry, he decided, yeah, I'd like to be messy with this person.",
+    "scent_sequence": [
+      {
+        "scent_name": "Garlic",
+        "scent_duration": 8
+      },
+      {
+        "scent_name": "Angelica",
+        "scent_duration": 7
+      },
+      {
+        "scent_name": "Spearmint",
+        "scent_duration": 5
+      },
+      {
+        "scent_name": "Cilantro",
+        "scent_duration": 10
+      }
+    ],
+    "feedback_summary": [
+      "Is it going? Mm-hmm. Is it supposed to smell? Oh, okay. Now I can smell it. Cool. What do you smell? What did you pick up during the sequence just now? Star anise. Mm-hmm. Just some spices. Yeah, I recognize the spice mix. Do you feel like it's heading the right direction? Is it curry? I would say so, yeah. Yeah? Yeah. Maybe not the curry itself. What is missing? Okay. Actually, yeah, it is curry. I think the main thing I'm missing is texture, but you can't do texture with this, so. You mean like the texture of the aroma coming in like puffs? Or how do you describe that texture? It's like, it only really comes when you like dig in, really. So it comes in puffs. When you bite it. Yeah, yeah, yeah. A savory punch? Yeah. Okay, let's see if we can do something like that. → Replaced Mugwort with Spearmint for freshness and added Angelica for earthiness while preserving Garlic and Cilantro.",
+      "you → Retained Garlic and Spearmint, adjusted the duration of Angelica and Cilantro for better flow and sensory experience."
+    ],
+    "rounds": 2
+  }
+]

@@ -23,12 +23,6 @@ cp .env.example .env
 - Check port 8000 free: `lsof -ti:8000 | xargs kill -9`
 - Logs: uvicorn output in terminal
 
-## Cartridge swap
-
-If compose returns `cartridge_swap.required: true`, swap the indicated cartridge half before playing.
-
-Update physical state via API or edit `aromagen/cartridge_state.json`.
-
 ## Paths
 
 | Resource | Default path |

@@ -18,8 +18,7 @@ AromaGen/
 │   │   ├── learned_examples.json
 │   │   └── exports/          # Training splits (generated)
 │   ├── scent_classification.json
-│   ├── cartridge_sets.json
-│   └── cartridge_state.json
+│   └── cartridge_sets.json
 ├── backend.py                # BLE device server (port 5001)
 ├── scripts/                  # Startup & data export utilities
 ├── docs/                     # Study protocol & documentation
@@ -135,8 +134,8 @@ Environment variables (`.env`):
 
 ## Hardware
 
-- Off-the-shelf SCENTAC-style neck wearable, 12 sequential odorant slots
-- Cartridge halves (food + abstract/floral) — see `cartridge_sets.json`
+- Off-the-shelf SCENTAC-style neck wearable, 12 fixed odorant slots
+- Single palette spanning 12 standardized descriptor categories (pleasant → unpleasant) — see `cartridge_sets.json`
 - BLE discovery: devices with `wear` in the name (`backend.py`)
 
 Multi-device sync (optional): `./start_sync_server.sh` + `SYNC_SERVER_URL=ws://...`

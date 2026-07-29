@@ -624,42 +624,6 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.cartridge-line {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.35);
-  margin: 0;
-  text-align: center;
-}
-
-.cartridge-line:empty {
-  display: none;
-}
-
-.cartridge-swap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  align-items: stretch;
-  padding: 0.55rem 0.65rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 210, 120, 0.25);
-  background: rgba(255, 210, 120, 0.06);
-}
-
-.cartridge-swap[hidden] {
-  display: none !important;
-}
-
-.cartridge-swap-notice {
-  font-size: 0.74rem;
-  line-height: 1.4;
-  color: rgba(255, 210, 120, 0.92);
-  margin: 0;
-  text-align: left;
-}
-
 /* Progress bar above frequency diagram */
 .frequency-progress {
   position: relative;

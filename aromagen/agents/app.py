@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,50 +8,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from .schemas import (
     AcceptRequest,
     AcceptResponse,
-    CartridgeStateUpdate,
     ComposeRequest,
     ComposeResponse,
     FeedbackRequest,
     FeedbackResponse,
-    ScentItem,
 )
 from .settings import settings
 from .openai_client import compose_with_openai, describe_image, refine_with_openai, transcribe_audio
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
 from .cartridge import (
-    analyze_swap_requirement,
-    build_active_scents,
     build_catalog_scents,
     get_cartridge_status,
     load_cartridge_config,
-    load_cartridge_state,
-    save_cartridge_state,
+    validate_composition,
 )
+from .descriptor_filter import filter_relevant_scents
 
 
-def _cartridge_context() -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
+def _cartridge_context() -> Tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]:
     config = load_cartridge_config(settings.cartridge_sets_path)
-    state = load_cartridge_state(settings.cartridge_state_path, config)
-    active = build_active_scents(config, state)
-    catalog = build_catalog_scents(config, state)
-    return config, state, active, catalog
+    catalog = build_catalog_scents(config)
+    return config, catalog
 
 
 def load_scents() -> Dict[str, Any]:
-    """Return the full scent catalog for AI composition (includes unloaded alternate-set scents)."""
-    _, _, _, catalog = _cartridge_context()
+    """Return the full (fixed, 12-odorant) scent catalog for AI composition."""
+    _, catalog = _cartridge_context()
     return catalog
-
-
-def _attach_swap_info(
-    response: Union[ComposeResponse, FeedbackResponse],
-    sequence: List[ScentItem],
-) -> Union[ComposeResponse, FeedbackResponse]:
-    config, state, _, catalog = _cartridge_context()
-    swap = analyze_swap_requirement(sequence, catalog, config, state)
-    playable_now = swap is None
-    return response.model_copy(update={"cartridge_swap": swap, "playable_now": playable_now})
 
 
 app = FastAPI(title="AromaGen Scent Composer")
@@ -73,59 +57,36 @@ def health() -> Dict[str, str]:
 @app.get("/cartridge/status")
 def cartridge_status() -> Dict[str, Any]:
     try:
-        config, state, active, catalog = _cartridge_context()
+        config, catalog = _cartridge_context()
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    status = get_cartridge_status(config, state)
+    status = get_cartridge_status(config)
     return {
         **status,
-        "active_scents": active,
-        "catalog_size": len(catalog),
+        "active_scents": catalog,
     }
 
 
 @app.get("/cartridge/active")
 def cartridge_active() -> Dict[str, Any]:
-    """Scents currently loaded in the device with slot locations (for playback)."""
+    """The fixed 12-odorant catalog with slot locations (for playback)."""
     try:
-        config, state, active, _ = _cartridge_context()
+        config, catalog = _cartridge_context()
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
     return {
-        "state": state,
-        "status": get_cartridge_status(config, state),
-        "scents": active,
-    }
-
-
-@app.put("/cartridge/state")
-def update_cartridge_state(update: CartridgeStateUpdate) -> Dict[str, Any]:
-    try:
-        config = load_cartridge_config(settings.cartridge_sets_path)
-        state = save_cartridge_state(
-            settings.cartridge_state_path,
-            config,
-            update.model_dump(),
-        )
-    except (FileNotFoundError, ValueError) as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    active = build_active_scents(config, state)
-    return {
-        "state": state,
-        "status": get_cartridge_status(config, state),
-        "scents": active,
+        "status": get_cartridge_status(config),
+        "scents": catalog,
     }
 
 
 @app.post("/compose", response_model=ComposeResponse)
 def compose(request: ComposeRequest) -> ComposeResponse:
     try:
-        config, state, _, catalog = _cartridge_context()
-        scents = catalog
-        cartridge_status = get_cartridge_status(config, state)
+        config, catalog = _cartridge_context()
+        cartridge_status = get_cartridge_status(config)
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -133,10 +94,13 @@ def compose(request: ComposeRequest) -> ComposeResponse:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
 
     try:
-        result = compose_with_openai(request.sentence, scents, cartridge_status)
+        narrowed_catalog = filter_relevant_scents(
+            request.sentence, catalog, settings.descriptor_filter_top_k
+        )
+        result = compose_with_openai(request.sentence, narrowed_catalog, cartridge_status)
+        validate_composition(result.scent_sequence, narrowed_catalog)
         session_id = new_session_id()
         output = result.model_copy(update={"session_id": session_id})
-        output = _attach_swap_info(output, output.scent_sequence)
         append_event(
             "compose",
             session_id=session_id,
@@ -152,9 +116,8 @@ def compose(request: ComposeRequest) -> ComposeResponse:
 @app.post("/feedback", response_model=FeedbackResponse)
 def feedback(request: FeedbackRequest) -> FeedbackResponse:
     try:
-        config, state, _, catalog = _cartridge_context()
-        scents = catalog
-        cartridge_status = get_cartridge_status(config, state)
+        config, catalog = _cartridge_context()
+        cartridge_status = get_cartridge_status(config)
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -162,10 +125,26 @@ def feedback(request: FeedbackRequest) -> FeedbackResponse:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
 
     try:
-        result = refine_with_openai(request, scents, cartridge_status)
+        relevance_text = f"{request.original_sentence} {request.latest_feedback}"
+        narrowed_catalog = filter_relevant_scents(
+            relevance_text, catalog, settings.descriptor_filter_top_k
+        )
+        # Keep whatever is already in the sequence being revised in scope, even if the
+        # re-narrowing for this round wouldn't have picked it -- otherwise a revision could
+        # involuntarily drop a scent the user already accepted just because the filter's
+        # relevance ranking shifted between rounds.
+        current_sequence = (
+            request.prior_rounds[-1].resulting_sequence
+            if request.prior_rounds
+            else request.original_sequence
+        )
+        for item in current_sequence:
+            if item.scent_name in catalog and item.scent_name not in narrowed_catalog:
+                narrowed_catalog[item.scent_name] = catalog[item.scent_name]
+        result = refine_with_openai(request, narrowed_catalog, cartridge_status)
+        validate_composition(result.scent_sequence, narrowed_catalog)
         session_id = request.session_id or new_session_id()
         output = result.model_copy(update={"session_id": session_id})
-        output = _attach_swap_info(output, output.scent_sequence)
         append_event(
             "feedback",
             session_id=session_id,
