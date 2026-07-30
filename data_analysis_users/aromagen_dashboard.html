@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AromaGen Recognition Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-exact:   #2a78d6; /* categorical slot 1 - blue */
+    --series-class:   #1baf7a; /* categorical slot 3 - aqua */
+    --status-good:    #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical:#d03b3b;
+    --delta-good:     #006300;
+    --delta-bad:      #d03b3b;
+    --card-bg:        #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-exact:   #3987e5;
+      --series-class:   #199e70;
+      --status-good:    #0ca30c;
+      --status-warning: #fab219;
+      --status-serious: #ec835a;
+      --status-critical:#d03b3b;
+      --delta-good:     #0ca30c;
+      --delta-bad:      #e66767;
+      --card-bg:        #17171600;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-exact:   #3987e5;
+    --series-class:   #199e70;
+    --delta-good:     #0ca30c;
+    --delta-bad:      #e66767;
+    --card-bg:        #17171600;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { padding: 24px 16px 64px; }
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  .toggle-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-primary);
+    border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; cursor: pointer;
+  }
+  .toggle-btn:hover { background: var(--gridline); }
+
+  .method p, .method li { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; }
+  .method code { background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  .method h3 { font-size: 0.92rem; margin: 14px 0 4px; color: var(--text-primary); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi .label { font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.02em; }
+  .kpi .value { font-size: 1.7rem; font-weight: 600; margin-top: 4px; font-variant-numeric: proportional-nums; }
+  .kpi .sub { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+
+  .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .filter-row label { font-size: 0.8rem; color: var(--text-secondary); margin-right: 6px; }
+  select, input[type=text], input[type=date], textarea {
+    background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; font-family: inherit;
+  }
+  textarea { width: 100%; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; line-height: 1.4; }
+
+  button.primary {
+    background: var(--series-exact); color: white; border: none; border-radius: 8px;
+    padding: 9px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.secondary {
+    background: none; border: 1px solid var(--border); color: var(--text-primary);
+    border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer;
+  }
+  button.secondary:hover { background: var(--gridline); }
+  button.danger {
+    background: none; border: 1px solid var(--status-critical); color: var(--status-critical);
+    border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer;
+  }
+  button.danger:hover { background: var(--status-critical); color: white; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+
+  .status-log { margin-top: 10px; font-size: 0.82rem; }
+  .status-log .ok { color: var(--status-good); }
+  .status-log .warn { color: var(--status-warning); }
+  .status-log .err { color: var(--status-critical); }
+  .status-log ul { margin: 4px 0; padding-left: 18px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+  table.scroll-wrap { display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
+  th { color: var(--text-muted); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--text-primary); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; }
+  .row-btn { background: none; border: 1px solid var(--border); color: var(--text-secondary); border-radius: 6px; padding: 3px 9px; font-size: 0.76rem; cursor: pointer; }
+  .row-btn:hover { background: var(--status-critical); border-color: var(--status-critical); color: white; }
+
+  .legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; }
+  .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+  .chart-row { position: relative; }
+  .bar-cat-label { font-size: 0.78rem; color: var(--text-secondary); }
+  .bar-value-label { font-size: 0.72rem; fill: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .bar-axis-label { font-size: 0.68rem; fill: var(--text-muted); }
+  .gridline { stroke: var(--gridline); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 50;
+    background: var(--text-primary); color: var(--surface-1);
+    font-size: 0.76rem; padding: 6px 9px; border-radius: 6px;
+    opacity: 0; transition: opacity 0.08s ease; white-space: nowrap;
+  }
+
+  .empty-note { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .field-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 0.76rem; color: var(--text-muted); }
+
+  .coverage-note { font-size: 0.78rem; color: var(--status-warning); margin-top: 6px; }
+  .divider { height: 1px; background: var(--gridline); margin: 6px 0 14px; border: none; }
+  .small-muted { font-size: 0.78rem; color: var(--text-muted); }
+  summary { cursor: pointer; }
+
+  .card.highlight {
+    border: 1px solid var(--series-exact);
+    background: color-mix(in srgb, var(--series-exact) 6%, var(--surface-1));
+    position: relative;
+  }
+  .card.highlight h2 { display: flex; align-items: center; gap: 8px; }
+  .card.highlight .badge {
+    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.03em;
+    background: var(--series-exact); color: white; padding: 2px 8px; border-radius: 999px;
+  }
+
+  .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .segmented button {
+    background: var(--surface-1); color: var(--text-secondary); border: none;
+    padding: 6px 12px; font-size: 0.8rem; cursor: pointer; border-right: 1px solid var(--border);
+  }
+  .segmented button:last-child { border-right: none; }
+  .segmented button.active { background: var(--series-exact); color: white; }
+  .segmented button:not(.active):hover { background: var(--gridline); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem;
+    background: var(--gridline); color: var(--text-primary); border-radius: 999px;
+    padding: 4px 10px 4px 12px; margin-bottom: 10px;
+  }
+  .chip button {
+    background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0;
+  }
+  .chip button:hover { color: var(--text-primary); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; margin-top: 14px; }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+  }
+  .compare-card select { width: 100%; margin-bottom: 10px; font-weight: 600; }
+  .compare-card .metric-line { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 3px 0; }
+  .compare-card .metric-line b { font-variant-numeric: tabular-nums; }
+  .compare-vs {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 0.78rem; color: var(--text-secondary); gap: 4px; min-width: 90px; text-align: center;
+  }
+  .compare-vs .delta { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .compare-vs .delta.good { color: var(--delta-good); }
+  .compare-vs .delta.bad { color: var(--delta-bad); }
+
+  .row-clickable { cursor: pointer; }
+  .row-clickable:hover .bar-cat-label { fill: var(--series-exact); }
+
+  .card.emphasis {
+    border: 1px solid var(--series-exact);
+    padding: 26px 28px;
+  }
+  .card.emphasis h2 { font-size: 1.3rem; }
+  table.table-big { font-size: 1rem; }
+  table.table-big th { font-size: 0.8rem; padding: 10px 14px; }
+  table.table-big td { padding: 10px 14px; }
+
+  .legend-defined { flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .legend-defined .swatch { margin-top: 3px; }
+
+  .day-cell { display: inline-flex; align-items: center; gap: 7px; }
+  .day-note-dot {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--status-warning); border: none; padding: 0; cursor: pointer;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-warning) 25%, transparent);
+  }
+  .day-note-dot:hover { filter: brightness(1.15); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 100; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card-bg, var(--surface-1)); background-color: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; max-width: 420px; width: 100%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .modal-box h3 { margin: 0 0 10px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .modal-box p { margin: 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; }
+  .modal-box .modal-close {
+    margin-top: 16px; background: none; border: 1px solid var(--border); color: var(--text-primary);
+    border-radius: 8px; padding: 7px 14px; font-size: 0.82rem; cursor: pointer;
+  }
+  .modal-box .modal-close:hover { background: var(--gridline); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div>
+    <h1>AromaGen Recognition Dashboard</h1>
+    <p class="subtitle">Smell-recognition user study — exact vs. family-level accuracy, by participant, by day, by cluster, by smell.</p>
+  </div>
+
+  <div class="card highlight" id="updateCsvCard">
+    <h2>Update from user_study_result.csv <span class="badge">Start here</span></h2>
+    <p class="small-muted">Pick the <code>user_study_result.csv</code> file your study tool writes to. The dashboard reads the whole file and replaces its data with exactly what's in it — that file is the single source of truth. Each row's timestamp is used to group participants "by day" automatically, no manual date entry needed.</p>
+    <div class="btn-row">
+      <label class="primary" style="display:inline-flex;align-items:center;cursor:pointer;">
+        Choose user_study_result.csv &amp; update
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none">
+      </label>
+    </div>
+    <div class="status-log" id="csvUpdateLog"></div>
+  </div>
+
+  <div class="card method">
+    <details id="methodDetails">
+      <summary><h2 style="display:inline">How this is calculated</h2></summary>
+      <div style="margin-top:10px">
+        <h3>The task</h3>
+        <p>Each trial shows a participant one smell and 4 candidate descriptor words (<code>option_a</code>–<code>option_d</code>), one of which is correct (<code>correct_index</code>). The participant picks one (<code>selected_index</code>).</p>
+        <h3>Two accuracy metrics</h3>
+        <ul>
+          <li><b>Exact accuracy</b> — <code>selected_index === correct_index</code>. The participant named the precise word.</li>
+          <li><b>Class (family) accuracy</b> — the <i>cluster</i> of the selected word matches the trial's target cluster, even if the exact word is wrong. Every descriptor is mapped to one of 12 odor families (Floral, Citrus, Woody &amp; Resinous, Herbal &amp; Cooling, Spice, Sweet &amp; Gourmand, Roasted &amp; Smoky, Fermented &amp; Sour, Putrid &amp; Decay, Body &amp; Animalic, Chemical &amp; Solvent, Perfumed &amp; Clean) using the fixed-ratio-vector taxonomy. This credits "right family, wrong word" answers — e.g. selecting <code>lavender</code> when the target was <code>rose</code> still counts, since both are Floral.</li>
+        </ul>
+        <h3>Aggregates</h3>
+        <p>Both metrics are rolled up <b>per cluster</b>, <b>per smell</b> (the correct descriptor), <b>per participant</b>, and <b>per day</b> (the date a participant's session was logged). The confidence/familiarity panel splits mean self-reported <code>confidence_1to5</code> and <code>familiarity_1to5_for_descriptor</code> by whether the trial was correct, plus a Pearson correlation between each rating and correctness.</p>
+        <h3>Data &amp; persistence</h3>
+        <p><code>user_study_result.csv</code> is the single source of truth — click <b>Update from user_study_result.csv</b> any time it changes (new participant, corrected row, etc.) and the dashboard fully replaces its data with what's in that file. In between updates, the last-loaded data is cached in this browser's local storage so the dashboard isn't blank on reopen, but it will <b>not</b> sync across devices/browsers and can be cleared by clearing site data — use <b>Download backup</b> if you want a portable copy independent of the file.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="filter-row">
+      <div><label for="filterParticipant">Participant</label>
+        <select id="filterParticipant"></select>
+      </div>
+      <div><label for="filterDay">Day</label>
+        <select id="filterDay"></select>
+      </div>
+      <div><label>Chart metric</label>
+        <span class="segmented" id="metricToggle">
+          <button data-metric="both" class="active">Both</button>
+          <button data-metric="exact">Exact</button>
+          <button data-metric="cls">Class</button>
+        </span>
+      </div>
+    </div>
+    <div id="coverageNote" class="coverage-note"></div>
+  </div>
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="card">
+    <h2>Accuracy by cluster</h2>
+    <div class="legend legend-defined">
+      <span><span class="swatch" style="background:var(--series-exact)"></span><b>Exact</b> — named the precise word</span>
+      <span><span class="swatch" style="background:var(--series-class)"></span><b>Class</b> — named any word from the right family (credits close-but-wrong answers)</span>
+    </div>
+    <p class="small-muted">Click any cluster to filter the smell table below to it. Sorted best → worst.</p>
+    <div id="clusterChart"></div>
+  </div>
+
+  <div class="card emphasis">
+    <h2>Accuracy by smell</h2>
+    <p class="small-muted">Click a column header to sort. "Upgrade" = wrong exact word but right family.</p>
+    <div id="clusterFocusChip"></div>
+    <div class="table-scroll"><table id="smellTable" class="table-big">
+      <thead><tr>
+        <th class="sortable" data-key="smell">Smell</th>
+        <th class="sortable num" data-key="cluster">Cluster</th>
+        <th class="sortable num" data-key="n">N</th>
+        <th class="sortable num" data-key="exact">Exact %</th>
+        <th class="sortable num" data-key="cls">Class %</th>
+        <th class="sortable num" data-key="upgrade">Upgraded</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Confidence &amp; familiarity vs. correctness</h2>
+    <div class="grid-2">
+      <div>
+        <div class="bar-cat-label" style="margin-bottom:6px">Mean confidence (1–5)</div>
+        <div id="confChart"></div>
+      </div>
+      <div>
+        <div class="bar-cat-label" style="margin-bottom:6px">Mean familiarity (1–5)</div>
+        <div id="famChart"></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="kpi-row" id="corrRow"></div>
+  </div>
+
+  <div class="card emphasis">
+    <h2>Accuracy by day</h2>
+    <div id="dayChart"></div>
+    <div class="table-scroll"><table id="dayTable" class="table-big">
+      <thead><tr><th>Day</th><th class="num">Participants</th><th class="num">Trials</th><th class="num">Exact %</th><th class="num">Class %</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Participants loaded</h2>
+    <div class="table-scroll"><table id="participantTable">
+      <thead><tr><th>Participant</th><th class="num">Trials</th><th class="num">Correct (exact)</th><th class="num">Exact %</th><th class="num">Class %</th><th>Day</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Backup &amp; restore</h2>
+    <p class="small-muted">The dashboard's data mirrors whatever <code>user_study_result.csv</code> you last clicked "Update" with at the top of the page — <code>analyze.py</code> reads that same file directly, so the two naturally stay in sync. This backup/restore is just for this browser: download a backup after a session, and restore it here (or in a fresh browser) to pick up where you left off without re-selecting the file.</p>
+    <div class="btn-row">
+      <button class="secondary" id="exportJsonBtn">Download backup (.json)</button>
+      <label class="secondary" style="display:inline-flex;align-items:center;cursor:pointer;">
+        Restore backup (.json)
+        <input type="file" id="restoreInput" accept="application/json" style="display:none">
+      </label>
+      <button class="danger" id="resetBtn">Reset all data</button>
+    </div>
+    <div class="status-log" id="restoreLog"></div>
+  </div>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="modal-overlay" id="dayNoteOverlay">
+  <div class="modal-box">
+    <h3><span class="day-note-dot" style="cursor:default;box-shadow:none;"></span><span id="dayNoteTitle"></span></h3>
+    <p id="dayNoteBody"></p>
+    <button class="modal-close" id="dayNoteClose">Close</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "aromagen_dashboard_v1";
+  var COLUMNS = ["participant_id","trial_number","cluster","descriptor","option_a","option_b","option_c","option_d","correct_index","selected_index","is_correct","confidence_1to5","familiarity_1to5_for_descriptor"];
+  var EXTRA_COLUMNS = ["response_timestamp","form_id","is_duplicate_submission"];
+  var FULL_COLUMNS = COLUMNS.concat(EXTRA_COLUMNS);
+
+  // "DD/MM/YYYY HH:MM:SS" -> "YYYY-MM-DD", as written by the study tool's timestamp column
+  function dateFromTimestamp(ts){
+    if (!ts) return "";
+    var datePart = String(ts).trim().split(/\s+/)[0];
+    var m = datePart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return "";
+    return m[3] + "-" + m[2].padStart(2,"0") + "-" + m[1].padStart(2,"0");
+  }
+
+  // Per-day annotations for methodology/device changes — shown as a small dot next to the
+  // date in the "Accuracy by day" table (not on the chart); click it for the note. Add an
+  // entry here whenever the study setup changes so results stay interpretable across days.
+  var DAY_NOTES = {
+    "2026-07-30": "Device changed today: descriptor set was updated, and odor diffusion now alternates between the two candidate odors in 1-second bursts over 4 cycles (instead of the previous timing)."
+  };
+
+  var TAXONOMY = {
+    "Floral": ["jasmine","lilac","rose","lavender"],
+    "Citrus": ["lemony","currant","tangy","guava"],
+    "Woody & Resinous": ["sandalwood","myrrh","cedar","saffron","piney"],
+    "Herbal & Cooling": ["minty","wintergreen","rosemary","eucalyptus"],
+    "Spice": ["anise","cinnamon","peppery","cumin","nutmeg"],
+    "Sweet & Gourmand": ["honeyed","vanilla","maple-syrup","coconut"],
+    "Roasted & Smoky": ["woodsmoke","fresh_bread","toasty","burnt","smoky"],
+    "Fermented & Sour": ["vinegar-like","yeasty","sour_milk","butyric"],
+    "Putrid & Decay": ["rotten-egg","musty","rotten_fish","feces"],
+    "Body & Animalic": ["fishy","wet_dog","bad_breath","sweaty"],
+    "Chemical & Solvent": ["burnt_rubber","disinfectant","chlorine","nail-polisher"],
+    "Perfumed & Clean": ["aftershave","air_freshener","perfumer","skin-care"]
+  };
+  var DESC2CLUSTER = {};
+  Object.keys(TAXONOMY).forEach(function(cl){
+    TAXONOMY[cl].forEach(function(d){ DESC2CLUSTER[d] = cl; });
+  });
+  function clusterOf(desc){
+    if (desc == null) return null;
+    var key = String(desc).trim().toLowerCase();
+    return DESC2CLUSTER[key] || null;
+  }
+
+  var SEED_ROWS = [
+    ["p2",1,"Roasted & Smoky","woodsmoke","fresh_bread","woodsmoke","Honeyed","vinegar-like",1,0,"FALSE",4,4,"29/07/2026 09:22:27","SESSION:p2","FALSE"],
+    ["p2",2,"Floral","lavender","lemony","guava","rose","lavender",3,1,"FALSE",3,5,"29/07/2026 09:26:01","SESSION:p2","FALSE"],
+    ["p2",3,"Floral","rose","rose","guava","lavender","tangy",0,0,"TRUE",4,3,"29/07/2026 09:27:38","SESSION:p2","FALSE"],
+    ["p2",4,"Woody & Resinous","sandalwood","minty","sandalwood","Myrrh","lemony",1,0,"FALSE",4,3,"29/07/2026 09:29:13","SESSION:p2","FALSE"],
+    ["p2",5,"Sweet & Gourmand","Honeyed","Vanilla","Honeyed","anise","woodsmoke",1,2,"FALSE",5,3,"29/07/2026 09:31:50","SESSION:p2","FALSE"],
+    ["p2",6,"Herbal & Cooling","wintergreen","Myrrh","minty","cinnamon","wintergreen",3,3,"TRUE",4,2,"29/07/2026 09:33:12","SESSION:p2","FALSE"],
+    ["p2",7,"Sweet & Gourmand","Maple-syrup","Maple-syrup","Coconut","toasty","peppery",0,0,"TRUE",2,3,"29/07/2026 09:34:36","SESSION:p2","FALSE"],
+    ["p2",8,"Roasted & Smoky","smoky","toasty","butyric","Coconut","smoky",3,3,"TRUE",5,5,"29/07/2026 09:35:55","SESSION:p2","FALSE"],
+    ["p2",9,"Citrus","guava","saffron","guava","lavender","tangy",1,3,"FALSE",4,5,"29/07/2026 09:37:15","SESSION:p2","FALSE"],
+    ["p2",10,"Woody & Resinous","Myrrh","Myrrh","currant","Cedar","wintergreen",0,2,"FALSE",5,1,"29/07/2026 09:38:36","SESSION:p2","FALSE"],
+    ["p2",11,"Citrus","tangy","rose","Cedar","currant","tangy",3,3,"TRUE",5,2,"29/07/2026 09:40:00","SESSION:p2","FALSE"],
+    ["p2",12,"Herbal & Cooling","minty","anise","wintergreen","sandalwood","minty",3,0,"FALSE",4,5,"29/07/2026 09:42:38","SESSION:p2","FALSE"],
+    ["p2",13,"Fermented & Sour","yeasty","fresh_bread","yeasty","musty","sour_milk",1,2,"FALSE",5,5,"29/07/2026 09:44:20","SESSION:p2","FALSE"],
+    ["p2",14,"Spice","nutmeg","cumin","Honeyed","nutmeg","minty",2,2,"TRUE",5,2,"29/07/2026 09:45:30","SESSION:p2","FALSE"],
+    ["p2",15,"Body & Animalic","wet_dog","musty","wet_dog","disinfectant","fishy",1,0,"FALSE",5,5,"29/07/2026 09:46:58","SESSION:p2","FALSE"],
+    ["p2",16,"Putrid & Decay","rotten_fish","rotten_fish","musty","sour_milk","bad_breath",0,2,"FALSE",4,5,"29/07/2026 09:48:21","SESSION:p2","FALSE"],
+    ["p2",17,"Fermented & Sour","sour_milk","rotten_fish","sour_milk","yeasty","toasty",1,2,"FALSE",3,5,"29/07/2026 09:49:52","SESSION:p2","FALSE"],
+    ["p2",18,"Spice","cinnamon","anise","Vanilla","cinnamon","wintergreen",2,2,"TRUE",5,5,"29/07/2026 09:50:53","SESSION:p2","FALSE"],
+    ["p2",19,"Chemical & Solvent","burnt_rubber","disinfectant","fishy","aftershave","burnt_rubber",3,3,"TRUE",5,5,"29/07/2026 09:51:57","SESSION:p2","FALSE"],
+    ["p2",20,"Perfumed & Clean","air_freshener","air_freshener","disinfectant","perfumer","chlorine",0,1,"FALSE",5,5,"29/07/2026 09:53:06","SESSION:p2","FALSE"],
+    ["p2",21,"Chemical & Solvent","nail-polisher","sweaty","chlorine","nail-polisher","skin-care",2,0,"FALSE",5,5,"29/07/2026 09:54:15","SESSION:p2","FALSE"],
+    ["p2",22,"Perfumed & Clean","aftershave","burnt_rubber","aftershave","disinfectant","air_freshener",1,2,"FALSE",5,4,"29/07/2026 09:55:14","SESSION:p2","FALSE"],
+    ["p2",23,"Body & Animalic","sweaty","feces","nail-polisher","sweaty","bad_breath",2,2,"TRUE",5,4,"29/07/2026 09:56:17","SESSION:p2","FALSE"],
+    ["p2",24,"Putrid & Decay","rotten-egg","fishy","vinegar-like","rotten-egg","musty",2,1,"FALSE",3,4,"29/07/2026 09:58:01","SESSION:p2","FALSE"],
+    ["p3",1,"Woody & Resinous","saffron","saffron","guava","eucalyptus","piney",0,2,"FALSE",4,2,"29/07/2026 12:15:14","SESSION:p3","FALSE"],
+    ["p3",2,"Citrus","guava","guava","saffron","lavender","tangy",0,1,"FALSE",3,2,"29/07/2026 12:17:27","SESSION:p3","FALSE"],
+    ["p3",3,"Herbal & Cooling","eucalyptus","saffron","rosemary","cumin","eucalyptus",3,1,"FALSE",3,4,"29/07/2026 12:19:30","SESSION:p3","FALSE"],
+    ["p3",4,"Woody & Resinous","Cedar","Cedar","rosemary","saffron","tangy",0,0,"TRUE",4,4,"29/07/2026 12:22:32","SESSION:p3","FALSE"],
+    ["p3",5,"Herbal & Cooling","rosemary","eucalyptus","rosemary","Cedar","peppery",1,0,"FALSE",3,2,"29/07/2026 12:24:48","SESSION:p3","FALSE"],
+    ["p3",6,"Sweet & Gourmand","Honeyed","woodsmoke","Honeyed","Vanilla","anise",1,3,"FALSE",1,2,"29/07/2026 12:26:36","SESSION:p3","FALSE"],
+    ["p3",7,"Roasted & Smoky","toasty","sour_milk","smoky","toasty","Maple-syrup",2,1,"FALSE",4,2,"29/07/2026 12:27:51","SESSION:p3","FALSE"],
+    ["p3",8,"Roasted & Smoky","smoky","smoky","Coconut","butyric","toasty",0,2,"FALSE",2,4,"29/07/2026 12:29:22","SESSION:p3","FALSE"],
+    ["p3",9,"Sweet & Gourmand","Coconut","Coconut","Maple-syrup","smoky","cumin",0,1,"FALSE",3,4,"29/07/2026 12:31:54","SESSION:p3","FALSE"],
+    ["p3",10,"Citrus","currant","lilac","Myrrh","tangy","currant",3,1,"FALSE",2,1,"29/07/2026 12:33:18","SESSION:p3","FALSE"],
+    ["p3",11,"Floral","jasmine","jasmine","lilac","currant","lemony",0,0,"TRUE",2,2,"29/07/2026 12:34:37","SESSION:p3","FALSE"],
+    ["p3",12,"Floral","rose","guava","rose","lavender","tangy",1,3,"FALSE",4,4,"29/07/2026 12:36:01","SESSION:p3","FALSE"],
+    ["p3",13,"Chemical & Solvent","burnt_rubber","aftershave","burnt_rubber","fishy","disinfectant",1,1,"TRUE",3,4,"29/07/2026 12:37:33","SESSION:p3","FALSE"],
+    ["p3",14,"Body & Animalic","sweaty","feces","sweaty","bad_breath","nail-polisher",1,1,"TRUE",1,3,"29/07/2026 12:39:14","SESSION:p3","FALSE"],
+    ["p3",15,"Chemical & Solvent","chlorine","nail-polisher","bad_breath","perfumer","chlorine",3,1,"FALSE",2,4,"29/07/2026 12:40:33","SESSION:p3","FALSE"],
+    ["p3",16,"Fermented & Sour","vinegar-like","vinegar-like","yeasty","woodsmoke","rotten-egg",0,3,"FALSE",1,4,"29/07/2026 12:42:49","SESSION:p3","FALSE"],
+    ["p3",17,"Putrid & Decay","feces","rotten_fish","feces","butyric","sweaty",1,3,"FALSE",2,4,"29/07/2026 12:45:35","SESSION:p3","FALSE"],
+    ["p3",18,"Perfumed & Clean","skin-care","burnt_rubber","perfumer","nail-polisher","skin-care",3,1,"FALSE",2,1,"29/07/2026 12:47:30","SESSION:p3","FALSE"],
+    ["p3",19,"Fermented & Sour","sour_milk","yeasty","sour_milk","toasty","rotten_fish",1,1,"TRUE",2,2,"29/07/2026 12:49:51","SESSION:p3","FALSE"],
+    ["p3",20,"Spice","anise","cinnamon","anise","minty","Honeyed",1,2,"FALSE",3,1,"29/07/2026 12:51:06","SESSION:p3","FALSE"],
+    ["p3",21,"Spice","peppery","Maple-syrup","rosemary","peppery","cinnamon",2,1,"FALSE",3,4,"29/07/2026 12:52:35","SESSION:p3","FALSE"],
+    ["p3",22,"Putrid & Decay","rotten_fish","sour_milk","musty","rotten_fish","bad_breath",2,1,"FALSE",2,4,"29/07/2026 12:54:09","SESSION:p3","FALSE"],
+    ["p3",23,"Body & Animalic","bad_breath","chlorine","bad_breath","sweaty","rotten_fish",1,0,"FALSE",3,3,"29/07/2026 12:55:23","SESSION:p3","FALSE"],
+    ["p3",24,"Perfumed & Clean","air_freshener","disinfectant","chlorine","air_freshener","perfumer",2,0,"FALSE",2,3,"29/07/2026 12:57:13","SESSION:p3","FALSE"],
+    ["p4",1,"Floral","lavender","rose","lavender","lemony","guava",1,1,"TRUE",2,4,"29/07/2026 14:08:56","SESSION:p4","FALSE"],
+    ["p4",2,"Roasted & Smoky","woodsmoke","vinegar-like","woodsmoke","fresh_bread","Honeyed",1,1,"TRUE",5,4,"29/07/2026 14:10:34","SESSION:p4","FALSE"],
+    ["p4",3,"Woody & Resinous","saffron","saffron","piney","eucalyptus","guava",0,2,"FALSE",2,1,"29/07/2026 14:13:23","SESSION:p4","FALSE"],
+    ["p4",4,"Woody & Resinous","sandalwood","Myrrh","minty","sandalwood","lemony",2,0,"FALSE",1,4,"29/07/2026 14:15:41","SESSION:p4","FALSE"],
+    ["p4",5,"Herbal & Cooling","wintergreen","Myrrh","wintergreen","minty","cinnamon",1,2,"FALSE",5,1,"29/07/2026 14:17:00","SESSION:p4","FALSE"],
+    ["p4",6,"Floral","lilac","rose","tangy","currant","lilac",3,3,"TRUE",3,1,"29/07/2026 14:19:12","SESSION:p4","FALSE"],
+    ["p4",7,"Citrus","tangy","currant","rose","Cedar","tangy",3,0,"FALSE",1,1,"29/07/2026 14:20:51","SESSION:p4","FALSE"],
+    ["p4",8,"Citrus","lemony","lemony","sandalwood","currant","jasmine",0,0,"TRUE",3,4,"29/07/2026 14:22:43","SESSION:p4","FALSE"],
+    ["p4",9,"Sweet & Gourmand","Maple-syrup","Coconut","toasty","Maple-syrup","peppery",2,3,"FALSE",5,4,"29/07/2026 14:25:05","SESSION:p4","FALSE"],
+    ["p4",10,"Roasted & Smoky","fresh_bread","yeasty","fresh_bread","toasty","Vanilla",1,0,"FALSE",3,5,"29/07/2026 14:27:11","SESSION:p4","FALSE"],
+    ["p4",11,"Herbal & Cooling","minty","anise","minty","wintergreen","sandalwood",1,1,"TRUE",3,5,"29/07/2026 14:28:40","SESSION:p4","FALSE"],
+    ["p4",12,"Sweet & Gourmand","Vanilla","Vanilla","Maple-syrup","fresh_bread","cinnamon",0,0,"TRUE",4,5,"29/07/2026 14:29:59","SESSION:p4","FALSE"],
+    ["p4",13,"Body & Animalic","wet_dog","disinfectant","wet_dog","musty","fishy",1,2,"FALSE",4,3,"29/07/2026 14:31:55","SESSION:p4","FALSE"],
+    ["p4",14,"Putrid & Decay","rotten-egg","fishy","rotten-egg","vinegar-like","musty",1,2,"FALSE",3,3,"29/07/2026 14:33:55","SESSION:p4","FALSE"],
+    ["p4",15,"Fermented & Sour","butyric","butyric","smoky","feces","sour_milk",0,1,"FALSE",3,1,"29/07/2026 14:35:38","SESSION:p4","FALSE"],
+    ["p4",16,"Chemical & Solvent","disinfectant","chlorine","disinfectant","air_freshener","wet_dog",1,1,"TRUE",2,5,"29/07/2026 14:37:00","SESSION:p4","FALSE"],
+    ["p4",17,"Spice","cumin","cumin","nutmeg","eucalyptus","Coconut",0,1,"FALSE",3,5,"29/07/2026 14:39:06","SESSION:p4","FALSE"],
+    ["p4",18,"Perfumed & Clean","aftershave","aftershave","disinfectant","burnt_rubber","air_freshener",0,0,"TRUE",4,1,"29/07/2026 14:40:49","SESSION:p4","FALSE"],
+    ["p4",19,"Chemical & Solvent","nail-polisher","nail-polisher","chlorine","skin-care","sweaty",0,3,"FALSE",3,4,"29/07/2026 14:43:18","SESSION:p4","FALSE"],
+    ["p4",20,"Body & Animalic","fishy","burnt_rubber","wet_dog","fishy","rotten-egg",2,1,"FALSE",4,5,"29/07/2026 14:44:57","SESSION:p4","FALSE"],
+    ["p4",21,"Perfumed & Clean","perfumer","chlorine","air_freshener","nail-polisher","perfumer",3,2,"FALSE",4,5,"29/07/2026 14:46:30","SESSION:p4","FALSE"],
+    ["p4",22,"Putrid & Decay","musty","musty","wet_dog","yeasty","rotten_fish",0,0,"TRUE",3,5,"29/07/2026 14:48:10","SESSION:p4","FALSE"],
+    ["p4",23,"Spice","anise","cinnamon","anise","minty","Honeyed",1,2,"FALSE",5,1,"29/07/2026 14:50:00","SESSION:p4","FALSE"],
+    ["p4",24,"Fermented & Sour","yeasty","musty","sour_milk","yeasty","fresh_bread",2,1,"FALSE",3,2,"29/07/2026 14:51:57","SESSION:p4","FALSE"],
+    ["p5",1,"Floral","lavender","rose","lavender","lemony","guava",1,1,"TRUE",2,5,"29/07/2026 15:11:33","SESSION:p5","FALSE"],
+    ["p5",2,"Floral","lilac","currant","lilac","rose","tangy",1,3,"FALSE",3,1,"29/07/2026 15:13:16","SESSION:p5","FALSE"],
+    ["p5",3,"Roasted & Smoky","fresh_bread","yeasty","toasty","Vanilla","fresh_bread",3,1,"FALSE",1,5,"29/07/2026 15:14:47","SESSION:p5","FALSE"],
+    ["p5",4,"Sweet & Gourmand","Maple-syrup","peppery","Maple-syrup","Coconut","toasty",1,0,"FALSE",1,5,"29/07/2026 15:16:05","SESSION:p5","FALSE"],
+    ["p5",5,"Woody & Resinous","Myrrh","wintergreen","Cedar","currant","Myrrh",3,1,"FALSE",5,1,"29/07/2026 15:18:28","SESSION:p5","FALSE"],
+    ["p5",6,"Herbal & Cooling","eucalyptus","saffron","cumin","rosemary","eucalyptus",3,1,"FALSE",4,2,"29/07/2026 15:20:11","SESSION:p5","FALSE"],
+    ["p5",7,"Herbal & Cooling","rosemary","peppery","eucalyptus","Cedar","rosemary",3,1,"FALSE",5,2,"29/07/2026 15:21:25","SESSION:p5","FALSE"],
+    ["p5",8,"Woody & Resinous","piney","piney","saffron","minty","lemony",0,1,"FALSE",3,1,"29/07/2026 15:23:10","SESSION:p5","FALSE"],
+    ["p5",9,"Sweet & Gourmand","Honeyed","woodsmoke","anise","Vanilla","Honeyed",3,0,"FALSE",2,5,"29/07/2026 15:29:06","SESSION:p5","FALSE"],
+    ["p5",10,"Roasted & Smoky","smoky","toasty","Coconut","butyric","smoky",3,2,"FALSE",1,4,"29/07/2026 15:30:13","SESSION:p5","FALSE"],
+    ["p5",11,"Citrus","currant","lilac","currant","tangy","Myrrh",1,3,"FALSE",2,1,"29/07/2026 15:31:49","SESSION:p5","FALSE"],
+    ["p5",12,"Citrus","tangy","currant","Cedar","tangy","rose",2,0,"FALSE",1,5,"29/07/2026 15:32:55","SESSION:p5","FALSE"],
+    ["p5",13,"Spice","cinnamon","anise","wintergreen","cinnamon","Vanilla",2,1,"FALSE",1,5,"29/07/2026 15:34:14","SESSION:p5","FALSE"],
+    ["p5",14,"Perfumed & Clean","skin-care","burnt_rubber","nail-polisher","perfumer","skin-care",3,0,"FALSE",2,5,"29/07/2026 15:35:30","SESSION:p5","FALSE"],
+    ["p5",15,"Putrid & Decay","musty","musty","yeasty","wet_dog","rotten_fish",0,1,"FALSE",2,4,"29/07/2026 15:36:44","SESSION:p5","FALSE"],
+    ["p5",16,"Fermented & Sour","vinegar-like","woodsmoke","rotten-egg","vinegar-like","yeasty",2,1,"FALSE",5,3,"29/07/2026 15:37:55","SESSION:p5","FALSE"],
+    ["p5",17,"Body & Animalic","fishy","burnt_rubber","rotten-egg","fishy","wet_dog",2,2,"TRUE",4,5,"29/07/2026 15:39:07","SESSION:p5","FALSE"],
+    ["p5",18,"Body & Animalic","sweaty","feces","bad_breath","sweaty","nail-polisher",2,2,"TRUE",3,4,"29/07/2026 15:40:45","SESSION:p5","FALSE"],
+    ["p5",19,"Putrid & Decay","feces","feces","butyric","sweaty","rotten_fish",0,0,"TRUE",1,3,"29/07/2026 15:42:00","SESSION:p5","FALSE"],
+    ["p5",20,"Chemical & Solvent","chlorine","perfumer","chlorine","nail-polisher","bad_breath",1,1,"TRUE",1,5,"29/07/2026 15:50:03","SESSION:p5","FALSE"],
+    ["p5",21,"Perfumed & Clean","perfumer","air_freshener","chlorine","nail-polisher","perfumer",3,2,"FALSE",1,5,"29/07/2026 15:51:21","SESSION:p5","FALSE"],
+    ["p5",22,"Fermented & Sour","butyric","butyric","sour_milk","feces","smoky",0,2,"FALSE",1,1,"29/07/2026 15:52:06","SESSION:p5","FALSE"],
+    ["p5",23,"Spice","nutmeg","cumin","Honeyed","minty","nutmeg",3,1,"FALSE",1,1,"29/07/2026 15:53:47","SESSION:p5","FALSE"],
+    ["p5",24,"Chemical & Solvent","nail-polisher","skin-care","nail-polisher","sweaty","chlorine",1,0,"FALSE",1,5,"29/07/2026 15:54:52","SESSION:p5","FALSE"],
+    ["p6",1,"Herbal & Cooling","minty","wintergreen","anise","minty","sandalwood",2,2,"TRUE",4,5,"29/07/2026 16:09:59","SESSION:p6","FALSE"],
+    ["p6",2,"Citrus","lemony","lemony","currant","jasmine","sandalwood",0,1,"FALSE",2,5,"29/07/2026 16:12:18","SESSION:p6","FALSE"],
+    ["p6",3,"Floral","rose","rose","lavender","tangy","guava",0,2,"FALSE",2,5,"29/07/2026 16:13:32","SESSION:p6","FALSE"],
+    ["p6",4,"Roasted & Smoky","woodsmoke","vinegar-like","fresh_bread","Honeyed","woodsmoke",3,0,"FALSE",2,4,"29/07/2026 16:15:19","SESSION:p6","FALSE"],
+    ["p6",5,"Herbal & Cooling","wintergreen","cinnamon","minty","wintergreen","Myrrh",2,1,"FALSE",3,1,"29/07/2026 16:17:12","SESSION:p6","FALSE"],
+    ["p6",6,"Roasted & Smoky","toasty","smoky","sour_milk","toasty","Maple-syrup",2,0,"FALSE",3,2,"29/07/2026 16:18:19","SESSION:p6","FALSE"],
+    ["p6",7,"Citrus","guava","lavender","saffron","guava","tangy",2,1,"FALSE",2,1,"29/07/2026 16:19:40","SESSION:p6","FALSE"],
+    ["p6",8,"Floral","jasmine","currant","lilac","lemony","jasmine",3,0,"FALSE",3,5,"29/07/2026 16:20:53","SESSION:p6","FALSE"],
+    ["p6",9,"Sweet & Gourmand","Vanilla","Vanilla","cinnamon","fresh_bread","Maple-syrup",0,0,"TRUE",1,3,"29/07/2026 16:22:34","SESSION:p6","FALSE"],
+    ["p6",10,"Sweet & Gourmand","Coconut","Maple-syrup","Coconut","cumin","smoky",1,1,"TRUE",3,4,"29/07/2026 16:24:58","SESSION:p6","FALSE"],
+    ["p6",11,"Woody & Resinous","saffron","piney","saffron","eucalyptus","guava",1,0,"FALSE",1,1,"29/07/2026 16:26:42","SESSION:p6","FALSE"],
+    ["p6",12,"Woody & Resinous","Cedar","tangy","saffron","rosemary","Cedar",3,2,"FALSE",1,1,"29/07/2026 16:28:44","SESSION:p6","FALSE"],
+    ["p6",13,"Putrid & Decay","rotten-egg","rotten-egg","musty","vinegar-like","fishy",0,1,"FALSE",4,3,"29/07/2026 16:30:10","SESSION:p6","FALSE"],
+    ["p6",14,"Chemical & Solvent","burnt_rubber","burnt_rubber","fishy","disinfectant","aftershave",0,2,"FALSE",2,5,"29/07/2026 16:32:22","SESSION:p6","FALSE"],
+    ["p6",15,"Perfumed & Clean","aftershave","disinfectant","air_freshener","burnt_rubber","aftershave",3,3,"TRUE",2,1,"29/07/2026 16:34:19","SESSION:p6","FALSE"],
+    ["p6",16,"Fermented & Sour","sour_milk","sour_milk","toasty","rotten_fish","yeasty",0,1,"FALSE",2,2,"29/07/2026 16:35:57","SESSION:p6","FALSE"],
+    ["p6",17,"Fermented & Sour","yeasty","fresh_bread","musty","yeasty","sour_milk",2,1,"FALSE",1,4,"29/07/2026 16:37:14","SESSION:p6","FALSE"],
+    ["p6",18,"Spice","peppery","peppery","rosemary","cinnamon","Maple-syrup",0,2,"FALSE",1,4,"29/07/2026 16:39:01","SESSION:p6","FALSE"],
+    ["p6",19,"Perfumed & Clean","air_freshener","chlorine","perfumer","air_freshener","disinfectant",2,2,"TRUE",1,5,"29/07/2026 16:40:25","SESSION:p6","FALSE"],
+    ["p6",20,"Body & Animalic","wet_dog","musty","fishy","wet_dog","disinfectant",2,2,"TRUE",1,1,"29/07/2026 16:43:17","SESSION:p6","FALSE"],
+    ["p6",21,"Chemical & Solvent","disinfectant","air_freshener","chlorine","wet_dog","disinfectant",3,0,"FALSE",2,5,"29/07/2026 16:45:26","SESSION:p6","FALSE"],
+    ["p6",22,"Spice","anise","Honeyed","anise","cinnamon","minty",1,2,"FALSE",2,5,"29/07/2026 16:46:59","SESSION:p6","FALSE"],
+    ["p6",23,"Putrid & Decay","rotten_fish","bad_breath","musty","sour_milk","rotten_fish",3,2,"FALSE",1,4,"29/07/2026 16:48:41","SESSION:p6","FALSE"],
+    ["p6",24,"Body & Animalic","bad_breath","chlorine","bad_breath","rotten_fish","sweaty",1,0,"FALSE",1,4,"29/07/2026 16:50:11","SESSION:p6","FALSE"],
+    ["p7",1,"Woody & Resinous","sandalwood","minty","sandalwood","musty","anise",1,0,"FALSE",3,2,"30/07/2026 15:20:12","SESSION:p7","FALSE"],
+    ["p7",2,"Sweet & Gourmand","Coconut","Coconut","guava","vinegar-like","lavender",0,3,"FALSE",4,4,"30/07/2026 15:22:45","SESSION:p7","FALSE"],
+    ["p7",3,"Citrus","currant","Myrrh","aftershave","wintergreen","currant",3,3,"TRUE",3,3,"30/07/2026 15:25:16","SESSION:p7","FALSE"],
+    ["p7",4,"Floral","lilac","Myrrh","vinegar-like","currant","lilac",3,0,"FALSE",1,2,"30/07/2026 15:27:17","SESSION:p7","FALSE"],
+    ["p7",5,"Roasted & Smoky","woodsmoke","vinegar-like","jasmine","woodsmoke","rotten-egg",2,2,"TRUE",4,5,"30/07/2026 15:31:06","SESSION:p7","FALSE"],
+    ["p7",6,"Citrus","lemony","minty","lemony","sandalwood","burnt_rubber",1,0,"FALSE",4,5,"30/07/2026 15:34:24","SESSION:p7","FALSE"],
+    ["p7",7,"Floral","jasmine","jasmine","woodsmoke","lemony","sandalwood",0,0,"TRUE",2,1,"30/07/2026 15:36:10","SESSION:p7","FALSE"],
+    ["p7",8,"Herbal & Cooling","eucalyptus","Coconut","eucalyptus","cumin","chlorine",1,1,"TRUE",1,3,"30/07/2026 15:39:49","SESSION:p7","FALSE"],
+    ["p7",9,"Sweet & Gourmand","Honeyed","Honeyed","nail-polisher","lemony","jasmine",0,3,"FALSE",2,5,"30/07/2026 15:42:20","SESSION:p7","FALSE"],
+    ["p7",10,"Woody & Resinous","piney","piney","minty","toasty","nutmeg",0,0,"TRUE",3,4,"30/07/2026 15:45:47","SESSION:p7","FALSE"],
+    ["p7",11,"Roasted & Smoky","toasty","rotten_fish","sour_milk","toasty","sandalwood",2,1,"FALSE",3,5,"30/07/2026 15:49:57","SESSION:p7","FALSE"],
+    ["p7",12,"Herbal & Cooling","minty","Honeyed","minty","sour_milk","anise",1,1,"TRUE",1,5,"30/07/2026 15:53:03","SESSION:p7","FALSE"],
+    ["p7",13,"Putrid & Decay","rotten-egg","burnt_rubber","Myrrh","fishy","rotten-egg",3,1,"FALSE",2,5,"30/07/2026 15:59:37","SESSION:p7","FALSE"],
+    ["p7",14,"Perfumed & Clean","skin-care","butyric","Coconut","skin-care","smoky",2,2,"TRUE",1,2,"30/07/2026 16:03:54","SESSION:p7","FALSE"],
+    ["p7",15,"Fermented & Sour","sour_milk","bad_breath","rotten_fish","lilac","sour_milk",3,0,"FALSE",4,5,"30/07/2026 16:06:02","SESSION:p7","FALSE"],
+    ["p7",16,"Spice","peppery","Maple-syrup","peppery","rose","butyric",1,2,"FALSE",2,4,"30/07/2026 16:09:04","SESSION:p7","FALSE"],
+    ["p7",17,"Spice","cinnamon","smoky","Vanilla","lilac","cinnamon",3,1,"FALSE",3,4,"30/07/2026 16:10:58","SESSION:p7","FALSE"],
+    ["p7",18,"Perfumed & Clean","aftershave","woodsmoke","vinegar-like","aftershave","saffron",2,2,"TRUE",3,4,"30/07/2026 16:14:46","SESSION:p7","FALSE"],
+    ["p7",19,"Body & Animalic","sweaty","rosemary","sweaty","nail-polisher","skin-care",1,1,"TRUE",4,4,"30/07/2026 16:15:32","SESSION:p7","FALSE"],
+    ["p7",20,"Chemical & Solvent","chlorine","lavender","perfumer","toasty","chlorine",3,3,"TRUE",2,5,"30/07/2026 16:16:57","SESSION:p7","FALSE"],
+    ["p7",21,"Fermented & Sour","vinegar-like","anise","vinegar-like","fishy","rotten-egg",1,1,"TRUE",1,5,"30/07/2026 16:18:41","SESSION:p7","FALSE"],
+    ["p7",22,"Chemical & Solvent","nail-polisher","nail-polisher","guava","smoky","skin-care",0,2,"FALSE",2,5,"30/07/2026 16:20:45","SESSION:p7","FALSE"],
+    ["p7",23,"Putrid & Decay","feces","Vanilla","sweaty","nail-polisher","feces",3,2,"FALSE",2,4,"30/07/2026 16:22:33","SESSION:p7","FALSE"],
+    ["p7",24,"Body & Animalic","fishy","aftershave","burnt_rubber","fishy","rose",2,0,"FALSE",2,5,"30/07/2026 16:24:18","SESSION:p7","FALSE"],
+    ["p8",1,"Citrus","tangy","Cedar","tangy","fresh_bread","rosemary",1,0,"FALSE",3,2,"30/07/2026 16:30:56","SESSION:p8","FALSE"],
+    ["p8",2,"Sweet & Gourmand","Coconut","guava","Coconut","vinegar-like","lavender",1,3,"FALSE",5,3,"30/07/2026 16:32:40","SESSION:p8","FALSE"],
+    ["p8",3,"Woody & Resinous","Cedar","rosemary","disinfectant","Cedar","peppery",2,2,"TRUE",3,3,"30/07/2026 16:34:49","SESSION:p8","FALSE"],
+    ["p8",4,"Roasted & Smoky","woodsmoke","rotten-egg","woodsmoke","vinegar-like","jasmine",1,3,"FALSE",4,5,"30/07/2026 16:37:00","SESSION:p8","FALSE"],
+    ["p8",5,"Roasted & Smoky","fresh_bread","lemony","musty","yeasty","fresh_bread",3,0,"FALSE",3,5,"30/07/2026 16:39:18","SESSION:p8","FALSE"],
+    ["p8",6,"Herbal & Cooling","minty","sour_milk","anise","Honeyed","minty",3,3,"TRUE",5,5,"30/07/2026 16:40:03","SESSION:p8","FALSE"],
+    ["p8",7,"Floral","jasmine","lemony","sandalwood","jasmine","woodsmoke",2,2,"TRUE",4,3,"30/07/2026 16:42:44","SESSION:p8","FALSE"],
+    ["p8",8,"Floral","lilac","vinegar-like","currant","Myrrh","lilac",3,3,"TRUE",1,1,"30/07/2026 16:45:00","SESSION:p8","FALSE"],
+    ["p8",9,"Sweet & Gourmand","Vanilla","Vanilla","lilac","skin-care","currant",0,1,"FALSE",1,3,"30/07/2026 16:47:10","SESSION:p8","FALSE"],
+    ["p8",10,"Herbal & Cooling","wintergreen","Vanilla","cinnamon","wintergreen","rotten_fish",2,2,"TRUE",3,1,"30/07/2026 16:49:02","SESSION:p8","FALSE"],
+    ["p8",11,"Woody & Resinous","saffron","cumin","saffron","eucalyptus","air_freshener",1,2,"FALSE",4,1,"30/07/2026 16:51:15","SESSION:p8","FALSE"],
+    ["p8",12,"Citrus","currant","aftershave","wintergreen","currant","Myrrh",2,0,"FALSE",1,1,"30/07/2026 16:52:56","SESSION:p8","FALSE"],
+    ["p8",13,"Chemical & Solvent","chlorine","chlorine","perfumer","lavender","toasty",0,0,"TRUE",4,5,"30/07/2026 16:55:25","SESSION:p8","FALSE"],
+    ["p8",14,"Body & Animalic","sweaty","sweaty","skin-care","nail-polisher","rosemary",0,0,"TRUE",3,5,"30/07/2026 16:58:15","SESSION:p8","FALSE"],
+    ["p8",15,"Fermented & Sour","yeasty","wet_dog","Honeyed","musty","yeasty",3,1,"FALSE",2,2,"30/07/2026 17:00:05","SESSION:p8","FALSE"],
+    ["p8",16,"Chemical & Solvent","burnt_rubber","burnt_rubber","peppery","aftershave","woodsmoke",0,3,"FALSE",4,5,"30/07/2026 17:01:34","SESSION:p8","FALSE"],
+    ["p8",17,"Putrid & Decay","musty","musty","wintergreen","disinfectant","wet_dog",0,2,"FALSE",3,5,"30/07/2026 17:03:45","SESSION:p8","FALSE"],
+    ["p8",18,"Putrid & Decay","rotten_fish","rotten_fish","bad_breath","chlorine","cinnamon",0,2,"FALSE",2,4,"30/07/2026 17:05:27","SESSION:p8","FALSE"],
+    ["p8",19,"Perfumed & Clean","perfumer","sour_milk","toasty","perfumer","cumin",2,2,"TRUE",4,5,"30/07/2026 17:07:35","SESSION:p8","FALSE"],
+    ["p8",20,"Spice","cumin","feces","lavender","Coconut","cumin",3,1,"FALSE",4,1,"30/07/2026 17:09:12","SESSION:p8","FALSE"],
+    ["p8",21,"Body & Animalic","fishy","rose","fishy","aftershave","burnt_rubber",1,0,"FALSE",2,4,"30/07/2026 17:11:02","SESSION:p8","FALSE"],
+    ["p8",22,"Fermented & Sour","butyric","currant","sweaty","butyric","feces",2,0,"FALSE",1,1,"30/07/2026 17:12:57","SESSION:p8","FALSE"],
+    ["p8",23,"Perfumed & Clean","aftershave","woodsmoke","saffron","aftershave","vinegar-like",2,2,"TRUE",2,2,"30/07/2026 17:14:43","SESSION:p8","FALSE"],
+    ["p8",24,"Spice","peppery","peppery","Maple-syrup","butyric","rose",0,2,"FALSE",1,4,"30/07/2026 17:16:37","SESSION:p8","FALSE"]
+  ].map(function(r){
+    var o = {}; FULL_COLUMNS.forEach(function(c,i){ o[c] = r[i]; }); return o;
+  });
+
+  // Session date per participant is derived from each seed row's response_timestamp — no manual SEED_META to maintain.
+  var SEED_META = {};
+  SEED_ROWS.forEach(function(r){
+    if (!SEED_META[r.participant_id]) SEED_META[r.participant_id] = { date: dateFromTimestamp(r.response_timestamp) || "" };
+  });
+
+  // New seed participants added to this file over time are merged into any existing
+  // browser storage automatically (once per participant) — no manual reset needed.
+  function loadStore(){
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch(e){}
+    var store = null;
+    if (raw) {
+      try { store = JSON.parse(raw); } catch(e){ store = null; }
+    }
+    if (!store) store = { version: 1, rows: [], meta: {} };
+    if (!store.meta) store.meta = {};
+    if (!store.seedApplied) store.seedApplied = {};
+
+    var seedByPid = {};
+    SEED_ROWS.forEach(function(r){ (seedByPid[r.participant_id] = seedByPid[r.participant_id] || []).push(r); });
+
+    var changed = false;
+    Object.keys(seedByPid).forEach(function(pid){
+      if (store.seedApplied[pid]) return;
+      var hasRows = store.rows.some(function(r){ return r.participant_id === pid; });
+      if (!hasRows){
+        store.rows = store.rows.concat(seedByPid[pid]);
+        store.meta[pid] = Object.assign({ addedAt: new Date().toISOString() }, SEED_META[pid] || { date: "" });
+      }
+      store.seedApplied[pid] = true;
+      changed = true;
+    });
+    // Backfill any participant with no known date (e.g. stale cached data from before
+    // response_timestamp parsing existed) with the date they were first added — falls
+    // back to today if even that is missing. Keeps "by day" grouping meaningful instead
+    // of stranding rows under "Unspecified".
+    Object.keys(store.meta).forEach(function(pid){
+      var m = store.meta[pid];
+      if (!m.date){
+        m.date = (m.addedAt ? m.addedAt.slice(0,10) : new Date().toISOString().slice(0,10));
+        changed = true;
+      }
+    });
+
+    if (changed) saveStore(store);
+    return store;
+  }
+  function saveStore(store){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch(e){}
+  }
+
+  var store = loadStore();
+
+  // ---------- derived-row computation ----------
+  function deriveRow(r){
+    var opts = [r.option_a, r.option_b, r.option_c, r.option_d];
+    var ci = Number(r.correct_index), si = Number(r.selected_index);
+    var selectedDesc = opts[si];
+    var correctDesc = opts[ci];
+    var selectedCluster = clusterOf(selectedDesc);
+    var targetCluster = r.cluster;
+    var exact = si === ci;
+    var cls = selectedCluster !== null && selectedCluster === targetCluster;
+    return {
+      participant_id: r.participant_id,
+      trial_number: Number(r.trial_number),
+      cluster: targetCluster,
+      correct_descriptor: correctDesc,
+      selected_descriptor: selectedDesc,
+      selected_cluster: selectedCluster,
+      exact: exact,
+      cls: cls,
+      confidence: Number(r.confidence_1to5),
+      familiarity: Number(r.familiarity_1to5_for_descriptor),
+      unmapped: selectedCluster === null || clusterOf(correctDesc) === null
+    };
+  }
+
+  function allDerived(){ return store.rows.map(deriveRow); }
+
+  function pct(n, d){ return d ? (100*n/d) : 0; }
+  function mean(arr){ return arr.length ? arr.reduce(function(a,b){return a+b;},0)/arr.length : 0; }
+  function pearson(xs, ys){
+    var n = xs.length; if (n < 2) return null;
+    var mx = mean(xs), my = mean(ys);
+    var num=0, dx2=0, dy2=0;
+    for (var i=0;i<n;i++){ var dx=xs[i]-mx, dy=ys[i]-my; num+=dx*dy; dx2+=dx*dx; dy2+=dy*dy; }
+    if (dx2===0 || dy2===0) return null;
+    return num/Math.sqrt(dx2*dy2);
+  }
+
+  // ---------- filters ----------
+  var filterParticipant = "__all__";
+  var filterDay = "__all__";
+  var chartMetric = "both"; // "both" | "exact" | "cls"
+  var clusterFocus = null;
+
+  function dayOf(pid){
+    var m = store.meta[pid];
+    if (m && m.date) return m.date;
+    if (m && m.addedAt) return m.addedAt.slice(0,10);
+    return "Unspecified";
+  }
+
+  function filteredDerived(){
+    return allDerived().filter(function(d){
+      if (filterParticipant !== "__all__" && d.participant_id !== filterParticipant) return false;
+      if (filterDay !== "__all__" && dayOf(d.participant_id) !== filterDay) return false;
+      return true;
+    });
+  }
+
+  // ---------- rendering: filter selects ----------
+  function participantIds(){
+    var ids = {};
+    store.rows.forEach(function(r){ ids[r.participant_id] = true; });
+    return Object.keys(ids).sort();
+  }
+  function dayList(){
+    var days = {};
+    participantIds().forEach(function(pid){ days[dayOf(pid)] = true; });
+    return Object.keys(days).sort();
+  }
+
+  function renderFilters(){
+    var pSel = document.getElementById("filterParticipant");
+    var dSel = document.getElementById("filterDay");
+    var pVal = pSel.value || filterParticipant;
+    var dVal = dSel.value || filterDay;
+    pSel.innerHTML = "<option value=\"__all__\">All participants</option>" +
+      participantIds().map(function(id){ return "<option value=\""+id+"\">"+id+"</option>"; }).join("");
+    dSel.innerHTML = "<option value=\"__all__\">All days</option>" +
+      dayList().map(function(d){ return "<option value=\""+d+"\">"+d+"</option>"; }).join("");
+    pSel.value = participantIds().indexOf(pVal) >= 0 || pVal === "__all__" ? pVal : "__all__";
+    dSel.value = dayList().indexOf(dVal) >= 0 || dVal === "__all__" ? dVal : "__all__";
+    filterParticipant = pSel.value;
+    filterDay = dSel.value;
+  }
+
+  // ---------- KPI ----------
+  function renderKPI(){
+    var d = filteredDerived();
+    var n = d.length;
+    var exactAcc = pct(d.filter(function(x){return x.exact;}).length, n);
+    var clsAcc = pct(d.filter(function(x){return x.cls;}).length, n);
+    var nParticipants = {};
+    d.forEach(function(x){ nParticipants[x.participant_id] = true; });
+    var kpiRow = document.getElementById("kpiRow");
+    kpiRow.innerHTML = "";
+    var tiles = [
+      {label:"Trials", value: n, sub: Object.keys(nParticipants).length + " participant" + (Object.keys(nParticipants).length===1?"":"s")},
+      {label:"Exact accuracy", value: n ? exactAcc.toFixed(1)+"%" : "—", sub:"selected the precise word"},
+      {label:"Class accuracy", value: n ? clsAcc.toFixed(1)+"%" : "—", sub:"selected the right family"},
+      {label:"Family upgrade", value: n ? (clsAcc-exactAcc).toFixed(1)+"%" : "—", sub:"wrong word, right family"}
+    ];
+    tiles.forEach(function(t){
+      var el = document.createElement("div"); el.className = "kpi";
+      el.innerHTML = "<div class=\"label\">"+t.label+"</div><div class=\"value\">"+t.value+"</div><div class=\"sub\">"+t.sub+"</div>";
+      kpiRow.appendChild(el);
+    });
+    var unmappedCount = d.filter(function(x){return x.unmapped;}).length;
+    document.getElementById("coverageNote").textContent = unmappedCount ? ("⚠ "+unmappedCount+" trial(s) reference a descriptor not in the taxonomy — class accuracy for those defaults to false.") : "";
+  }
+
+  // ---------- bar chart helper (grouped, horizontal, 2 series) ----------
+  var tooltipEl;
+  function showTooltip(evt, html){
+    tooltipEl.innerHTML = html;
+    tooltipEl.style.opacity = 1;
+    tooltipEl.style.left = (evt.clientX + 14) + "px";
+    tooltipEl.style.top = (evt.clientY + 14) + "px";
+  }
+  function hideTooltip(){ tooltipEl.style.opacity = 0; }
+
+  function renderGroupedBarChart(containerId, categories, opts){
+    // categories: [{label, n, exact, cls}]
+    opts = opts || {};
+    var metric = opts.metric || "both";
+    var onClick = opts.onClick || null;
+    var activeLabel = opts.activeLabel || null;
+    var showRank = !!opts.showRank;
+    var container = document.getElementById(containerId);
+    container.innerHTML = "";
+    if (!categories.length){ container.innerHTML = "<p class='empty-note'>No data for this filter.</p>"; return; }
+    var single = metric !== "both";
+    var labelW = 178, rowH = single ? 32 : 46, barH = single ? 17 : 13, gap = 3, chartW = 620, axisH = 20;
+    var rankW = showRank ? 22 : 0;
+    var totalH = categories.length * rowH + axisH;
+    var svgW = rankW + labelW + chartW + 60;
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("viewBox","0 0 "+svgW+" "+totalH);
+    svg.setAttribute("width","100%");
+    svg.style.maxWidth = svgW+"px";
+    svg.style.display = "block";
+    svg.style.overflow = "visible";
+
+    var scaleX = chartW;
+    [0,25,50,75,100].forEach(function(g){
+      var x = rankW + labelW + (g/100)*scaleX;
+      var line = document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1", x); line.setAttribute("x2", x);
+      line.setAttribute("y1", 4); line.setAttribute("y2", totalH-axisH+2);
+      line.setAttribute("class", g===0 ? "baseline" : "gridline");
+      svg.appendChild(line);
+      var t = document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.setAttribute("x", x); t.setAttribute("y", totalH-4);
+      t.setAttribute("text-anchor","middle"); t.setAttribute("class","bar-axis-label");
+      t.textContent = g+"%";
+      svg.appendChild(t);
+    });
+
+    categories.forEach(function(cat, i){
+      var y0 = i*rowH + 8;
+      var rowGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
+      if (onClick){
+        rowGroup.setAttribute("class", "row-clickable");
+        rowGroup.addEventListener("click", function(){ onClick(cat.label); });
+      }
+      // invisible full-width hit area so the whole row is clickable, not just the bars
+      if (onClick){
+        var hit = document.createElementNS("http://www.w3.org/2000/svg","rect");
+        hit.setAttribute("x", 0); hit.setAttribute("y", i*rowH);
+        hit.setAttribute("width", svgW); hit.setAttribute("height", rowH);
+        hit.setAttribute("fill", cat.label === activeLabel ? "var(--gridline)" : "transparent");
+        rowGroup.appendChild(hit);
+      }
+
+      if (showRank){
+        var rk = document.createElementNS("http://www.w3.org/2000/svg","text");
+        rk.setAttribute("x", 4); rk.setAttribute("y", y0 + barH);
+        rk.setAttribute("class","bar-axis-label");
+        rk.textContent = "#"+(i+1);
+        rowGroup.appendChild(rk);
+      }
+
+      var label = document.createElementNS("http://www.w3.org/2000/svg","text");
+      label.setAttribute("x", rankW + labelW - 10); label.setAttribute("y", single ? y0 + barH - 3 : y0 + barH + gap/2 + 4);
+      label.setAttribute("text-anchor","end"); label.setAttribute("class","bar-cat-label");
+      if (cat.label === activeLabel) label.setAttribute("style","font-weight:700");
+      label.textContent = cat.label;
+      rowGroup.appendChild(label);
+
+      var series = [];
+      if (metric === "both" || metric === "exact") series.push(["exact", cat.exact, "var(--series-exact)"]);
+      if (metric === "both" || metric === "cls") series.push(["cls", cat.cls, "var(--series-class)"]);
+      series.forEach(function(spec, si){
+        var key=spec[0], val=spec[1], color=spec[2];
+        var y = single ? y0 : (si === 0 ? y0 : y0+barH+gap);
+        var w = Math.max(0, (val/100)*scaleX);
+        var rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+        rect.setAttribute("x", rankW + labelW); rect.setAttribute("y", y);
+        rect.setAttribute("width", w); rect.setAttribute("height", barH);
+        rect.setAttribute("rx", barH/2); rect.setAttribute("fill", color);
+        if (onClick) rect.style.cursor = "pointer";
+        rect.addEventListener("mousemove", function(evt){
+          showTooltip(evt, "<b>"+cat.label+"</b><br>"+(key==="exact"?"Exact":"Class")+": "+val.toFixed(1)+"% (n="+cat.n+")");
+        });
+        rect.addEventListener("mouseleave", hideTooltip);
+        rowGroup.appendChild(rect);
+        var vt = document.createElementNS("http://www.w3.org/2000/svg","text");
+        vt.setAttribute("x", rankW + labelW + w + 6); vt.setAttribute("y", y + barH - 3);
+        vt.setAttribute("class","bar-value-label");
+        vt.textContent = val.toFixed(0)+"%";
+        rowGroup.appendChild(vt);
+      });
+
+      svg.appendChild(rowGroup);
+    });
+
+    container.appendChild(svg);
+  }
+
+  function renderSimpleBarChart(containerId, items, color){
+    // items: [{label, value}] value on 1..5 scale
+    var container = document.getElementById(containerId);
+    container.innerHTML = "";
+    if (!items.length){ container.innerHTML = "<p class='empty-note'>No data.</p>"; return; }
+    var labelW = 110, rowH = 34, barH = 14, chartW = 220, axisH = 18;
+    var totalH = items.length*rowH + axisH;
+    var svgW = labelW + chartW + 50;
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("viewBox","0 0 "+svgW+" "+totalH);
+    svg.setAttribute("width","100%"); svg.style.maxWidth = svgW+"px"; svg.style.display="block"; svg.style.overflow="visible";
+    [0,1,2,3,4,5].forEach(function(g){
+      var x = labelW + (g/5)*chartW;
+      var line = document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1",x); line.setAttribute("x2",x); line.setAttribute("y1",4); line.setAttribute("y2", totalH-axisH+2);
+      line.setAttribute("class", g===0?"baseline":"gridline");
+      svg.appendChild(line);
+    });
+    items.forEach(function(it,i){
+      var y = i*rowH + 8;
+      var label = document.createElementNS("http://www.w3.org/2000/svg","text");
+      label.setAttribute("x", labelW-10); label.setAttribute("y", y+barH-3);
+      label.setAttribute("text-anchor","end"); label.setAttribute("class","bar-cat-label");
+      label.textContent = it.label;
+      svg.appendChild(label);
+      var w = Math.max(0,(it.value/5)*chartW);
+      var rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+      rect.setAttribute("x",labelW); rect.setAttribute("y",y); rect.setAttribute("width",w); rect.setAttribute("height",barH);
+      rect.setAttribute("rx", barH/2); rect.setAttribute("fill", color); rect.style.cursor="pointer";
+      rect.addEventListener("mousemove", function(evt){ showTooltip(evt, "<b>"+it.label+"</b>: "+it.value.toFixed(2)+" / 5 (n="+it.n+")"); });
+      rect.addEventListener("mouseleave", hideTooltip);
+      svg.appendChild(rect);
+      var vt = document.createElementNS("http://www.w3.org/2000/svg","text");
+      vt.setAttribute("x", labelW+w+6); vt.setAttribute("y", y+barH-3); vt.setAttribute("class","bar-value-label");
+      vt.textContent = it.value.toFixed(2);
+      svg.appendChild(vt);
+    });
+    container.appendChild(svg);
+  }
+
+  // ---------- section renderers ----------
+  function groupBy(arr, keyFn){
+    var m = {};
+    arr.forEach(function(x){
+      var k = keyFn(x);
+      (m[k] = m[k] || []).push(x);
+    });
+    return m;
+  }
+
+  function clusterAccStats(rows){
+    return { n: rows.length,
+      exact: pct(rows.filter(function(r){return r.exact;}).length, rows.length),
+      cls: pct(rows.filter(function(r){return r.cls;}).length, rows.length) };
+  }
+
+  function renderClusterChart(){
+    var d = filteredDerived();
+    var byCluster = groupBy(d, function(x){return x.cluster;});
+    var sortKey = chartMetric === "exact" ? "exact" : "cls";
+    var cats = Object.keys(byCluster).map(function(cl){
+      var s = clusterAccStats(byCluster[cl]);
+      return { label: cl, n: s.n, exact: s.exact, cls: s.cls };
+    }).sort(function(a,b){ return b[sortKey] - a[sortKey]; });
+    renderGroupedBarChart("clusterChart", cats, {
+      metric: chartMetric, showRank: true, activeLabel: clusterFocus,
+      onClick: function(label){
+        clusterFocus = (clusterFocus === label) ? null : label;
+        renderClusterChart();
+        renderClusterFocusChip();
+        renderSmellTable(smellSort.key, smellSort.dir);
+      }
+    });
+  }
+
+  function renderDayChart(){
+    var d = allDerived();
+    var byDay = groupBy(d, function(x){return dayOf(x.participant_id);});
+    var cats = Object.keys(byDay).sort().map(function(day){
+      var s = clusterAccStats(byDay[day]);
+      return { label: day, n: s.n, exact: s.exact, cls: s.cls };
+    });
+    renderGroupedBarChart("dayChart", cats, { metric: chartMetric });
+  }
+
+  function renderClusterFocusChip(){
+    var el = document.getElementById("clusterFocusChip");
+    if (!clusterFocus){ el.innerHTML = ""; return; }
+    el.innerHTML = "<span class='chip'>Filtered to <b>"+clusterFocus+"</b> <button id='clearClusterFocus' title='Clear filter'>✕</button></span>";
+    document.getElementById("clearClusterFocus").addEventListener("click", function(){
+      clusterFocus = null;
+      renderClusterChart();
+      renderClusterFocusChip();
+      renderSmellTable(smellSort.key, smellSort.dir);
+    });
+  }
+
+  function renderSmellTable(sortKey, sortDir){
+    var d = filteredDerived();
+    if (clusterFocus) d = d.filter(function(x){ return x.cluster === clusterFocus; });
+    var byS = groupBy(d, function(x){return x.correct_descriptor;});
+    var rows = Object.keys(byS).map(function(s){
+      var rs = byS[s];
+      var exactN = rs.filter(function(r){return r.exact;}).length;
+      var clsN = rs.filter(function(r){return r.cls;}).length;
+      return { smell: s, cluster: rs[0].cluster, n: rs.length,
+        exact: pct(exactN, rs.length), cls: pct(clsN, rs.length), upgrade: clsN - exactN };
+    });
+    sortKey = sortKey || "cls"; sortDir = sortDir || 1;
+    rows.sort(function(a,b){ return (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir; });
+    var tbody = document.querySelector("#smellTable tbody");
+    tbody.innerHTML = rows.map(function(r){
+      return "<tr><td>"+r.smell+"</td><td class='num'>"+r.cluster+"</td><td class='num'>"+r.n+"</td>"+
+        "<td class='num'>"+r.exact.toFixed(0)+"%</td><td class='num'>"+r.cls.toFixed(0)+"%</td><td class='num'>"+(r.upgrade>0? "+"+r.upgrade : r.upgrade)+"</td></tr>";
+    }).join("") || "<tr><td colspan='6' class='empty-note'>No data.</td></tr>";
+  }
+  var smellSort = {key:"cls", dir:1};
+  document.querySelectorAll("#smellTable th.sortable").forEach(function(th){
+    th.addEventListener("click", function(){
+      var key = th.getAttribute("data-key");
+      smellSort.dir = smellSort.key === key ? -smellSort.dir : 1;
+      smellSort.key = key;
+      renderSmellTable(smellSort.key, smellSort.dir);
+    });
+  });
+
+  function renderConfidenceFamiliarity(){
+    var d = filteredDerived();
+    var correct = d.filter(function(x){return x.exact;});
+    var wrong = d.filter(function(x){return !x.exact;});
+    renderSimpleBarChart("confChart", [
+      {label:"When correct", value: mean(correct.map(function(x){return x.confidence;})), n: correct.length},
+      {label:"When wrong", value: mean(wrong.map(function(x){return x.confidence;})), n: wrong.length}
+    ], "var(--series-exact)");
+    renderSimpleBarChart("famChart", [
+      {label:"When correct", value: mean(correct.map(function(x){return x.familiarity;})), n: correct.length},
+      {label:"When wrong", value: mean(wrong.map(function(x){return x.familiarity;})), n: wrong.length}
+    ], "var(--series-exact)");
+
+    var confCorr = pearson(d.map(function(x){return x.confidence;}), d.map(function(x){return x.exact?1:0;}));
+    var famCorr = pearson(d.map(function(x){return x.familiarity;}), d.map(function(x){return x.exact?1:0;}));
+    var corrRow = document.getElementById("corrRow");
+    corrRow.innerHTML = "";
+    [
+      {label:"Confidence ↔ exact-correct (r)", value: confCorr===null?"—":confCorr.toFixed(2)},
+      {label:"Familiarity ↔ exact-correct (r)", value: famCorr===null?"—":famCorr.toFixed(2)}
+    ].forEach(function(t){
+      var el = document.createElement("div"); el.className="kpi";
+      el.innerHTML = "<div class='label'>"+t.label+"</div><div class='value'>"+t.value+"</div>";
+      corrRow.appendChild(el);
+    });
+  }
+
+  function renderDayTable(){
+    var d = allDerived();
+    var byDay = groupBy(d, function(x){return dayOf(x.participant_id);});
+    var tbody = document.querySelector("#dayTable tbody");
+    var rows = Object.keys(byDay).sort().map(function(day){
+      var rs = byDay[day];
+      var pids = {}; rs.forEach(function(r){pids[r.participant_id]=true;});
+      var dayCell = DAY_NOTES[day]
+        ? "<span class='day-cell'>"+day+"<button class='day-note-dot' data-day='"+day+"' title='What changed on this day'></button></span>"
+        : day;
+      return "<tr><td>"+dayCell+"</td><td class='num'>"+Object.keys(pids).length+"</td><td class='num'>"+rs.length+"</td>"+
+        "<td class='num'>"+pct(rs.filter(function(r){return r.exact;}).length, rs.length).toFixed(1)+"%</td>"+
+        "<td class='num'>"+pct(rs.filter(function(r){return r.cls;}).length, rs.length).toFixed(1)+"%</td></tr>";
+    });
+    tbody.innerHTML = rows.join("") || "<tr><td colspan='5' class='empty-note'>No data.</td></tr>";
+    tbody.querySelectorAll(".day-note-dot").forEach(function(dot){
+      dot.addEventListener("click", function(){ openDayNote(dot.getAttribute("data-day")); });
+    });
+  }
+
+  function openDayNote(day){
+    var note = DAY_NOTES[day];
+    if (!note) return;
+    document.getElementById("dayNoteTitle").textContent = day;
+    document.getElementById("dayNoteBody").textContent = note;
+    document.getElementById("dayNoteOverlay").classList.add("open");
+  }
+  function closeDayNote(){
+    document.getElementById("dayNoteOverlay").classList.remove("open");
+  }
+
+  function renderParticipantTable(){
+    var d = allDerived();
+    var byP = groupBy(d, function(x){return x.participant_id;});
+    var tbody = document.querySelector("#participantTable tbody");
+    var rows = Object.keys(byP).sort().map(function(pid){
+      var rs = byP[pid];
+      var nCorrect = rs.filter(function(r){return r.exact;}).length;
+      return "<tr><td>"+pid+"</td><td class='num'>"+rs.length+"</td>"+
+        "<td class='num'>"+nCorrect+" / "+rs.length+"</td>"+
+        "<td class='num'>"+pct(nCorrect, rs.length).toFixed(1)+"%</td>"+
+        "<td class='num'>"+pct(rs.filter(function(r){return r.cls;}).length, rs.length).toFixed(1)+"%</td>"+
+        "<td>"+dayOf(pid)+"</td>"+
+        "<td><button class='row-btn' data-pid='"+pid+"'>Remove</button></td></tr>";
+    });
+    tbody.innerHTML = rows.join("") || "<tr><td colspan='7' class='empty-note'>No participants loaded.</td></tr>";
+    tbody.querySelectorAll(".row-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var pid = btn.getAttribute("data-pid");
+        if (!confirm("Remove all data for "+pid+"?")) return;
+        store.rows = store.rows.filter(function(r){return r.participant_id !== pid;});
+        delete store.meta[pid];
+        saveStore(store);
+        renderAll();
+      });
+    });
+  }
+
+  function renderAll(){
+    renderFilters();
+    renderKPI();
+    renderClusterChart();
+    renderClusterFocusChip();
+    renderSmellTable(smellSort.key, smellSort.dir);
+    renderConfidenceFamiliarity();
+    renderDayChart();
+    renderDayTable();
+    renderParticipantTable();
+  }
+
+  // ---------- parsing / add participant ----------
+  // Accepts comma- OR tab-separated input (auto-detected), and either the 13-column
+  // legacy format or the full 16-column file format (with response_timestamp/form_id/is_duplicate_submission).
+  function parseRows(text){
+    var lines = text.split(/\r?\n/).map(function(l){return l.replace(/\r$/,"");}).filter(function(l){return l.trim().length;});
+    if (!lines.length) return {byPid:{}, errors:["No rows found."], unmappedDescs:{}, duplicatesSkipped:0};
+    var commaCount = (lines[0].match(/,/g)||[]).length;
+    var tabCount = (lines[0].match(/\t/g)||[]).length;
+    var delim = tabCount > commaCount ? "\t" : ",";
+    if (/^participant_id\s*[,\t]/i.test(lines[0])) lines.shift();
+
+    var byPid = {}, unmappedDescs = {};
+    var errorList = [];
+    var duplicatesSkipped = 0;
+    lines.forEach(function(line, idx){
+      var cells = line.split(delim).map(function(c){return c.trim();});
+      var o = {};
+      if (cells.length === COLUMNS.length){
+        COLUMNS.forEach(function(c,i){ o[c] = cells[i]; });
+      } else if (cells.length >= FULL_COLUMNS.length){
+        FULL_COLUMNS.forEach(function(c,i){ o[c] = cells[i]; });
+      } else {
+        errorList.push("Line "+(idx+1)+": expected "+COLUMNS.length+" or "+FULL_COLUMNS.length+" columns, got "+cells.length+" — skipped.");
+        return;
+      }
+      var ci = Number(o.correct_index), si = Number(o.selected_index), tn = Number(o.trial_number);
+      if (!o.participant_id || isNaN(ci) || isNaN(si) || isNaN(tn)){
+        errorList.push("Line "+(idx+1)+": non-numeric index/trial number or missing participant id — skipped.");
+        return;
+      }
+      if (o.is_duplicate_submission && String(o.is_duplicate_submission).trim().toUpperCase() === "TRUE"){
+        duplicatesSkipped++;
+        return;
+      }
+      [o.descriptor,o.option_a,o.option_b,o.option_c,o.option_d].forEach(function(dsc){
+        if (dsc && !clusterOf(dsc)) unmappedDescs[dsc] = true;
+      });
+      var pid = o.participant_id;
+      if (!byPid[pid]) byPid[pid] = { rows: [], date: "" };
+      byPid[pid].rows.push(o);
+      if (!byPid[pid].date && o.response_timestamp){
+        var d = dateFromTimestamp(o.response_timestamp);
+        if (d) byPid[pid].date = d;
+      }
+    });
+    return {byPid: byPid, errors: errorList, unmappedDescs: unmappedDescs, duplicatesSkipped: duplicatesSkipped};
+  }
+
+  function logStatus(elId, lines){
+    document.getElementById(elId).innerHTML = lines.map(function(l){
+      return "<div class='"+l.type+"'>"+l.text+"</div>";
+    }).join("");
+  }
+
+
+  document.getElementById("csvFileInput").addEventListener("change", function(evt){
+    var file = evt.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var result = parseRows(reader.result);
+      var log = [];
+      var pids = Object.keys(result.byPid);
+      if (!pids.length){
+        log.push({type:"err", text:"⚠ No valid rows found in "+file.name+". Nothing changed."});
+        result.errors.slice(0,5).forEach(function(e){ log.push({type:"err", text:e}); });
+        logStatus("csvUpdateLog", log);
+        evt.target.value = "";
+        return;
+      }
+      store.rows = [];
+      var newMeta = {};
+      pids.forEach(function(pid){
+        store.rows = store.rows.concat(result.byPid[pid].rows);
+        newMeta[pid] = { date: result.byPid[pid].date || (store.meta[pid] && store.meta[pid].date) || "", addedAt: new Date().toISOString() };
+      });
+      store.meta = newMeta;
+      if (!store.seedApplied) store.seedApplied = {};
+      pids.forEach(function(pid){ store.seedApplied[pid] = true; });
+      saveStore(store);
+      renderAll();
+      log.push({type:"ok", text:"✓ Loaded "+pids.length+" participant(s), "+store.rows.length+" trials from "+file.name+" — this replaced the dashboard's previous data."});
+      if (result.errors.length){
+        log.push({type:"warn", text:"⚠ "+result.errors.length+" line(s) skipped (bad format) — see console for details."});
+        console.warn("user_study_result.csv parse issues:", result.errors);
+      }
+      if (Object.keys(result.unmappedDescs).length){
+        log.push({type:"warn", text:"⚠ Descriptor(s) not in taxonomy (scored as family-wrong): "+Object.keys(result.unmappedDescs).join(", ")});
+      }
+      if (result.duplicatesSkipped){
+        log.push({type:"warn", text:"⚠ Skipped "+result.duplicatesSkipped+" row(s) flagged is_duplicate_submission=TRUE."});
+      }
+      logStatus("csvUpdateLog", log);
+      evt.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------- export / import ----------
+  function triggerDownload(filename, mime, content){
+    if (window.claude && window.claude.downloads && window.claude.downloads.save){
+      window.claude.downloads.save({ filename: filename, data: content }).catch(function(err){
+        logStatus("restoreLog", [{type:"err", text:"⚠ Download was not completed: "+(err && err.message ? err.message : err)}]);
+      });
+    } else {
+      var blob = new Blob([content], {type: mime});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    }
+  }
+
+  document.getElementById("exportJsonBtn").addEventListener("click", function(){
+    var payload = JSON.stringify({ version: store.version, rows: store.rows, meta: store.meta, exportedAt: new Date().toISOString() }, null, 2);
+    triggerDownload("aromagen-dashboard-backup-"+new Date().toISOString().slice(0,10)+".json", "application/json", payload);
+  });
+
+  document.getElementById("restoreInput").addEventListener("change", function(evt){
+    var file = evt.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try {
+        var data = JSON.parse(reader.result);
+        if (!data || !Array.isArray(data.rows)) throw new Error("Missing 'rows' array.");
+        var incomingPids = {};
+        data.rows.forEach(function(r){ incomingPids[r.participant_id] = true; });
+        var overwritten = Object.keys(incomingPids).filter(function(pid){
+          return store.rows.some(function(r){return r.participant_id === pid;});
+        });
+        store.rows = store.rows.filter(function(r){return !incomingPids[r.participant_id];}).concat(data.rows);
+        store.meta = Object.assign({}, store.meta, data.meta || {});
+        saveStore(store);
+        renderAll();
+        var log = [{type:"ok", text:"✓ Restored "+Object.keys(incomingPids).length+" participant(s) from backup."}];
+        if (overwritten.length) log.push({type:"warn", text:"⚠ Overwrote existing data for: "+overwritten.join(", ")});
+        logStatus("restoreLog", log);
+      } catch(e){
+        logStatus("restoreLog", [{type:"err", text:"⚠ Could not read backup file: "+e.message}]);
+      }
+      evt.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    if (!confirm("This clears all locally stored participant data on this page. This cannot be undone unless you have a backup file. Continue?")) return;
+    store = { version: 1, rows: [], meta: {} };
+    saveStore(store);
+    renderAll();
+    logStatus("restoreLog", [{type:"warn", text:"All data cleared."}]);
+  });
+
+  // ---------- filter listeners ----------
+  function refreshFilteredSections(){
+    renderKPI(); renderClusterChart(); renderSmellTable(smellSort.key, smellSort.dir); renderConfidenceFamiliarity();
+  }
+  document.getElementById("filterParticipant").addEventListener("change", function(){
+    filterParticipant = this.value; refreshFilteredSections();
+  });
+  document.getElementById("filterDay").addEventListener("change", function(){
+    filterDay = this.value; refreshFilteredSections();
+  });
+  document.querySelectorAll("#metricToggle button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      chartMetric = btn.getAttribute("data-metric");
+      document.querySelectorAll("#metricToggle button").forEach(function(b){ b.classList.toggle("active", b === btn); });
+      renderClusterChart();
+      renderDayChart();
+    });
+  });
+
+  document.getElementById("dayNoteClose").addEventListener("click", closeDayNote);
+  document.getElementById("dayNoteOverlay").addEventListener("click", function(evt){
+    if (evt.target === this) closeDayNote();
+  });
+  document.addEventListener("keydown", function(evt){
+    if (evt.key === "Escape") closeDayNote();
+  });
+
+  // ---------- init ----------
+  document.addEventListener("DOMContentLoaded", function(){
+    tooltipEl = document.getElementById("tooltip");
+    renderAll();
+  });
+  if (document.readyState !== "loading") {
+    tooltipEl = document.getElementById("tooltip");
+    renderAll();
+  }
+})();
+</script>
+</body>
+</html>

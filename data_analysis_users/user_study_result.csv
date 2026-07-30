@@ -1,0 +1,169 @@
+participant_id,trial_number,cluster,descriptor,option_a,option_b,option_c,option_d,correct_index,selected_index,is_correct,confidence_1to5,familiarity_1to5_for_descriptor,response_timestamp,form_id,is_duplicate_submission
+p2,1,Roasted & Smoky,woodsmoke,fresh_bread,woodsmoke,Honeyed,vinegar-like,1,0,FALSE,4,4,29/07/2026 09:22:27,SESSION:p2,FALSE
+p2,2,Floral,lavender,lemony,guava,rose,lavender,3,1,FALSE,3,5,29/07/2026 09:26:01,SESSION:p2,FALSE
+p2,3,Floral,rose,rose,guava,lavender,tangy,0,0,TRUE,4,3,29/07/2026 09:27:38,SESSION:p2,FALSE
+p2,4,Woody & Resinous,sandalwood,minty,sandalwood,Myrrh,lemony,1,0,FALSE,4,3,29/07/2026 09:29:13,SESSION:p2,FALSE
+p2,5,Sweet & Gourmand,Honeyed,Vanilla,Honeyed,anise,woodsmoke,1,2,FALSE,5,3,29/07/2026 09:31:50,SESSION:p2,FALSE
+p2,6,Herbal & Cooling,wintergreen,Myrrh,minty,cinnamon,wintergreen,3,3,TRUE,4,2,29/07/2026 09:33:12,SESSION:p2,FALSE
+p2,7,Sweet & Gourmand,Maple-syrup,Maple-syrup,Coconut,toasty,peppery,0,0,TRUE,2,3,29/07/2026 09:34:36,SESSION:p2,FALSE
+p2,8,Roasted & Smoky,smoky,toasty,butyric,Coconut,smoky,3,3,TRUE,5,5,29/07/2026 09:35:55,SESSION:p2,FALSE
+p2,9,Citrus,guava,saffron,guava,lavender,tangy,1,3,FALSE,4,5,29/07/2026 09:37:15,SESSION:p2,FALSE
+p2,10,Woody & Resinous,Myrrh,Myrrh,currant,Cedar,wintergreen,0,2,FALSE,5,1,29/07/2026 09:38:36,SESSION:p2,FALSE
+p2,11,Citrus,tangy,rose,Cedar,currant,tangy,3,3,TRUE,5,2,29/07/2026 09:40:00,SESSION:p2,FALSE
+p2,12,Herbal & Cooling,minty,anise,wintergreen,sandalwood,minty,3,0,FALSE,4,5,29/07/2026 09:42:38,SESSION:p2,FALSE
+p2,13,Fermented & Sour,yeasty,fresh_bread,yeasty,musty,sour_milk,1,2,FALSE,5,5,29/07/2026 09:44:20,SESSION:p2,FALSE
+p2,14,Spice,nutmeg,cumin,Honeyed,nutmeg,minty,2,2,TRUE,5,2,29/07/2026 09:45:30,SESSION:p2,FALSE
+p2,15,Body & Animalic,wet_dog,musty,wet_dog,disinfectant,fishy,1,0,FALSE,5,5,29/07/2026 09:46:58,SESSION:p2,FALSE
+p2,16,Putrid & Decay,rotten_fish,rotten_fish,musty,sour_milk,bad_breath,0,2,FALSE,4,5,29/07/2026 09:48:21,SESSION:p2,FALSE
+p2,17,Fermented & Sour,sour_milk,rotten_fish,sour_milk,yeasty,toasty,1,2,FALSE,3,5,29/07/2026 09:49:52,SESSION:p2,FALSE
+p2,18,Spice,cinnamon,anise,Vanilla,cinnamon,wintergreen,2,2,TRUE,5,5,29/07/2026 09:50:53,SESSION:p2,FALSE
+p2,19,Chemical & Solvent,burnt_rubber,disinfectant,fishy,aftershave,burnt_rubber,3,3,TRUE,5,5,29/07/2026 09:51:57,SESSION:p2,FALSE
+p2,20,Perfumed & Clean,air_freshener,air_freshener,disinfectant,perfumer,chlorine,0,1,FALSE,5,5,29/07/2026 09:53:06,SESSION:p2,FALSE
+p2,21,Chemical & Solvent,nail-polisher,sweaty,chlorine,nail-polisher,skin-care,2,0,FALSE,5,5,29/07/2026 09:54:15,SESSION:p2,FALSE
+p2,22,Perfumed & Clean,aftershave,burnt_rubber,aftershave,disinfectant,air_freshener,1,2,FALSE,5,4,29/07/2026 09:55:14,SESSION:p2,FALSE
+p2,23,Body & Animalic,sweaty,feces,nail-polisher,sweaty,bad_breath,2,2,TRUE,5,4,29/07/2026 09:56:17,SESSION:p2,FALSE
+p2,24,Putrid & Decay,rotten-egg,fishy,vinegar-like,rotten-egg,musty,2,1,FALSE,3,4,29/07/2026 09:58:01,SESSION:p2,FALSE
+p3,1,Woody & Resinous,saffron,saffron,guava,eucalyptus,piney,0,2,FALSE,4,2,29/07/2026 12:15:14,SESSION:p3,FALSE
+p3,2,Citrus,guava,guava,saffron,lavender,tangy,0,1,FALSE,3,2,29/07/2026 12:17:27,SESSION:p3,FALSE
+p3,3,Herbal & Cooling,eucalyptus,saffron,rosemary,cumin,eucalyptus,3,1,FALSE,3,4,29/07/2026 12:19:30,SESSION:p3,FALSE
+p3,4,Woody & Resinous,Cedar,Cedar,rosemary,saffron,tangy,0,0,TRUE,4,4,29/07/2026 12:22:32,SESSION:p3,FALSE
+p3,5,Herbal & Cooling,rosemary,eucalyptus,rosemary,Cedar,peppery,1,0,FALSE,3,2,29/07/2026 12:24:48,SESSION:p3,FALSE
+p3,6,Sweet & Gourmand,Honeyed,woodsmoke,Honeyed,Vanilla,anise,1,3,FALSE,1,2,29/07/2026 12:26:36,SESSION:p3,FALSE
+p3,7,Roasted & Smoky,toasty,sour_milk,smoky,toasty,Maple-syrup,2,1,FALSE,4,2,29/07/2026 12:27:51,SESSION:p3,FALSE
+p3,8,Roasted & Smoky,smoky,smoky,Coconut,butyric,toasty,0,2,FALSE,2,4,29/07/2026 12:29:22,SESSION:p3,FALSE
+p3,9,Sweet & Gourmand,Coconut,Coconut,Maple-syrup,smoky,cumin,0,1,FALSE,3,4,29/07/2026 12:31:54,SESSION:p3,FALSE
+p3,10,Citrus,currant,lilac,Myrrh,tangy,currant,3,1,FALSE,2,1,29/07/2026 12:33:18,SESSION:p3,FALSE
+p3,11,Floral,jasmine,jasmine,lilac,currant,lemony,0,0,TRUE,2,2,29/07/2026 12:34:37,SESSION:p3,FALSE
+p3,12,Floral,rose,guava,rose,lavender,tangy,1,3,FALSE,4,4,29/07/2026 12:36:01,SESSION:p3,FALSE
+p3,13,Chemical & Solvent,burnt_rubber,aftershave,burnt_rubber,fishy,disinfectant,1,1,TRUE,3,4,29/07/2026 12:37:33,SESSION:p3,FALSE
+p3,14,Body & Animalic,sweaty,feces,sweaty,bad_breath,nail-polisher,1,1,TRUE,1,3,29/07/2026 12:39:14,SESSION:p3,FALSE
+p3,15,Chemical & Solvent,chlorine,nail-polisher,bad_breath,perfumer,chlorine,3,1,FALSE,2,4,29/07/2026 12:40:33,SESSION:p3,FALSE
+p3,16,Fermented & Sour,vinegar-like,vinegar-like,yeasty,woodsmoke,rotten-egg,0,3,FALSE,1,4,29/07/2026 12:42:49,SESSION:p3,FALSE
+p3,17,Putrid & Decay,feces,rotten_fish,feces,butyric,sweaty,1,3,FALSE,2,4,29/07/2026 12:45:35,SESSION:p3,FALSE
+p3,18,Perfumed & Clean,skin-care,burnt_rubber,perfumer,nail-polisher,skin-care,3,1,FALSE,2,1,29/07/2026 12:47:30,SESSION:p3,FALSE
+p3,19,Fermented & Sour,sour_milk,yeasty,sour_milk,toasty,rotten_fish,1,1,TRUE,2,2,29/07/2026 12:49:51,SESSION:p3,FALSE
+p3,20,Spice,anise,cinnamon,anise,minty,Honeyed,1,2,FALSE,3,1,29/07/2026 12:51:06,SESSION:p3,FALSE
+p3,21,Spice,peppery,Maple-syrup,rosemary,peppery,cinnamon,2,1,FALSE,3,4,29/07/2026 12:52:35,SESSION:p3,FALSE
+p3,22,Putrid & Decay,rotten_fish,sour_milk,musty,rotten_fish,bad_breath,2,1,FALSE,2,4,29/07/2026 12:54:09,SESSION:p3,FALSE
+p3,23,Body & Animalic,bad_breath,chlorine,bad_breath,sweaty,rotten_fish,1,0,FALSE,3,3,29/07/2026 12:55:23,SESSION:p3,FALSE
+p3,24,Perfumed & Clean,air_freshener,disinfectant,chlorine,air_freshener,perfumer,2,0,FALSE,2,3,29/07/2026 12:57:13,SESSION:p3,FALSE
+p4,1,Floral,lavender,rose,lavender,lemony,guava,1,1,TRUE,2,4,29/07/2026 14:08:56,SESSION:p4,FALSE
+p4,2,Roasted & Smoky,woodsmoke,vinegar-like,woodsmoke,fresh_bread,Honeyed,1,1,TRUE,5,4,29/07/2026 14:10:34,SESSION:p4,FALSE
+p4,3,Woody & Resinous,saffron,saffron,piney,eucalyptus,guava,0,2,FALSE,2,1,29/07/2026 14:13:23,SESSION:p4,FALSE
+p4,4,Woody & Resinous,sandalwood,Myrrh,minty,sandalwood,lemony,2,0,FALSE,1,4,29/07/2026 14:15:41,SESSION:p4,FALSE
+p4,5,Herbal & Cooling,wintergreen,Myrrh,wintergreen,minty,cinnamon,1,2,FALSE,5,1,29/07/2026 14:17:00,SESSION:p4,FALSE
+p4,6,Floral,lilac,rose,tangy,currant,lilac,3,3,TRUE,3,1,29/07/2026 14:19:12,SESSION:p4,FALSE
+p4,7,Citrus,tangy,currant,rose,Cedar,tangy,3,0,FALSE,1,1,29/07/2026 14:20:51,SESSION:p4,FALSE
+p4,8,Citrus,lemony,lemony,sandalwood,currant,jasmine,0,0,TRUE,3,4,29/07/2026 14:22:43,SESSION:p4,FALSE
+p4,9,Sweet & Gourmand,Maple-syrup,Coconut,toasty,Maple-syrup,peppery,2,3,FALSE,5,4,29/07/2026 14:25:05,SESSION:p4,FALSE
+p4,10,Roasted & Smoky,fresh_bread,yeasty,fresh_bread,toasty,Vanilla,1,0,FALSE,3,5,29/07/2026 14:27:11,SESSION:p4,FALSE
+p4,11,Herbal & Cooling,minty,anise,minty,wintergreen,sandalwood,1,1,TRUE,3,5,29/07/2026 14:28:40,SESSION:p4,FALSE
+p4,12,Sweet & Gourmand,Vanilla,Vanilla,Maple-syrup,fresh_bread,cinnamon,0,0,TRUE,4,5,29/07/2026 14:29:59,SESSION:p4,FALSE
+p4,13,Body & Animalic,wet_dog,disinfectant,wet_dog,musty,fishy,1,2,FALSE,4,3,29/07/2026 14:31:55,SESSION:p4,FALSE
+p4,14,Putrid & Decay,rotten-egg,fishy,rotten-egg,vinegar-like,musty,1,2,FALSE,3,3,29/07/2026 14:33:55,SESSION:p4,FALSE
+p4,15,Fermented & Sour,butyric,butyric,smoky,feces,sour_milk,0,1,FALSE,3,1,29/07/2026 14:35:38,SESSION:p4,FALSE
+p4,16,Chemical & Solvent,disinfectant,chlorine,disinfectant,air_freshener,wet_dog,1,1,TRUE,2,5,29/07/2026 14:37:00,SESSION:p4,FALSE
+p4,17,Spice,cumin,cumin,nutmeg,eucalyptus,Coconut,0,1,FALSE,3,5,29/07/2026 14:39:06,SESSION:p4,FALSE
+p4,18,Perfumed & Clean,aftershave,aftershave,disinfectant,burnt_rubber,air_freshener,0,0,TRUE,4,1,29/07/2026 14:40:49,SESSION:p4,FALSE
+p4,19,Chemical & Solvent,nail-polisher,nail-polisher,chlorine,skin-care,sweaty,0,3,FALSE,3,4,29/07/2026 14:43:18,SESSION:p4,FALSE
+p4,20,Body & Animalic,fishy,burnt_rubber,wet_dog,fishy,rotten-egg,2,1,FALSE,4,5,29/07/2026 14:44:57,SESSION:p4,FALSE
+p4,21,Perfumed & Clean,perfumer,chlorine,air_freshener,nail-polisher,perfumer,3,2,FALSE,4,5,29/07/2026 14:46:30,SESSION:p4,FALSE
+p4,22,Putrid & Decay,musty,musty,wet_dog,yeasty,rotten_fish,0,0,TRUE,3,5,29/07/2026 14:48:10,SESSION:p4,FALSE
+p4,23,Spice,anise,cinnamon,anise,minty,Honeyed,1,2,FALSE,5,1,29/07/2026 14:50:00,SESSION:p4,FALSE
+p4,24,Fermented & Sour,yeasty,musty,sour_milk,yeasty,fresh_bread,2,1,FALSE,3,2,29/07/2026 14:51:57,SESSION:p4,FALSE
+p5,1,Floral,lavender,rose,lavender,lemony,guava,1,1,TRUE,2,5,29/07/2026 15:11:33,SESSION:p5,FALSE
+p5,2,Floral,lilac,currant,lilac,rose,tangy,1,3,FALSE,3,1,29/07/2026 15:13:16,SESSION:p5,FALSE
+p5,3,Roasted & Smoky,fresh_bread,yeasty,toasty,Vanilla,fresh_bread,3,1,FALSE,1,5,29/07/2026 15:14:47,SESSION:p5,FALSE
+p5,4,Sweet & Gourmand,Maple-syrup,peppery,Maple-syrup,Coconut,toasty,1,0,FALSE,1,5,29/07/2026 15:16:05,SESSION:p5,FALSE
+p5,5,Woody & Resinous,Myrrh,wintergreen,Cedar,currant,Myrrh,3,1,FALSE,5,1,29/07/2026 15:18:28,SESSION:p5,FALSE
+p5,6,Herbal & Cooling,eucalyptus,saffron,cumin,rosemary,eucalyptus,3,1,FALSE,4,2,29/07/2026 15:20:11,SESSION:p5,FALSE
+p5,7,Herbal & Cooling,rosemary,peppery,eucalyptus,Cedar,rosemary,3,1,FALSE,5,2,29/07/2026 15:21:25,SESSION:p5,FALSE
+p5,8,Woody & Resinous,piney,piney,saffron,minty,lemony,0,1,FALSE,3,1,29/07/2026 15:23:10,SESSION:p5,FALSE
+p5,9,Sweet & Gourmand,Honeyed,woodsmoke,anise,Vanilla,Honeyed,3,0,FALSE,2,5,29/07/2026 15:29:06,SESSION:p5,FALSE
+p5,10,Roasted & Smoky,smoky,toasty,Coconut,butyric,smoky,3,2,FALSE,1,4,29/07/2026 15:30:13,SESSION:p5,FALSE
+p5,11,Citrus,currant,lilac,currant,tangy,Myrrh,1,3,FALSE,2,1,29/07/2026 15:31:49,SESSION:p5,FALSE
+p5,12,Citrus,tangy,currant,Cedar,tangy,rose,2,0,FALSE,1,5,29/07/2026 15:32:55,SESSION:p5,FALSE
+p5,13,Spice,cinnamon,anise,wintergreen,cinnamon,Vanilla,2,1,FALSE,1,5,29/07/2026 15:34:14,SESSION:p5,FALSE
+p5,14,Perfumed & Clean,skin-care,burnt_rubber,nail-polisher,perfumer,skin-care,3,0,FALSE,2,5,29/07/2026 15:35:30,SESSION:p5,FALSE
+p5,15,Putrid & Decay,musty,musty,yeasty,wet_dog,rotten_fish,0,1,FALSE,2,4,29/07/2026 15:36:44,SESSION:p5,FALSE
+p5,16,Fermented & Sour,vinegar-like,woodsmoke,rotten-egg,vinegar-like,yeasty,2,1,FALSE,5,3,29/07/2026 15:37:55,SESSION:p5,FALSE
+p5,17,Body & Animalic,fishy,burnt_rubber,rotten-egg,fishy,wet_dog,2,2,TRUE,4,5,29/07/2026 15:39:07,SESSION:p5,FALSE
+p5,18,Body & Animalic,sweaty,feces,bad_breath,sweaty,nail-polisher,2,2,TRUE,3,4,29/07/2026 15:40:45,SESSION:p5,FALSE
+p5,19,Putrid & Decay,feces,feces,butyric,sweaty,rotten_fish,0,0,TRUE,1,3,29/07/2026 15:42:00,SESSION:p5,FALSE
+p5,20,Chemical & Solvent,chlorine,perfumer,chlorine,nail-polisher,bad_breath,1,1,TRUE,1,5,29/07/2026 15:50:03,SESSION:p5,FALSE
+p5,21,Perfumed & Clean,perfumer,air_freshener,chlorine,nail-polisher,perfumer,3,2,FALSE,1,5,29/07/2026 15:51:21,SESSION:p5,FALSE
+p5,22,Fermented & Sour,butyric,butyric,sour_milk,feces,smoky,0,2,FALSE,1,1,29/07/2026 15:52:06,SESSION:p5,FALSE
+p5,23,Spice,nutmeg,cumin,Honeyed,minty,nutmeg,3,1,FALSE,1,1,29/07/2026 15:53:47,SESSION:p5,FALSE
+p5,24,Chemical & Solvent,nail-polisher,skin-care,nail-polisher,sweaty,chlorine,1,0,FALSE,1,5,29/07/2026 15:54:52,SESSION:p5,FALSE
+p6,1,Herbal & Cooling,minty,wintergreen,anise,minty,sandalwood,2,2,TRUE,4,5,29/07/2026 16:09:59,SESSION:p6,FALSE
+p6,2,Citrus,lemony,lemony,currant,jasmine,sandalwood,0,1,FALSE,2,5,29/07/2026 16:12:18,SESSION:p6,FALSE
+p6,3,Floral,rose,rose,lavender,tangy,guava,0,2,FALSE,2,5,29/07/2026 16:13:32,SESSION:p6,FALSE
+p6,4,Roasted & Smoky,woodsmoke,vinegar-like,fresh_bread,Honeyed,woodsmoke,3,0,FALSE,2,4,29/07/2026 16:15:19,SESSION:p6,FALSE
+p6,5,Herbal & Cooling,wintergreen,cinnamon,minty,wintergreen,Myrrh,2,1,FALSE,3,1,29/07/2026 16:17:12,SESSION:p6,FALSE
+p6,6,Roasted & Smoky,toasty,smoky,sour_milk,toasty,Maple-syrup,2,0,FALSE,3,2,29/07/2026 16:18:19,SESSION:p6,FALSE
+p6,7,Citrus,guava,lavender,saffron,guava,tangy,2,1,FALSE,2,1,29/07/2026 16:19:40,SESSION:p6,FALSE
+p6,8,Floral,jasmine,currant,lilac,lemony,jasmine,3,0,FALSE,3,5,29/07/2026 16:20:53,SESSION:p6,FALSE
+p6,9,Sweet & Gourmand,Vanilla,Vanilla,cinnamon,fresh_bread,Maple-syrup,0,0,TRUE,1,3,29/07/2026 16:22:34,SESSION:p6,FALSE
+p6,10,Sweet & Gourmand,Coconut,Maple-syrup,Coconut,cumin,smoky,1,1,TRUE,3,4,29/07/2026 16:24:58,SESSION:p6,FALSE
+p6,11,Woody & Resinous,saffron,piney,saffron,eucalyptus,guava,1,0,FALSE,1,1,29/07/2026 16:26:42,SESSION:p6,FALSE
+p6,12,Woody & Resinous,Cedar,tangy,saffron,rosemary,Cedar,3,2,FALSE,1,1,29/07/2026 16:28:44,SESSION:p6,FALSE
+p6,13,Putrid & Decay,rotten-egg,rotten-egg,musty,vinegar-like,fishy,0,1,FALSE,4,3,29/07/2026 16:30:10,SESSION:p6,FALSE
+p6,14,Chemical & Solvent,burnt_rubber,burnt_rubber,fishy,disinfectant,aftershave,0,2,FALSE,2,5,29/07/2026 16:32:22,SESSION:p6,FALSE
+p6,15,Perfumed & Clean,aftershave,disinfectant,air_freshener,burnt_rubber,aftershave,3,3,TRUE,2,1,29/07/2026 16:34:19,SESSION:p6,FALSE
+p6,16,Fermented & Sour,sour_milk,sour_milk,toasty,rotten_fish,yeasty,0,1,FALSE,2,2,29/07/2026 16:35:57,SESSION:p6,FALSE
+p6,17,Fermented & Sour,yeasty,fresh_bread,musty,yeasty,sour_milk,2,1,FALSE,1,4,29/07/2026 16:37:14,SESSION:p6,FALSE
+p6,18,Spice,peppery,peppery,rosemary,cinnamon,Maple-syrup,0,2,FALSE,1,4,29/07/2026 16:39:01,SESSION:p6,FALSE
+p6,19,Perfumed & Clean,air_freshener,chlorine,perfumer,air_freshener,disinfectant,2,2,TRUE,1,5,29/07/2026 16:40:25,SESSION:p6,FALSE
+p6,20,Body & Animalic,wet_dog,musty,fishy,wet_dog,disinfectant,2,2,TRUE,1,1,29/07/2026 16:43:17,SESSION:p6,FALSE
+p6,21,Chemical & Solvent,disinfectant,air_freshener,chlorine,wet_dog,disinfectant,3,0,FALSE,2,5,29/07/2026 16:45:26,SESSION:p6,FALSE
+p6,22,Spice,anise,Honeyed,anise,cinnamon,minty,1,2,FALSE,2,5,29/07/2026 16:46:59,SESSION:p6,FALSE
+p6,23,Putrid & Decay,rotten_fish,bad_breath,musty,sour_milk,rotten_fish,3,2,FALSE,1,4,29/07/2026 16:48:41,SESSION:p6,FALSE
+p6,24,Body & Animalic,bad_breath,chlorine,bad_breath,rotten_fish,sweaty,1,0,FALSE,1,4,29/07/2026 16:50:11,SESSION:p6,FALSE
+p7,1,Woody & Resinous,sandalwood,minty,sandalwood,musty,anise,1,0,FALSE,3,2,30/07/2026 15:20:12,SESSION:p7,FALSE
+p7,2,Sweet & Gourmand,Coconut,Coconut,guava,vinegar-like,lavender,0,3,FALSE,4,4,30/07/2026 15:22:45,SESSION:p7,FALSE
+p7,3,Citrus,currant,Myrrh,aftershave,wintergreen,currant,3,3,TRUE,3,3,30/07/2026 15:25:16,SESSION:p7,FALSE
+p7,4,Floral,lilac,Myrrh,vinegar-like,currant,lilac,3,0,FALSE,1,2,30/07/2026 15:27:17,SESSION:p7,FALSE
+p7,5,Roasted & Smoky,woodsmoke,vinegar-like,jasmine,woodsmoke,rotten-egg,2,2,TRUE,4,5,30/07/2026 15:31:06,SESSION:p7,FALSE
+p7,6,Citrus,lemony,minty,lemony,sandalwood,burnt_rubber,1,0,FALSE,4,5,30/07/2026 15:34:24,SESSION:p7,FALSE
+p7,7,Floral,jasmine,jasmine,woodsmoke,lemony,sandalwood,0,0,TRUE,2,1,30/07/2026 15:36:10,SESSION:p7,FALSE
+p7,8,Herbal & Cooling,eucalyptus,Coconut,eucalyptus,cumin,chlorine,1,1,TRUE,1,3,30/07/2026 15:39:49,SESSION:p7,FALSE
+p7,9,Sweet & Gourmand,Honeyed,Honeyed,nail-polisher,lemony,jasmine,0,3,FALSE,2,5,30/07/2026 15:42:20,SESSION:p7,FALSE
+p7,10,Woody & Resinous,piney,piney,minty,toasty,nutmeg,0,0,TRUE,3,4,30/07/2026 15:45:47,SESSION:p7,FALSE
+p7,11,Roasted & Smoky,toasty,rotten_fish,sour_milk,toasty,sandalwood,2,1,FALSE,3,5,30/07/2026 15:49:57,SESSION:p7,FALSE
+p7,12,Herbal & Cooling,minty,Honeyed,minty,sour_milk,anise,1,1,TRUE,1,5,30/07/2026 15:53:03,SESSION:p7,FALSE
+p7,13,Putrid & Decay,rotten-egg,burnt_rubber,Myrrh,fishy,rotten-egg,3,1,FALSE,2,5,30/07/2026 15:59:37,SESSION:p7,FALSE
+p7,14,Perfumed & Clean,skin-care,butyric,Coconut,skin-care,smoky,2,2,TRUE,1,2,30/07/2026 16:03:54,SESSION:p7,FALSE
+p7,15,Fermented & Sour,sour_milk,bad_breath,rotten_fish,lilac,sour_milk,3,0,FALSE,4,5,30/07/2026 16:06:02,SESSION:p7,FALSE
+p7,16,Spice,peppery,Maple-syrup,peppery,rose,butyric,1,2,FALSE,2,4,30/07/2026 16:09:04,SESSION:p7,FALSE
+p7,17,Spice,cinnamon,smoky,Vanilla,lilac,cinnamon,3,1,FALSE,3,4,30/07/2026 16:10:58,SESSION:p7,FALSE
+p7,18,Perfumed & Clean,aftershave,woodsmoke,vinegar-like,aftershave,saffron,2,2,TRUE,3,4,30/07/2026 16:14:46,SESSION:p7,FALSE
+p7,19,Body & Animalic,sweaty,rosemary,sweaty,nail-polisher,skin-care,1,1,TRUE,4,4,30/07/2026 16:15:32,SESSION:p7,FALSE
+p7,20,Chemical & Solvent,chlorine,lavender,perfumer,toasty,chlorine,3,3,TRUE,2,5,30/07/2026 16:16:57,SESSION:p7,FALSE
+p7,21,Fermented & Sour,vinegar-like,anise,vinegar-like,fishy,rotten-egg,1,1,TRUE,1,5,30/07/2026 16:18:41,SESSION:p7,FALSE
+p7,22,Chemical & Solvent,nail-polisher,nail-polisher,guava,smoky,skin-care,0,2,FALSE,2,5,30/07/2026 16:20:45,SESSION:p7,FALSE
+p7,23,Putrid & Decay,feces,Vanilla,sweaty,nail-polisher,feces,3,2,FALSE,2,4,30/07/2026 16:22:33,SESSION:p7,FALSE
+p7,24,Body & Animalic,fishy,aftershave,burnt_rubber,fishy,rose,2,0,FALSE,2,5,30/07/2026 16:24:18,SESSION:p7,FALSE
+p8,1,Citrus,tangy,Cedar,tangy,fresh_bread,rosemary,1,0,FALSE,3,2,30/07/2026 16:30:56,SESSION:p8,FALSE
+p8,2,Sweet & Gourmand,Coconut,guava,Coconut,vinegar-like,lavender,1,3,FALSE,5,3,30/07/2026 16:32:40,SESSION:p8,FALSE
+p8,3,Woody & Resinous,Cedar,rosemary,disinfectant,Cedar,peppery,2,2,TRUE,3,3,30/07/2026 16:34:49,SESSION:p8,FALSE
+p8,4,Roasted & Smoky,woodsmoke,rotten-egg,woodsmoke,vinegar-like,jasmine,1,3,FALSE,4,5,30/07/2026 16:37:00,SESSION:p8,FALSE
+p8,5,Roasted & Smoky,fresh_bread,lemony,musty,yeasty,fresh_bread,3,0,FALSE,3,5,30/07/2026 16:39:18,SESSION:p8,FALSE
+p8,6,Herbal & Cooling,minty,sour_milk,anise,Honeyed,minty,3,3,TRUE,5,5,30/07/2026 16:40:03,SESSION:p8,FALSE
+p8,7,Floral,jasmine,lemony,sandalwood,jasmine,woodsmoke,2,2,TRUE,4,3,30/07/2026 16:42:44,SESSION:p8,FALSE
+p8,8,Floral,lilac,vinegar-like,currant,Myrrh,lilac,3,3,TRUE,1,1,30/07/2026 16:45:00,SESSION:p8,FALSE
+p8,9,Sweet & Gourmand,Vanilla,Vanilla,lilac,skin-care,currant,0,1,FALSE,1,3,30/07/2026 16:47:10,SESSION:p8,FALSE
+p8,10,Herbal & Cooling,wintergreen,Vanilla,cinnamon,wintergreen,rotten_fish,2,2,TRUE,3,1,30/07/2026 16:49:02,SESSION:p8,FALSE
+p8,11,Woody & Resinous,saffron,cumin,saffron,eucalyptus,air_freshener,1,2,FALSE,4,1,30/07/2026 16:51:15,SESSION:p8,FALSE
+p8,12,Citrus,currant,aftershave,wintergreen,currant,Myrrh,2,0,FALSE,1,1,30/07/2026 16:52:56,SESSION:p8,FALSE
+p8,13,Chemical & Solvent,chlorine,chlorine,perfumer,lavender,toasty,0,0,TRUE,4,5,30/07/2026 16:55:25,SESSION:p8,FALSE
+p8,14,Body & Animalic,sweaty,sweaty,skin-care,nail-polisher,rosemary,0,0,TRUE,3,5,30/07/2026 16:58:15,SESSION:p8,FALSE
+p8,15,Fermented & Sour,yeasty,wet_dog,Honeyed,musty,yeasty,3,1,FALSE,2,2,30/07/2026 17:00:05,SESSION:p8,FALSE
+p8,16,Chemical & Solvent,burnt_rubber,burnt_rubber,peppery,aftershave,woodsmoke,0,3,FALSE,4,5,30/07/2026 17:01:34,SESSION:p8,FALSE
+p8,17,Putrid & Decay,musty,musty,wintergreen,disinfectant,wet_dog,0,2,FALSE,3,5,30/07/2026 17:03:45,SESSION:p8,FALSE
+p8,18,Putrid & Decay,rotten_fish,rotten_fish,bad_breath,chlorine,cinnamon,0,2,FALSE,2,4,30/07/2026 17:05:27,SESSION:p8,FALSE
+p8,19,Perfumed & Clean,perfumer,sour_milk,toasty,perfumer,cumin,2,2,TRUE,4,5,30/07/2026 17:07:35,SESSION:p8,FALSE
+p8,20,Spice,cumin,feces,lavender,Coconut,cumin,3,1,FALSE,4,1,30/07/2026 17:09:12,SESSION:p8,FALSE
+p8,21,Body & Animalic,fishy,rose,fishy,aftershave,burnt_rubber,1,0,FALSE,2,4,30/07/2026 17:11:02,SESSION:p8,FALSE
+p8,22,Fermented & Sour,butyric,currant,sweaty,butyric,feces,2,0,FALSE,1,1,30/07/2026 17:12:57,SESSION:p8,FALSE
+p8,23,Perfumed & Clean,aftershave,woodsmoke,saffron,aftershave,vinegar-like,2,2,TRUE,2,2,30/07/2026 17:14:43,SESSION:p8,FALSE
+p8,24,Spice,peppery,peppery,Maple-syrup,butyric,rose,0,2,FALSE,1,4,30/07/2026 17:16:37,SESSION:p8,FALSE
