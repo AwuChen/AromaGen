@@ -14,7 +14,13 @@ from .schemas import (
     FeedbackResponse,
 )
 from .settings import settings
-from .openai_client import compose_with_openai, describe_image, refine_with_openai, transcribe_audio
+from .openai_client import (
+    compose_with_openai,
+    describe_image,
+    expand_to_pulse_sequence,
+    refine_with_openai,
+    transcribe_audio,
+)
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
 from .cartridge import (
@@ -100,7 +106,10 @@ def compose(request: ComposeRequest) -> ComposeResponse:
         result = compose_with_openai(request.sentence, narrowed_catalog, cartridge_status)
         validate_composition(result.scent_sequence, narrowed_catalog)
         session_id = new_session_id()
-        output = result.model_copy(update={"session_id": session_id})
+        pulse_sequence = expand_to_pulse_sequence(
+            result.scent_sequence, settings.pulse_seconds, settings.pulse_rounds
+        )
+        output = result.model_copy(update={"session_id": session_id, "pulse_sequence": pulse_sequence})
         append_event(
             "compose",
             session_id=session_id,
@@ -144,7 +153,10 @@ def feedback(request: FeedbackRequest) -> FeedbackResponse:
         result = refine_with_openai(request, narrowed_catalog, cartridge_status)
         validate_composition(result.scent_sequence, narrowed_catalog)
         session_id = request.session_id or new_session_id()
-        output = result.model_copy(update={"session_id": session_id})
+        pulse_sequence = expand_to_pulse_sequence(
+            result.scent_sequence, settings.pulse_seconds, settings.pulse_rounds
+        )
+        output = result.model_copy(update={"session_id": session_id, "pulse_sequence": pulse_sequence})
         append_event(
             "feedback",
             session_id=session_id,

@@ -334,9 +334,13 @@ function loadActiveCartridgeScents() {
 
 loadActiveCartridgeScents();
 
+let currentPulseSequence = null; // Interleaved hardware pulse train from the last compose/feedback call
+
 function handleComposeResponse(data) {
   if (data.session_id) sessionId = data.session_id;
   console.log('[Compose] Justification:', data.justification);
+  console.log('[Compose] Pulse sequence:', data.pulse_sequence);
+  currentPulseSequence = data.pulse_sequence || null;
   return data.scent_sequence || null;
 }
 
@@ -390,6 +394,8 @@ async function feedbackScent(feedbackText) {
     }
     console.log('[Feedback] Justification:', data.justification);
     console.log('[Feedback] Changes made:', data.changes_made);
+    console.log('[Feedback] Pulse sequence:', data.pulse_sequence);
+    currentPulseSequence = data.pulse_sequence || null;
     return data.scent_sequence || null;
   } catch (err) {
     console.error(err);
@@ -520,9 +526,16 @@ async function playSequenceOnDevice() {
     console.warn('Could not refresh cartridge scents', e);
   }
 
+  // Prefer the interleaved hardware pulse train (short repeated rounds meant to
+  // encourage perceptual blending) over the raw conceptual sequence; fall back
+  // if the backend didn't return one.
+  const sourceSequence = (currentPulseSequence && currentPulseSequence.length > 0)
+    ? currentPulseSequence
+    : currentSequence;
+
   // Convert scent names to scent_ids using the location field, skipping unknown scents
   const bleSequence = [];
-  for (const item of currentSequence) {
+  for (const item of sourceSequence) {
     const meta = scentsData[item.scent_name];
     if (!meta || !meta.location) {
       console.warn(`Skipping scent with no device location: ${item.scent_name}`);

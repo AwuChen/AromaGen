@@ -1,35 +1,35 @@
 {
-    "Lavender": {
+    "Benz Sal": {
         "location": "1",
+        "category": "Perfumed / Clean",
+        "volatility": 4,
+        "note": "Sweet, balsamic, soft floral, powdery clean note"
+    },
+    "Cypress": {
+        "location": "2",
+        "category": "Woody & Resinous",
+        "volatility": 4,
+        "note": "Woody, resinous, dry, coniferous"
+    },
+    "Clove Bud": {
+        "location": "3",
+        "category": "Spice",
+        "volatility": 6,
+        "note": "Warm, pungent, spicy"
+    },
+    "Lavender": {
+        "location": "4",
         "category": "Floral",
         "volatility": 6,
         "note": "Floral, herbaceous-sweet, calming"
     },
     "Lemon": {
-        "location": "2",
+        "location": "5",
         "category": "Citrus",
         "volatility": 8,
         "note": "Bright, citrus, sharp, fresh top note"
     },
-    "Cypress": {
-        "location": "3",
-        "category": "Woody & Resinous",
-        "volatility": 4,
-        "note": "Woody, resinous, dry, coniferous"
-    },
-    "Eucalyptus": {
-        "location": "4",
-        "category": "Herbal / Cooling",
-        "volatility": 7,
-        "note": "Camphorous, cooling, medicinal-fresh"
-    },
-    "Clove bud oil": {
-        "location": "5",
-        "category": "Spice",
-        "volatility": 6,
-        "note": "Warm, pungent, spicy"
-    },
-    "Vanilla extract": {
+    "Vanilla": {
         "location": "6",
         "category": "Sweet / Gourmand",
         "volatility": 3,
@@ -41,34 +41,28 @@
         "volatility": 3,
         "note": "Smoky, tarry, leathery, medicinal-burnt"
     },
-    "Distilled white vinegar": {
+    "Peppermint": {
         "location": "8",
+        "category": "Herbal / Cooling",
+        "volatility": 8,
+        "note": "Sharp, minty, cooling, fresh herbal top note"
+    },
+    "Cognac": {
+        "location": "9",
+        "category": "Chemical / Solvent",
+        "volatility": 8,
+        "note": "Sharp, alcoholic, boozy, solvent-like pungency"
+    },
+    "Vinegar": {
+        "location": "10",
         "category": "Fermented & Sour",
         "volatility": 8,
         "note": "Sour, sharp, acetic, pungent"
-    },
-    "Baker's ammonia": {
-        "location": "9",
-        "category": "Chemical / Solvent",
-        "volatility": 9,
-        "note": "Sharp, pungent, ammoniacal"
-    },
-    "Hydrogen sulfide": {
-        "location": "10",
-        "category": "Putrid / Decay",
-        "volatility": 10,
-        "note": "Rotten-egg, sulfurous, putrid"
     },
     "Isovaleric acid": {
         "location": "11",
         "category": "Animal / Body",
         "volatility": 7,
         "note": "Sweaty, cheesy, animalic"
-    },
-    "Eau de Cologne": {
-        "location": "12",
-        "category": "Perfumed / Clean",
-        "volatility": 9,
-        "note": "Clean, alcoholic, bright"
     }
 }

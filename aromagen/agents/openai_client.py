@@ -10,13 +10,41 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from openai import OpenAI
 from pydantic import BaseModel
 
-from .schemas import ComposeResponse, FeedbackRequest, FeedbackResponse
+from .schemas import ComposeResponse, FeedbackRequest, FeedbackResponse, ScentItem
 from .settings import settings
 from .example_bank import find_similar
 
 log = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
+
+
+def expand_to_pulse_sequence(
+    scent_sequence: List[ScentItem],
+    pulse_seconds: float,
+    rounds: int,
+) -> List[ScentItem]:
+    """Deterministically turn the model's conceptual scent pick into an
+    interleaved pulse train: every distinct odorant in scent_sequence (in
+    first-appearance order) fires for pulse_seconds seconds, once per round,
+    for `rounds` rounds -- e.g. [A, B, C] -> A B C A B C A B C A B C A B C.
+
+    The model's own per-scent durations are intentionally discarded here;
+    this is a hardware-delivery experiment (rapid alternation to encourage
+    perceptual blending) separate from the model's compositional reasoning,
+    so it's implemented as a deterministic post-processing step rather than
+    asked of the model in the prompt.
+    """
+    seen: List[str] = []
+    for item in scent_sequence:
+        if item.scent_name not in seen:
+            seen.append(item.scent_name)
+
+    return [
+        ScentItem(scent_name=name, scent_duration=pulse_seconds)
+        for _ in range(rounds)
+        for name in seen
+    ]
 
 
 def transcribe_audio(audio_bytes: bytes, filename: str = "audio.webm") -> str:
