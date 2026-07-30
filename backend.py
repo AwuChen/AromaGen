@@ -128,14 +128,14 @@ def crc16_modbus(data: bytes) -> bytes:
     return bytes([(crc >> 8) & 0xFF, crc & 0xFF])
 
 
-def build_scent_command(scent_id: int, duration_sec: int) -> bytes:
+def build_scent_command(scent_id: int, duration_sec: float) -> bytes:
     start = bytes([0xF5])
     header = bytes([0x00, 0x00, 0x00, 0x01])
     cmd_type = bytes([0x02])
     subcmd = bytes([0x05])
     channel = bytes([scent_id])
     padding = bytes([0x00, 0x00])
-    duration_ms = duration_sec * 1000
+    duration_ms = int(round(duration_sec * 1000))
     duration_bytes = duration_ms.to_bytes(2, "big")
     body = header + cmd_type + subcmd + channel + padding + duration_bytes
     crc_bytes = crc16_modbus(body)

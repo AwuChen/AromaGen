@@ -34,6 +34,8 @@ class Settings:
     sequence_total_seconds: int = int(os.getenv("SEQUENCE_TOTAL_SECONDS", "30"))
     scent_duration_max: int = int(os.getenv("SCENT_DURATION_MAX", "15"))
     descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "8"))
+    pulse_seconds: float = float(os.getenv("PULSE_SECONDS", "1"))
+    pulse_rounds: int = int(os.getenv("PULSE_ROUNDS", "4"))
 
 
 settings = Settings()

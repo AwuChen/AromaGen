@@ -21,12 +21,13 @@ def scent_name_literal(choices: list[str]):
 
 class ScentItem(BaseModel):
     scent_name: str
-    scent_duration: int = Field(ge=1, le=SCENT_DURATION_MAX)
+    scent_duration: float = Field(gt=0, le=SCENT_DURATION_MAX)
 
 
 class ComposeResponse(BaseModel):
     scent_sequence: List[ScentItem]
     justification: str
+    pulse_sequence: List[ScentItem] = []
     session_id: str = ""
 
     @field_validator("scent_sequence")
@@ -58,6 +59,7 @@ class FeedbackResponse(BaseModel):
     scent_sequence: List[ScentItem]
     justification: str
     changes_made: str
+    pulse_sequence: List[ScentItem] = []
     session_id: str = ""
 
     @field_validator("scent_sequence")
