@@ -339,9 +339,15 @@ let currentPulseSequence = null; // Interleaved hardware pulse train from the la
 function handleComposeResponse(data) {
   if (data.session_id) sessionId = data.session_id;
   console.log('[Compose] Justification:', data.justification);
+  console.log('[Compose] Validation:', data.validation_reasoning, 'removed:', data.removed_scents);
+  if (data.compatibility_warnings && data.compatibility_warnings.length) {
+    console.warn('[Compose] Compatibility warnings:', data.compatibility_warnings);
+  }
   console.log('[Compose] Pulse sequence:', data.pulse_sequence);
   currentPulseSequence = data.pulse_sequence || null;
-  return data.scent_sequence || null;
+  return (data.validated_sequence && data.validated_sequence.length > 0)
+    ? data.validated_sequence
+    : (data.scent_sequence || null);
 }
 
 async function composeScent(sentence) {
@@ -384,19 +390,26 @@ async function feedbackScent(feedbackText) {
       return null;
     }
     const data = await res.json();
-    if (data.scent_sequence) {
+    const effectiveSequence = (data.validated_sequence && data.validated_sequence.length > 0)
+      ? data.validated_sequence
+      : (data.scent_sequence || null);
+    if (effectiveSequence) {
       if (data.session_id) sessionId = data.session_id;
       sessionHistory.push({
         feedback_text: feedbackText,
         changes_made: data.changes_made || '',
-        resulting_sequence: data.scent_sequence
+        resulting_sequence: effectiveSequence
       });
     }
     console.log('[Feedback] Justification:', data.justification);
     console.log('[Feedback] Changes made:', data.changes_made);
+    console.log('[Feedback] Validation:', data.validation_reasoning, 'removed:', data.removed_scents);
+    if (data.compatibility_warnings && data.compatibility_warnings.length) {
+      console.warn('[Feedback] Compatibility warnings:', data.compatibility_warnings);
+    }
     console.log('[Feedback] Pulse sequence:', data.pulse_sequence);
     currentPulseSequence = data.pulse_sequence || null;
-    return data.scent_sequence || null;
+    return effectiveSequence;
   } catch (err) {
     console.error(err);
     alert('Network error calling feedback service. Is the backend running on :8000?');
@@ -474,12 +487,23 @@ function renderProfile(sequence) {
     if (label) label.textContent = '';
   });
 
-  sequence.slice(0, 8).forEach((item, i) => {
+  const visible = sequence.slice(0, 8);
+  // Normalize displayed percentages to the visible set so they sum to 100% even
+  // after the validation layer has dropped some odorants from the original ratios.
+  const ratioTotal = visible.reduce((sum, item) => {
+    return sum + (typeof item.ratio === 'number' && !Number.isNaN(item.ratio) ? item.ratio : 0);
+  }, 0);
+
+  visible.forEach((item, i) => {
     const node = nodes[i];
     if (!node) return;
     const label = node.querySelector('.node-label');
     console.log(item.scent_name);
-    if (label) label.textContent = item.scent_name || '';
+    if (label) {
+      const hasRatio = typeof item.ratio === 'number' && !Number.isNaN(item.ratio) && ratioTotal > 0;
+      const pct = hasRatio ? Math.round((item.ratio / ratioTotal) * 100) + '%' : '';
+      label.textContent = pct ? `${item.scent_name || ''} · ${pct}` : (item.scent_name || '');
+    }
 
     setTimeout(() => {
       node.classList.add('frequency-node-visible');

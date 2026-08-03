@@ -4,67 +4,341 @@
       "location": "1",
       "category": "Perfumed / Clean",
       "note": "Sweet, balsamic, soft floral, powdery clean note",
-      "volatility": 4
+      "volatility": 4,
+      "pairs_well_with": [
+        "Clove Bud"
+      ],
+      "avoid_with": [
+        {
+          "name": "Lemon",
+          "reason": "can mute lemon's sharp citrus freshness if allowed to dominate"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "flattens peppermint's raw cooling sharpness"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "smooths vinegar's intended sourness into something too polished"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "can make smoky/tarry realism feel oddly perfumed"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "can make animalic realism feel oddly polished"
+        }
+      ],
+      "mixing_notes_full": "Benzyl salicylate is one of the industry's classic blending materials rather than a note that is intended to stand out on its own. Most perfumers describe it as a modifier, fixative, and bridge between floral, woody, and balsamic materials. Its odor is relatively mild—a soft sweet floral with powdery, balsamic, slightly solar and faintly marine facets—so its value lies less in contributing a recognizable smell and more in making other ingredients feel smoother, rounder, and more natural. Because of its high molecular weight and low volatility, it also slows the evaporation of more volatile floral materials, making fragrances feel richer and longer-lasting. ScenTree specifically notes its widespread use in white floral compositions, its slight marine/iodized nuance, and its role in stabilizing fragrances and even sunscreen products because it also functions as a UV absorber.\n\nProfessionally, benzyl salicylate is most commonly paired with jasmine, ylang-ylang, tuberose, lily-of-the-valley, orange blossom, heliotrope, hydroxycitronellal, coumarin, woody materials, patchouli, and soft musks. One of the most famous historical accords is the eugenol (clove)–benzyl salicylate accord, sometimes called the Mellis accord, which formed the backbone of many classic oriental fragrances including Youth Dew, Opium, Coco, Tabu, and L'Air du Temps. Rather than smelling obviously of clove or salicylate, the combination produces a rich spicy-floral warmth that became characteristic of twentieth-century perfumery. Modern perfumers also frequently use benzyl salicylate to expand white floral accords (gardenia, jasmine, lily), create a warm \"sun-kissed\" solar effect, soften marine fragrances, and increase the realism of orchid, tropical floral, and sunscreen-inspired compositions.",
+      "avoid_notes_full": "Benzyl salicylate rarely \"clashes\" chemically with other perfume materials, but professionals avoid allowing it to dominate compositions because excessive amounts tend to flatten, blur, or mute brighter notes. Since its odor is intentionally diffuse, overdosing can reduce contrast within a fragrance, causing sparkling citrus, crisp green materials, or transparent aquatic accords to lose their freshness. Experienced perfumers therefore treat it as a structural ingredient rather than a featured note: enough to support the composition, but not so much that every floral accord acquires the same heavy salicylic \"sunscreen\" character. Community discussions among trained perfumers likewise caution that while benzyl salicylate is an excellent blender, excessive use can dull a composition if the surrounding accord is not well balanced.\n\nFrom a semantic standpoint, benzyl salicylate is also generally avoided in fragrances that depend on sharp realism rather than smooth elegance. For example, if the goal is to recreate freshly squeezed lemon, raw peppermint, crisp pine needles, fresh-cut grass, vinegar, or harsh industrial odors, large amounts of benzyl salicylate tend to make these materials feel overly creamy, floral, or cosmetic. Likewise, highly smoky accords dominated by birch tar or intensely animalic accords dominated by isovaleric acid can become oddly polished if too much benzyl salicylate is added. Experts instead reserve it for compositions where softness, elegance, and diffusion are desirable rather than raw authenticity.",
+      "strength": "medium"
     },
     "Cypress": {
       "location": "2",
       "category": "Woody & Resinous",
       "note": "Woody, resinous, dry, coniferous",
-      "volatility": 4
+      "volatility": 4,
+      "pairs_well_with": [
+        "Lemon",
+        "Lavender"
+      ],
+      "avoid_with": [
+        {
+          "name": "Vanilla",
+          "reason": "sweet gourmand character competes with cypress's dry resinous profile"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "both compete for the woody backbone instead of complementing"
+        }
+      ],
+      "mixing_notes_full": "Cypress essential oil serves primarily as a woody-aromatic backbone. Perfumers value it because it contributes a dry, resinous, coniferous character that is cleaner and more elegant than pine while remaining less sweet than cedar. Rather than dominating a fragrance, it provides vertical structure, giving woody compositions a sense of height, freshness, and air. It frequently appears in masculine fragrances, Mediterranean colognes, forest accords, incense compositions, and modern woody aromatics. Fragrantica describes its profile as dry, woody, earthy, aromatic, and remarkably tenacious, explaining why it remains a popular material in fragrances emphasizing forests, Mediterranean landscapes, and elegant woods.\n\nProfessionals most often combine cypress with cedarwood, vetiver, sandalwood, patchouli, frankincense, juniper, bergamot, lemon, lavender, rosemary, sage, black pepper, and subtle musks. Citrus materials brighten its resinous dryness, while lavender and rosemary emphasize its aromatic character. In forest accords it is frequently layered with cedar and patchouli to build depth from fresh evergreen needles through bark into forest floor. Cypress also works exceptionally well alongside incense materials because its dry woody profile prevents resinous accords from becoming overly sweet. Many modern niche fragrances pair cypress with sea notes, mineral accords, or smoky woods to evoke Mediterranean coastlines or Japanese hinoki forests.",
+      "avoid_notes_full": "Although cypress is versatile, experts generally avoid pairing it with extremely sweet gourmand materials as the dominant theme. Heavy doses of vanilla, caramel, chocolate, marshmallow, or sugary fruit accords often compete with the dry resinous character of cypress, resulting in an unnatural juxtaposition where neither accord feels convincing. Similarly, highly powdery floral bouquets dominated by heliotrope or violet may lose clarity because cypress contributes a persistent woody dryness that interrupts their soft texture. When sweetness is desired, perfumers usually counterbalance it with amber, labdanum, or tonka rather than relying solely on vanilla.\n\nCypress is also rarely used as a major supporting note in fragrances intended to smell lush, juicy, or tropical. Fruits such as mango, lychee, peach, pineapple, or banana depend on rounded sweetness and bright esters, whereas cypress introduces a distinctly dry, slightly bitter green character. Small amounts can provide realism in botanical accords, but excessive use quickly makes fruit fragrances smell woody or medicinal. Likewise, intensely smoky materials such as birch tar can overwhelm cypress unless used very sparingly, because both compete for the woody backbone of the composition instead of complementing one another.",
+      "strength": "medium"
     },
     "Clove Bud": {
       "location": "3",
       "category": "Spice",
       "note": "Warm, pungent, spicy",
-      "volatility": 6
+      "volatility": 6,
+      "pairs_well_with": [
+        "Benz Sal",
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Peppermint",
+          "reason": "shared aromatic facets can create an unintended medicinal quality"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "produces harsh medicinal impressions together"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "produces harsh medicinal impressions together"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "reads as smoky/medicinal unless deliberately going for leather or incense"
+        }
+      ],
+      "mixing_notes_full": "Clove bud oil is one of perfumery's classic spice materials, with its aroma dominated by eugenol. It contributes warmth, richness, sweetness, and a slightly medicinal spiciness that immediately adds depth to floral, oriental, amber, gourmand, and woody fragrances. Rather than functioning only as a spice note, clove often acts as a connector between floral sweetness and woody darkness. Small quantities can make floral bouquets feel more vibrant and realistic, while larger amounts create luxurious oriental fragrances with remarkable warmth. Historically, clove has been central to many iconic perfumes because it lends both complexity and impressive longevity.\n\nThe most famous professional pairing is unquestionably clove (eugenol) with benzyl salicylate, forming the celebrated Mellis accord that shaped many classic fragrances of the twentieth century. Beyond that, clove pairs beautifully with vanilla, patchouli, sandalwood, cinnamon, labdanum, rose, jasmine, carnation, ylang-ylang, benzoin, amber materials, tobacco, leather, and woody notes. In floral accords, tiny amounts provide a realistic carnation-like spiciness. In gourmand fragrances, clove reinforces baked goods, chocolate, coffee, mulled wine, and chai tea. In woody compositions, it enriches cedar and sandalwood while preventing them from feeling too dry.",
+      "avoid_notes_full": "Because clove possesses a strong, highly recognizable odor, professionals avoid pairing it at high levels with materials that depend on clean transparency. Delicate lily-of-the-valley, airy aquatic florals, subtle citrus colognes, ozone accords, and minimalist musk fragrances can easily become dominated by clove's warm spicy signature. Likewise, extremely fresh peppermint or eucalyptus accords may develop an unintended medicinal quality because both materials share aromatic facets that reinforce one another in an undesirable way.\n\nClove is also generally used cautiously in fragrances intended to evoke fresh fruit or green botanical realism. While trace levels may enhance baked apple or spiced orange, larger amounts quickly transform juicy fruits into mulled or cooked interpretations. Similarly, combining clove with sharp vinegar, excessive isovaleric acid, or heavy birch tar often produces harsh medicinal or smoky impressions that mask the intended target unless the goal is explicitly leather, smoke, incense, or dark oriental fragrances. Experienced perfumers therefore typically treat clove as a powerful modifier whose dosage is carefully controlled to avoid overwhelming more delicate accords.",
+      "strength": "medium"
     },
     "Lavender": {
       "location": "4",
       "category": "Floral",
       "note": "Floral, herbaceous-sweet, calming",
-      "volatility": 6
+      "volatility": 6,
+      "pairs_well_with": [
+        "Lemon",
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Isovaleric acid",
+          "reason": "overwhelms lavender's refined character into something antiseptic"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "overwhelms lavender's refined character into something antiseptic"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "suppresses lavender's elegant floral qualities unless a dark profile is intended"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "reinforces cooling/camphoraceous facets into a pharmaceutical-ointment impression"
+        }
+      ],
+      "mixing_notes_full": "Lavender is one of the most versatile ingredients in modern perfumery because it simultaneously contributes floral, herbal, aromatic, green, and subtly camphoraceous facets. Unlike delicate white florals, lavender possesses enough aromatic freshness to bridge citrus top notes with woody or amber bases, making it one of the defining ingredients of the fougère family and a cornerstone of many masculine fragrances. Modern perfumers also increasingly use lavender in feminine and unisex compositions, pairing it with gourmand materials such as vanilla to create fragrances that feel simultaneously comforting and sophisticated. Fragrantica describes lavender as an aromatic floral note with green, fresh-spicy, and licorice nuances, highlighting its recent resurgence across both masculine and feminine perfumery.\n\nProfessionally, lavender is commonly paired with bergamot, lemon, rosemary, sage, thyme, cedarwood, vetiver, patchouli, sandalwood, vanilla, tonka bean, benzoin, musk, neroli, and geranium. Citrus notes brighten lavender's herbal freshness, while woods provide structure and longevity. One of today's most successful combinations is lavender and vanilla, where vanilla softens lavender's camphoraceous edge into a creamy, comforting accord used extensively in bedtime fragrances, niche perfumery, and premium body-care products. Lavender also works exceptionally well with honey, Earl Grey tea, coffee, and chocolate accords because its herbal freshness prevents gourmand fragrances from becoming overly sweet. Community discussions among experienced perfume enthusiasts similarly highlight lavender's affinity for bergamot, tea, honey, vanilla, and clean musks.",
+      "avoid_notes_full": "Although remarkably adaptable, lavender becomes problematic when combined with materials that are extremely pungent, sulfurous, or aggressively animalic. Large amounts of isovaleric acid, harsh vinegar accords, or strong smoky materials such as birch tar tend to overwhelm lavender's refined aromatic character, often producing medicinal or antiseptic impressions rather than elegant herbal freshness. Likewise, excessive peppermint can reinforce lavender's cooling and camphoraceous facets, causing fragrances to resemble pharmaceutical ointments rather than fine perfumes. Perfumers therefore typically reserve these pairings for specialized medicinal, spa, or conceptual fragrances rather than mainstream compositions.\n\nExperts also use restraint when combining lavender with very juicy tropical fruit accords such as mango, pineapple, banana, or lychee. Lavender naturally introduces dryness and herbal complexity, whereas tropical fruits rely on smooth, ester-rich sweetness. Unless additional bridge notes such as vanilla, neroli, citrus, or musk are present, the contrast can feel abrupt and artificial. Similarly, highly smoky leather accords dominated by birch tar may suppress lavender's elegant floral qualities unless the fragrance intentionally aims for a dark aromatic profile. In practice, lavender performs best when supporting freshness, aromatic sophistication, or gourmand warmth rather than heavy smoke or aggressive fermentation.",
+      "strength": "medium"
     },
     "Lemon": {
       "location": "5",
       "category": "Citrus",
       "note": "Bright, citrus, sharp, fresh top note",
-      "volatility": 8
+      "volatility": 8,
+      "pairs_well_with": [
+        "Lavender",
+        "Peppermint",
+        "Cypress",
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Birch tar oil",
+          "reason": "overpowers and erases lemon's bright opening almost instantly"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "converts fresh citrus into 'spoiled citrus'"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "converts fresh citrus into 'spoiled citrus'"
+        }
+      ],
+      "mixing_notes_full": "Lemon is one of perfumery's archetypal top notes, valued for its brilliant, sparkling freshness and its ability to immediately lift a composition. It evaporates rapidly, making it less important as a lasting note than as an opening impression that communicates cleanliness, energy, and realism. Professional perfumers frequently use lemon not as the main attraction but as an \"illuminator\" that sharpens surrounding materials. Even when the finished fragrance is floral, woody, gourmand, or aquatic, a small amount of lemon often makes the opening feel more natural and vibrant. Lemon also functions as an excellent transition between citrus openings and aromatic heart notes, explaining its widespread use in colognes, fougères, Mediterranean fragrances, and fresh woody compositions.\n\nClassic professional pairings include bergamot, lavender, rosemary, basil, peppermint, neroli, orange blossom, petitgrain, cedarwood, vetiver, cypress, tea accords, and light musks. Lemon also blends exceptionally well with vanilla when the objective is to create creamy citrus desserts or soft gourmand fragrances, although balancing sweetness is crucial. Citrus-herbal accords such as lemon–lavender, lemon–rosemary, and lemon–mint are widely used because lemon brightens aromatic herbs without masking their individuality. In woody fragrances, lemon provides initial freshness before gradually revealing deeper cedar, vetiver, or sandalwood bases.",
+      "avoid_notes_full": "Because lemon is exceptionally volatile and transparent, professionals generally avoid placing it beside very heavy, dense, or dark materials without an intermediate bridge. Large quantities of birch tar, dense patchouli, thick amber, or highly animalic materials can immediately overpower lemon, causing the citrus opening to disappear almost instantly. Similarly, sharp fermented odors such as vinegar or strong isovaleric acid tend to convert lemon from \"fresh citrus\" into \"spoiled citrus,\" making the composition feel sour or chemically harsh rather than naturally bright.\n\nLemon also requires careful balancing with very sweet gourmand ingredients. Vanilla, caramel, chocolate, and sugary accords can produce beautiful lemon-dessert fragrances, but only when sweetness is moderated. Otherwise the result often resembles artificial candy or cleaning products rather than realistic citrus. Perfumers therefore frequently introduce floral, herbal, or woody bridge notes—such as lavender, neroli, cedarwood, or musk—to prevent the lemon–vanilla combination from becoming one-dimensional or excessively confectionery.",
+      "strength": "strong"
     },
     "Vanilla": {
       "location": "6",
       "category": "Sweet / Gourmand",
       "note": "Sweet, creamy, warm, gourmand",
-      "volatility": 3
+      "volatility": 3,
+      "pairs_well_with": [
+        "Lavender",
+        "Benz Sal",
+        "Clove Bud",
+        "Lemon"
+      ],
+      "avoid_with": [
+        {
+          "name": "Peppermint",
+          "reason": "reduces its cooling effect, making it feel confectionery rather than fresh"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "makes its harsh realism feel oddly dessert-like"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "makes its harsh realism feel oddly dessert-like"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "makes its harsh realism feel oddly dessert-like"
+        }
+      ],
+      "mixing_notes_full": "Vanilla is among the most important base materials in perfumery because it contributes warmth, sweetness, creaminess, and exceptional roundness to almost every fragrance family. While consumers often perceive vanilla simply as a gourmand note, professional perfumers use it far more broadly as a softening and harmonizing material. Vanilla smooths sharp citrus, tames aggressive spices, enriches woods, and gives floral bouquets a velvety texture. It is a cornerstone of amber, oriental, gourmand, woody, and many modern floral fragrances because it increases both perceived richness and longevity. Network analyses of perfume accords likewise identify vanilla as one of the highest-centrality notes, meaning it enhances compatibility with an unusually large number of other fragrance materials.\n\nExpert pairings include lavender, benzyl salicylate, jasmine, rose, sandalwood, cedarwood, patchouli, tonka bean, benzoin, amber, coffee, chocolate, tobacco, cinnamon, clove, citrus fruits, and soft musks. Vanilla is especially effective as a bridge between contrasting materials: it transforms aromatic lavender into a cozy bedtime accord, rounds smoky woods into luxurious ambers, and softens coffee or cocoa into comforting gourmand fragrances. Rather than drawing attention to itself, vanilla frequently functions as the ingredient that makes an otherwise sharp composition feel complete, explaining why it appears in an enormous proportion of commercial fine fragrances despite often not being advertised as a principal note.",
+      "avoid_notes_full": "Although vanilla is extraordinarily flexible, professionals generally avoid allowing it to dominate fragrances intended to smell crisp, dry, or mineral. Excessive vanilla can obscure the clean precision of oceanic accords, fresh-cut grass, green leaves, pine forests, or transparent citrus colognes by coating them with an unintended creamy sweetness. Likewise, if the objective is to recreate highly realistic peppermint, eucalyptus, or icy herbal fragrances, large amounts of vanilla tend to reduce their cooling effect and make them feel confectionery rather than naturally fresh.\n\nVanilla is also used cautiously alongside strong fermentation, acidic, or animalic materials. While tiny amounts may soften whiskey, coffee, leather, or tobacco accords, excessive vanilla often suppresses the realism of vinegar, isovaleric acid, or smoky birch tar by making these harsh materials feel oddly dessert-like. Professional perfumers therefore normally treat vanilla as a supporting foundation rather than a universal solution, carefully adjusting dosage so it enhances complexity without eliminating the intended character of more challenging odor profiles.",
+      "strength": "medium"
     },
     "Birch tar oil": {
       "location": "7",
       "category": "Roasted / Smoky",
       "note": "Smoky, tarry, leathery, medicinal-burnt",
-      "volatility": 3
+      "volatility": 3,
+      "pairs_well_with": [
+        "Cypress",
+        "Clove Bud",
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Lemon",
+          "reason": "birch tar's darkness and combustion overwhelms lemon's brightness"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "competes for perceptual dominance, creating harsh medicinal/industrial impressions"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "competes for perceptual dominance, creating harsh medicinal/industrial impressions"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "competes for perceptual dominance, creating harsh medicinal/industrial impressions"
+        }
+      ],
+      "mixing_notes_full": "Birch tar is one of perfumery's most powerful special-effect materials. Rather than contributing a pleasant standalone aroma, it provides an unmistakable smoky, leathery, burnt, tarry, and slightly phenolic character that immediately creates the illusion of fire, leather, tobacco, or charred wood. Historically, birch tar became famous through the classical Russian leather accord, where minute quantities recreated the smell of leather tanned using birch smoke. Because of its extraordinary strength, modern perfumers almost always work with rectified birch tar diluted to very low concentrations (often 0.01–0.1% of the concentrate), using it as a trace modifier instead of a major note. Even iconic fragrances such as Creed Aventus reportedly employ only trace amounts to introduce a subtle smoky nuance rather than an overt burnt smell.\n\nProfessionally, birch tar is commonly paired with labdanum, styrax, cedarwood, patchouli, vetiver, guaiac wood, cypress, thyme, clove bud, tobacco, frankincense, benzoin, leather bases, amber materials, and dark vanilla accords. These combinations soften its harshness while preserving its smoky realism. In leather fragrances, labdanum and styrax contribute resinous warmth, while clove adds spicy richness. In incense accords, trace birch tar introduces realistic smoke without overwhelming the resins. In gourmand fragrances, surprisingly small amounts can make chocolate, roasted coffee, whiskey, and even vanilla smell more \"toasted\" and authentic, provided the dosage remains extremely low. Professional perfumers repeatedly emphasize that birch tar succeeds through restraint: it should be noticed subconsciously, not consciously identified.",
+      "avoid_notes_full": "Birch tar performs poorly when paired with fragrances whose defining characteristic is freshness, cleanliness, or delicate transparency. Light citrus colognes, airy lily-of-the-valley, dewy florals, oceanic aquatics, fresh laundry accords, and realistic green botanicals all rely on brightness and low visual \"weight.\" Birch tar immediately introduces darkness and combustion, making these fragrances feel dirty, burnt, or medicinal. Even a small overdose can completely suppress subtle floral nuances because the human olfactory system is particularly sensitive to smoky phenolic molecules. For this reason, experienced perfumers rarely use birch tar in fragrances intended to communicate purity, innocence, or crystalline freshness.\n\nBirch tar also requires caution when paired with other highly dominant materials such as excessive isovaleric acid, concentrated vinegar accords, or large amounts of peppermint. Instead of producing greater complexity, these combinations often compete for perceptual attention and create harsh medicinal, burnt, or industrial impressions. When birch tar is used successfully with challenging materials, perfumers almost always insert bridging notes such as vanilla, benzoin, labdanum, cedarwood, or patchouli to smooth the transitions between smoky and non-smoky facets. Consequently, birch tar should generally be viewed as a structural accent rather than a primary odorant in most fragrance families.",
+      "strength": "strong"
     },
     "Peppermint": {
       "location": "8",
       "category": "Herbal / Cooling",
       "note": "Sharp, minty, cooling, fresh herbal top note",
-      "volatility": 8
+      "volatility": 8,
+      "pairs_well_with": [
+        "Lemon",
+        "Lavender",
+        "Cypress",
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Birch tar oil",
+          "reason": "creates medicinal liniment/antiseptic impressions"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "creates medicinal liniment/antiseptic impressions"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "creates medicinal liniment/antiseptic impressions"
+        }
+      ],
+      "mixing_notes_full": "Peppermint occupies a unique position because it is valued less for sweetness than for its cooling physiological effect. Menthol activates cold-sensitive receptors in the nose and skin, creating a sensation of freshness that extends beyond its actual aroma. Perfumers therefore employ peppermint strategically to brighten citrus openings, reinforce herbal accords, or introduce an energetic \"lift\" to otherwise dense fragrances. Rather than serving as the central note, peppermint frequently functions as an enhancer that increases perceived cleanliness and diffusion. It is especially common in spa fragrances, aromatherapy products, toothpaste, mouthwash, candles, and wellness-oriented perfumes, where its cooling effect is considered as important as its odor.\n\nProfessionally, peppermint is most commonly paired with lemon, bergamot, eucalyptus, rosemary, basil, lavender, sage, green tea, cedarwood, cypress, pine, and light musks. Lemon and bergamot amplify its brightness, while aromatic herbs create classical Mediterranean herbal accords. Woods such as cedar and cypress provide structure so that peppermint does not evaporate into a purely medicinal top note. In gourmand perfumery, peppermint also appears alongside chocolate, vanilla, and coffee to create recognizable confectionery profiles such as mint chocolate or peppermint mocha. In these cases, vanilla acts as an important bridge that softens peppermint's sharp edges into a smoother edible impression.",
+      "avoid_notes_full": "Peppermint generally performs poorly with heavy floral bouquets unless used in extremely small quantities. White florals such as jasmine, tuberose, gardenia, and orange blossom derive much of their realism from creamy, narcotic richness. Peppermint's intense cooling effect can disrupt this illusion, making the flowers appear artificial, metallic, or toothpaste-like. Likewise, romantic floral accords centered around rose or violet often lose emotional warmth when significant peppermint is introduced. Professional perfumers therefore use peppermint in florals only as a trace freshness modifier rather than a featured ingredient.\n\nPeppermint also clashes with strong smoky, leathery, fermented, and animalic materials when no transitional notes are present. Birch tar, isovaleric acid, and concentrated vinegar each possess dominant odor signatures that compete directly with peppermint's cooling freshness, often producing impressions reminiscent of medicinal liniments or antiseptic ointments. If such combinations are intentionally pursued—as in conceptual fragrances—bridge materials such as vanilla, cedarwood, benzoin, or citrus are almost always added to restore perceptual harmony. Without these intermediates, peppermint tends to highlight rather than conceal the unpleasant aspects of these challenging materials.",
+      "strength": "strong"
     },
     "Cognac": {
       "location": "9",
       "category": "Chemical / Solvent",
       "note": "Sharp, alcoholic, boozy, solvent-like pungency",
-      "volatility": 8
+      "volatility": 8,
+      "pairs_well_with": [
+        "Vanilla",
+        "Clove Bud"
+      ],
+      "avoid_with": [
+        {
+          "name": "Lemon",
+          "reason": "clashes with cognac's warmth/density unless an intentional contrast is meant"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "clashes with cognac's warmth/density unless an intentional contrast is meant"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "can turn refined boozy warmth into something resembling spoiled alcohol"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "can turn refined boozy warmth into something resembling industrial solvent"
+        }
+      ],
+      "mixing_notes_full": "\"Cognac\" in perfumery is not intended to smell exactly like the beverage itself, but rather to evoke its boozy warmth, oak maturation, dried fruits, caramelized sugars, and alcoholic lift. It functions as a transitional note between bright volatile top notes and deep gourmand or woody bases. Professional perfumers use cognac accords to create an impression of maturity, richness, and luxury without allowing the fragrance to smell simply alcoholic. In many modern niche perfumes, the cognac accord disappears quickly after application, leaving behind woods, tobacco, amber, vanilla, and spices that collectively recreate the lingering memory of an aged spirit.\n\nThe materials most frequently paired with cognac include vanilla, benzoin, tonka bean, oak, cedarwood, sandalwood, patchouli, tobacco, leather, coffee, cocoa, dried fruits, cinnamon, clove, labdanum, and amber. Vanilla and tonka soften the alcohol, while woods recreate barrel aging. Tobacco and leather contribute sophistication, and coffee or cocoa reinforce roasted nuances. Rather than existing independently, cognac almost always serves as a bridge that makes gourmand, woody, or oriental fragrances feel richer and more realistic. Many contemporary niche fragrances built around whiskey, rum, bourbon, or cognac rely on this same structural strategy.",
+      "avoid_notes_full": "Cognac accords generally conflict with fragrance themes centered on crystalline freshness. Delicate citrus colognes, marine aquatics, icy mint fragrances, or transparent green florals depend on lightness and evaporation, whereas cognac introduces warmth, sweetness, and density. Combining these contrasting themes without an intentional artistic concept often produces a confusing fragrance that lacks a coherent identity. For this reason, perfumers rarely combine strong cognac accords directly with large amounts of peppermint, ozonic materials, or minimalist aquatic compositions.\n\nSimilarly, cognac requires restraint around strong acidic and sulfurous materials. Excessive vinegar or highly animalic ingredients such as isovaleric acid can easily transform the intended impression of refined aged spirits into one resembling spoiled alcohol or industrial solvent. When fermentation notes are desired—as in wine, whiskey, or dark fruit accords—professionals generally rely on trace acidic nuances supported by vanilla, dried fruits, woods, and spices rather than allowing sourness to dominate. The resulting composition communicates sophistication rather than harshness, preserving the luxurious identity expected of a cognac accord.",
+      "strength": "medium"
     },
+    
     "Vinegar": {
       "location": "10",
       "category": "Fermented & Sour",
       "note": "Sour, sharp, acetic, pungent",
-      "volatility": 8
+      "volatility": 8,
+      "pairs_well_with": [
+        "Lavender",
+        "Clove Bud"
+      ],
+      "avoid_with": [
+        {
+          "name": "Lemon",
+          "reason": "turns 'freshly peeled lemon' into 'old lemon juice'"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "combination reads as medicinal/industrial"
+        },
+        {
+          "name": "Isovaleric acid",
+          "reason": "combination reads as medicinal/industrial"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "combination reads as medicinal/industrial"
+        }
+      ],
+      "mixing_notes_full": "Unlike vanilla or lavender, vinegar is rarely used as a character note. Instead, perfumers use extremely small amounts of acetic acid to introduce realism into fermented, alcoholic, fruity, and gourmand accords. The goal is almost never to make the fragrance smell like household vinegar. Rather, trace acidity creates the same perceptual effect that acidity creates in food: it cuts sweetness, increases contrast, and makes surrounding ingredients appear more vivid. PerfumersWorld specifically recommends acetic acid only in high dilution and lists applications in woody blends, butter, butterscotch, cheese, chocolate, grape, raspberry, rum, strawberry, wine, pickles, and spice accords.\n\nHistorically, vinegar even has a long history in perfumery through toilet vinegars (vinaigres de toilette). Nineteenth-century perfumers macerated herbs such as lavender, rosemary, peppermint, sage, cloves, and citrus blossoms in wine vinegar or acetic acid to produce aromatic vinegars that served both hygienic and fragrant purposes. Modern niche perfumery occasionally revives this tradition. For example, Diptyque's Vinaigre de Toilette opens with a recognizable vinegar impression before transitioning into neroli, herbs, incense, pepper, woods, and resin, demonstrating that vinegar functions best as a brief structural accent rather than a persistent odor.",
+      "avoid_notes_full": "Professional perfumers generally avoid combining vinegar with fragrance themes whose defining quality is purity, softness, or creamy elegance. White florals such as jasmine, tuberose, gardenia, lily-of-the-valley, and powdery violet rely on smooth diffusion and rounded transitions. Even small overdoses of acetic acid can abruptly introduce a sour edge that makes these flowers appear wilted or fermented rather than fresh. Likewise, excessive acidity can spoil delicate citrus accords by changing the perception from \"freshly peeled lemon\" to \"old lemon juice\" or \"spoiled fruit.\" Consequently, perfumers using vinegar almost always counterbalance it with floral, woody, or balsamic materials before allowing it to become perceptible.\n\nVinegar also competes poorly with other harsh high-impact materials. Pairing concentrated acetic acid with birch tar, isovaleric acid, or excessive peppermint frequently produces medicinal, industrial, or cleaning-product associations because all four materials are extremely salient to the human olfactory system. Rather than reinforcing realism, they compete for perceptual dominance. Expert perfumers therefore generally allow only one \"harsh\" material to dominate, while the others remain in trace amounts and are buffered by bridge materials such as vanilla, woods, spices, amber, or soft florals.",
+      "strength": "medium"
     },
+
     "Isovaleric acid": {
       "location": "11",
       "category": "Animal / Body",
       "note": "Sweaty, cheesy, animalic",
-      "volatility": 7
+      "volatility": 7,
+      "pairs_well_with": [
+        "Vanilla"
+      ],
+      "avoid_with": [
+        {
+          "name": "Lemon",
+          "reason": "disrupts citrus's clean/hygienic impression"
+        },
+        {
+          "name": "Lavender",
+          "reason": "disrupts herbal/floral clean impression"
+        },
+        {
+          "name": "Vinegar",
+          "reason": "additive harshness rather than complexity"
+        },
+        {
+          "name": "Birch tar oil",
+          "reason": "additive harshness rather than complexity"
+        },
+        {
+          "name": "Peppermint",
+          "reason": "additive harshness rather than complexity"
+        }
+      ],
+      "mixing_notes_full": "Isovaleric acid is one of perfumery's classic trace realism materials. In isolation it is immediately recognizable as sweaty feet, aged cheese, dirty socks, or body odor. However, at concentrations hundreds or even thousands of times lower than its detection threshold in isolation, it becomes extraordinarily valuable because it introduces the subtle biological imperfections found in real foods, natural materials, and living organisms. Professional perfumers almost never intend for consumers to identify isovaleric acid directly. Instead, they use minute quantities to make cheese, butter, yogurt, fermented dairy, chocolate, roasted coffee, leather, tobacco, certain fruits, and animalic accords feel significantly more authentic. Experienced perfumers working with isovaleric acid routinely discuss using concentrations in the parts-per-million or even parts-per-billion range because of its exceptional odor power.\n\nProfessionally, isovaleric acid is most often supported by vanilla, butter, milk accords, lactones, coffee, cocoa, tobacco, leather, woods, amber, and light fruity esters. These ingredients provide context that transforms its unpleasant standalone odor into a convincing component of a larger accord. For example, chocolate without trace acidic or animalic nuances often smells flat or artificial, whereas the addition of minute amounts of isovaleric acid can produce a more realistic roasted depth. Similarly, aged cheese accords depend on balancing isovaleric acid with buttery, creamy, and lactic materials rather than allowing the acid to dominate. In expert hands, isovaleric acid is therefore not a \"bad smell\" but a realism enhancer that adds biological complexity unavailable through pleasant materials alone.",
+      "avoid_notes_full": "The most common mistake when using isovaleric acid is pairing it with fragrances whose identity depends on cleanliness or freshness. Citrus colognes, oceanic aquatics, transparent musks, fresh laundry accords, airy florals, and herbal spa fragrances communicate hygiene. Even trace overdoses of isovaleric acid immediately disrupt this perception because humans are evolutionarily extremely sensitive to body-odor molecules. Instead of increasing realism, the fragrance begins to smell contaminated. Professional perfumers therefore almost never use isovaleric acid in compositions intended to communicate cleanliness unless the amount is so low that it is effectively undetectable.\n\nIsovaleric acid also interacts poorly with other dominant unpleasant materials when no supporting framework exists. Large amounts of vinegar increase sourness, birch tar adds burnt phenolics, and peppermint emphasizes medicinal cooling. Together these materials create additive harshness rather than complexity. Experts instead rely on the principle of single-feature dominance: if isovaleric acid provides the biological realism, smoky or acidic materials are reduced to trace levels, and warm bridge notes such as vanilla, woods, tobacco, chocolate, amber, or spices are introduced to integrate the accord. This principle explains why real cheese, coffee, leather, and tobacco fragrances remain pleasant despite containing molecules that are individually offensive.",
+      "strength": "strong"
     }
   }
 }

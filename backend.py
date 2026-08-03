@@ -155,7 +155,7 @@ async def play_scent_ble(scent_id: int, duration: int):
                 return {"status": "error", "message": "Failed to connect to device"}
 
             cmd_bytes = build_scent_command(scent_id, duration)
-            log.info("Sending scent %d for %ds  cmd=%s", scent_id, duration, cmd_bytes.hex().upper())
+            log.info("Sending scent %d for %gs  cmd=%s", scent_id, duration, cmd_bytes.hex().upper())
             await client.write_gatt_char(WRITE_CHAR_UUID, cmd_bytes)
             log.info("Scent %d sent successfully", scent_id)
             return {"status": "success", "message": f"Scent {scent_id} sent for {duration} seconds"}
@@ -182,7 +182,7 @@ async def play_sequence_ble(sequence: list):
                 duration = item.get("duration", 5)
                 try:
                     cmd_bytes = build_scent_command(scent_id, duration)
-                    log.info("Sending scent %d for %ds", scent_id, duration)
+                    log.info("Sending scent %d for %gs", scent_id, duration)
                     await client.write_gatt_char(WRITE_CHAR_UUID, cmd_bytes)
                     await asyncio.sleep(duration)
                 except Exception as e:
@@ -342,8 +342,8 @@ def play_scent():
 
         if not isinstance(scent_id, int) or scent_id < 1 or scent_id > 12:
             return jsonify({"status": "error", "message": "Invalid scent_id. Must be between 1-12"}), 400
-        if not isinstance(duration, int) or duration < 1 or duration > 60:
-            return jsonify({"status": "error", "message": "Invalid duration. Must be between 1-60 seconds"}), 400
+        if not isinstance(duration, (int, float)) or duration <= 0 or duration > 60:
+            return jsonify({"status": "error", "message": "Invalid duration. Must be greater than 0 and at most 60 seconds"}), 400
 
         # Play locally
         result = asyncio.run(play_scent_ble(scent_id, duration))
@@ -373,8 +373,8 @@ def play_sequence():
             duration = item.get("duration", 5)
             if not isinstance(scent_id, int) or scent_id < 1 or scent_id > 12:
                 return jsonify({"status": "error", "message": f"Invalid scent_id in item {i}. Must be 1-12"}), 400
-            if not isinstance(duration, int) or duration < 1 or duration > 60:
-                return jsonify({"status": "error", "message": f"Invalid duration in item {i}. Must be 1-60 s"}), 400
+            if not isinstance(duration, (int, float)) or duration <= 0 or duration > 60:
+                return jsonify({"status": "error", "message": f"Invalid duration in item {i}. Must be greater than 0 and at most 60 s"}), 400
 
         # Broadcast to remote device(s) BEFORE playing locally so both start
         # at nearly the same time (network latency is usually < 100 ms on LAN).

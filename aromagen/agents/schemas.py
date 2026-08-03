@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+import logging
+from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from .settings import settings
 
-SEQUENCE_TOTAL_SECONDS = settings.sequence_total_seconds
+log = logging.getLogger(__name__)
+
 SCENT_DURATION_MAX = settings.scent_duration_max
 
 
@@ -22,23 +24,20 @@ def scent_name_literal(choices: list[str]):
 class ScentItem(BaseModel):
     scent_name: str
     scent_duration: float = Field(gt=0, le=SCENT_DURATION_MAX)
+    ratio: float = Field(default=1.0, gt=0, le=1)
 
 
 class ComposeResponse(BaseModel):
     scent_sequence: List[ScentItem]
     justification: str
+    validated_sequence: List[ScentItem] = []
+    removed_scents: List[str] = []
+    validation_reasoning: str = ""
+    compatibility_warnings: List[str] = []
     pulse_sequence: List[ScentItem] = []
+    request_category: str = ""
+    ensemble_stability: Optional[Dict[str, Any]] = None
     session_id: str = ""
-
-    @field_validator("scent_sequence")
-    @classmethod
-    def validate_total_duration(cls, value: List[ScentItem]):
-        total = sum(item.scent_duration for item in value)
-        if total != SEQUENCE_TOTAL_SECONDS:
-            raise ValueError(
-                f"Total duration must equal {SEQUENCE_TOTAL_SECONDS}, got {total}"
-            )
-        return value
 
 
 class FeedbackRound(BaseModel):
@@ -59,18 +58,12 @@ class FeedbackResponse(BaseModel):
     scent_sequence: List[ScentItem]
     justification: str
     changes_made: str
+    validated_sequence: List[ScentItem] = []
+    removed_scents: List[str] = []
+    validation_reasoning: str = ""
+    compatibility_warnings: List[str] = []
     pulse_sequence: List[ScentItem] = []
     session_id: str = ""
-
-    @field_validator("scent_sequence")
-    @classmethod
-    def validate_total_duration(cls, value: List[ScentItem]):
-        total = sum(item.scent_duration for item in value)
-        if total != SEQUENCE_TOTAL_SECONDS:
-            raise ValueError(
-                f"Total duration must equal {SEQUENCE_TOTAL_SECONDS}, got {total}"
-            )
-        return value
 
 
 class AcceptRequest(BaseModel):
@@ -80,15 +73,25 @@ class AcceptRequest(BaseModel):
     session_id: Optional[str] = None
     rating: Optional[int] = Field(default=None, ge=1, le=5)
 
-    @field_validator("final_sequence")
-    @classmethod
-    def validate_total_duration(cls, value: List[ScentItem]):
-        total = sum(item.scent_duration for item in value)
-        if total != SEQUENCE_TOTAL_SECONDS:
-            raise ValueError(
-                f"Total duration must equal {SEQUENCE_TOTAL_SECONDS}, got {total}"
-            )
-        return value
+
+class ValidationResponse(BaseModel):
+    # Only kept_scent_names is asked of the model -- removed is derived in code
+    # as the complement, so the model can't produce a self-contradictory
+    # response where the same name appears in both lists.
+    kept_scent_names: List[str] = Field(min_length=1)
+    reasoning: str
+
+
+class ClassificationResponse(BaseModel):
+    category: Literal["concrete", "abstract"]
+
+
+class EnsembleValidationResponse(BaseModel):
+    # Unlike ValidationResponse, an empty list is a legitimate outcome here --
+    # the strong-consensus set may already fully cover the target, in which
+    # case every moderate/weak candidate is correctly rejected.
+    kept_scent_names: List[str] = []
+    reasoning: str
 
 
 class AcceptResponse(BaseModel):
