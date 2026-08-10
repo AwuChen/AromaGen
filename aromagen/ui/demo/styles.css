@@ -624,6 +624,30 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.frequency-control-btn.is-active {
+  border-color: #7fd0ff;
+  background: rgba(127, 208, 255, 0.22);
+  color: #fff;
+}
+
+.frequency-textual-feedback-box {
+  width: 100%;
+  margin-top: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #7fd0ff;
+  border-radius: 8px;
+  background: rgba(127, 208, 255, 0.08);
+}
+
+.frequency-textual-feedback-label {
+  margin: 0 0 0.4rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7fd0ff;
+}
+
 /* Progress bar above frequency diagram */
 .frequency-progress {
   position: relative;

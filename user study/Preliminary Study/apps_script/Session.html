@@ -1,0 +1,165 @@
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222; line-height: 1.5; }
+  h1 { font-size: 19px; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-top: 16px; }
+  .word-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .word-row:last-child { border-bottom: none; }
+  .word-label { font-weight: 600; }
+  .scale { display: flex; gap: 10px; }
+  .scale label { font-size: 12px; text-align: center; }
+  .option-row { display: block; padding: 10px 12px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+  .option-row:hover { background: #f5f7fb; }
+  .option-row input { margin-right: 8px; }
+  button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 16px; }
+  button:disabled { background: #aaa; cursor: default; }
+  textarea { width: 100%; min-height: 100px; padding: 8px; box-sizing: border-box; font-size: 14px; }
+  #countdown { font-size: 28px; font-weight: 700; text-align: center; margin: 20px 0; color: #1a73e8; }
+  .muted { color: #666; font-size: 13px; }
+  .progress { font-size: 13px; color: #666; margin-bottom: 4px; }
+</style>
+
+<div id="app"><p>Loading...</p></div>
+
+<script>
+  var PID = "<?= pid ?>";
+  var RECOVERY_SECONDS = 30;
+
+  function render(html) { document.getElementById('app').innerHTML = html; }
+
+  function loadState() {
+    render("<p>Loading...</p>");
+    google.script.run.withSuccessHandler(onState).withFailureHandler(onError).getSessionState(PID);
+  }
+
+  function onError(err) {
+    render('<div class="card"><p>Something went wrong: ' + err.message + '</p><button onclick="loadState()">Retry</button></div>');
+  }
+
+  function onState(state) {
+    if (!state.found) {
+      render('<div class="card"><p>No session found for this link. Contact the study administrator.</p></div>');
+      return;
+    }
+    if (state.status === "completed") {
+      render('<div class="card"><h1>You have already completed this study.</h1><p>Thank you again for participating.</p></div>');
+      return;
+    }
+    if (state.step === "familiarity") renderFamiliarity(state);
+    else if (state.step === "trial") renderTrialRecovery(state);
+    else if (state.step === "closing") renderClosing();
+  }
+
+  function renderFamiliarity(state) {
+    currentVocab = state.vocab;
+    var scaleLabels = ["Very unfamiliar", "Unfamiliar", "Neutral", "Familiar", "Very familiar"];
+    var rows = state.vocab.map(function (word) {
+      var options = [1, 2, 3, 4, 5].map(function (v) {
+        return '<label><input type="radio" name="fam_' + word + '" value="' + v + '" onchange="checkFamiliarityComplete()"><br>' + v + '</label>';
+      }).join('');
+      return '<div class="word-row"><span class="word-label">' + word + '</span><span class="scale">' + options + '</span></div>';
+    }).join('');
+    render(
+      '<h1>Familiarity check</h1>' +
+      '<p class="muted">Before smelling anything, rate how familiar you are with each smell concept, based on the word alone. (1 = ' + scaleLabels[0] + ', 5 = ' + scaleLabels[4] + ')</p>' +
+      '<div class="card">' + rows + '</div>' +
+      '<button id="famContinue" disabled onclick="submitFamiliarityStep()">Continue</button>'
+    );
+  }
+
+  var currentVocab = [];
+
+  function checkFamiliarityComplete() {
+    var allAnswered = currentVocab.every(function (word) {
+      return document.querySelector('input[name="fam_' + word + '"]:checked');
+    });
+    document.getElementById('famContinue').disabled = !allAnswered;
+  }
+
+  function submitFamiliarityStep() {
+    document.getElementById('famContinue').disabled = true;
+    var ratings = {};
+    currentVocab.forEach(function (word) {
+      var checked = document.querySelector('input[name="fam_' + word + '"]:checked');
+      ratings[word] = checked ? checked.value : "";
+    });
+    google.script.run.withSuccessHandler(function () { loadState(); }).withFailureHandler(onError)
+      .submitFamiliarity(PID, ratings);
+  }
+
+  function renderTrialRecovery(state) {
+    var seconds = state.isFirstTrial ? 3 : RECOVERY_SECONDS;
+    var message = state.isFirstTrial
+      ? "The experimenter will now present the first odor."
+      : "Please wait while the experimenter prepares the next odor.";
+    render(
+      '<div class="progress">Smell ' + state.trialNumber + ' of ' + state.totalTrials + '</div>' +
+      '<div class="card"><p>' + message + '</p><div id="countdown">' + seconds + '</div>' +
+      '<button id="trialContinue" disabled>Please wait&hellip;</button></div>'
+    );
+    var remaining = seconds;
+    var timer = setInterval(function () {
+      remaining -= 1;
+      document.getElementById('countdown').innerText = remaining > 0 ? remaining : "Ready";
+      if (remaining <= 0) {
+        clearInterval(timer);
+        var btn = document.getElementById('trialContinue');
+        btn.disabled = false;
+        btn.innerText = "Continue";
+        btn.onclick = function () { renderTrialResponse(state); };
+      }
+    }, 1000);
+  }
+
+  function renderTrialResponse(state) {
+    var options = state.options.map(function (opt, i) {
+      return '<label class="option-row"><input type="radio" name="answer" value="' + opt + '" onchange="checkTrialComplete()">' + opt + '</label>';
+    }).join('');
+    var confidenceOptions = [1, 2, 3, 4, 5].map(function (v) {
+      return '<label><input type="radio" name="confidence" value="' + v + '" onchange="checkTrialComplete()"><br>' + v + '</label>';
+    }).join('');
+    render(
+      '<div class="progress">Smell ' + state.trialNumber + ' of ' + state.totalTrials + '</div>' +
+      '<div class="card">' +
+      '<p><strong>Which option best describes the odor you just smelled?</strong></p>' + options +
+      '<p style="margin-top:20px"><strong>How confident are you in your answer?</strong> (1 = not at all, 5 = extremely confident)</p>' +
+      '<div class="scale">' + confidenceOptions + '</div>' +
+      '</div>' +
+      '<button id="trialSubmit" disabled onclick="submitTrialStep(' + state.trialNumber + ')">Submit</button>'
+    );
+  }
+
+  function checkTrialComplete() {
+    var answered = document.querySelector('input[name="answer"]:checked');
+    var confidence = document.querySelector('input[name="confidence"]:checked');
+    document.getElementById('trialSubmit').disabled = !(answered && confidence);
+  }
+
+  function submitTrialStep(trialNumber) {
+    document.getElementById('trialSubmit').disabled = true;
+    var answer = document.querySelector('input[name="answer"]:checked').value;
+    var confidence = document.querySelector('input[name="confidence"]:checked').value;
+    google.script.run.withSuccessHandler(function () { loadState(); }).withFailureHandler(onError)
+      .submitTrial(PID, trialNumber, answer, confidence);
+  }
+
+  function renderClosing() {
+    render(
+      '<h1>Almost done</h1>' +
+      '<div class="card">' +
+      '<p><strong>Overall, what is your experience with the AromaGen system and its generated smell?</strong></p>' +
+      '<textarea id="closingText" oninput="document.getElementById(\'closingSubmit\').disabled = !this.value.trim()"></textarea>' +
+      '</div>' +
+      '<button id="closingSubmit" disabled onclick="submitClosingStep()">Submit</button>'
+    );
+  }
+
+  function submitClosingStep() {
+    document.getElementById('closingSubmit').disabled = true;
+    var text = document.getElementById('closingText').value;
+    google.script.run.withSuccessHandler(function () {
+      render('<div class="card"><h1>Thank you!</h1><p>Your responses have been recorded.</p></div>');
+    }).withFailureHandler(onError).submitClosing(PID, text);
+  }
+
+  loadState();
+</script>

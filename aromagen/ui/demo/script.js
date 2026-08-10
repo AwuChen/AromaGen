@@ -36,6 +36,10 @@ function bindImageUploadHandler(onImageSelected) {
   var statusEl = document.getElementById('frequencyTranscriptionStatus');
   var directTextInputEl = document.getElementById('frequencyDirectTextInput');
   var directSubmitBtnEl = document.getElementById('frequencyDirectSubmitBtn');
+  var textualFeedbackToggleBtnEl = document.getElementById('textualFeedbackToggleBtn');
+  var textualFeedbackRowEl = document.getElementById('textualFeedbackRow');
+  var textualFeedbackInputEl = document.getElementById('textualFeedbackInput');
+  var textualFeedbackSubmitBtnEl = document.getElementById('textualFeedbackSubmitBtn');
   if (!recordBtn) return;
 
   var micIcon = recordBtn.querySelector('.record-mic-icon');
@@ -288,6 +292,48 @@ function bindImageUploadHandler(onImageSelected) {
       }
     });
   }
+
+  // Textual feedback: an alternate input path for the SAME feedback loop
+  // that voice recording feeds (via processInputText -> feedbackScent when
+  // isInFeedbackMode is true) -- just typed instead of spoken/transcribed.
+  // Deliberately does NOT pass forceCompose, so it gets exactly the same
+  // downstream treatment as transcribed voice feedback: routes to
+  // feedbackScent() if already in feedback mode, or starts a fresh
+  // composition otherwise, identical to what a transcribed recording would
+  // do at the same point in the session.
+  if (textualFeedbackToggleBtnEl && textualFeedbackRowEl) {
+    textualFeedbackToggleBtnEl.addEventListener('click', function () {
+      var isHidden = textualFeedbackRowEl.style.display === 'none';
+      textualFeedbackRowEl.style.display = isHidden ? 'block' : 'none';
+      textualFeedbackToggleBtnEl.classList.toggle('is-active', isHidden);
+      if (isHidden && textualFeedbackInputEl) textualFeedbackInputEl.focus();
+    });
+  }
+
+  if (textualFeedbackSubmitBtnEl && textualFeedbackInputEl) {
+    textualFeedbackSubmitBtnEl.addEventListener('click', function () {
+      var feedbackText = (textualFeedbackInputEl.value || '').trim();
+      if (!feedbackText) {
+        setStatus('Please enter feedback text before submitting.', true);
+        return;
+      }
+      showProgress(isInFeedbackMode ? 'Refining scent' : 'Composing scent', 25);
+      setStatus('');
+      processInputText(feedbackText).then(function () {
+        textualFeedbackInputEl.value = '';
+      }).catch(function (err) {
+        setStatus('Textual feedback failed: ' + (err.message || err), true);
+        hideProgress();
+      });
+    });
+
+    textualFeedbackInputEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        textualFeedbackSubmitBtnEl.click();
+      }
+    });
+  }
 })();
 
 /*
@@ -334,10 +380,20 @@ function loadActiveCartridgeScents() {
 
 loadActiveCartridgeScents();
 
+let currentPulseSequence = null; // Interleaved hardware pulse train from the last compose/feedback call
+
 function handleComposeResponse(data) {
   if (data.session_id) sessionId = data.session_id;
   console.log('[Compose] Justification:', data.justification);
-  return data.scent_sequence || null;
+  console.log('[Compose] Validation:', data.validation_reasoning, 'removed:', data.removed_scents);
+  if (data.compatibility_warnings && data.compatibility_warnings.length) {
+    console.warn('[Compose] Compatibility warnings:', data.compatibility_warnings);
+  }
+  console.log('[Compose] Pulse sequence:', data.pulse_sequence);
+  currentPulseSequence = data.pulse_sequence || null;
+  return (data.validated_sequence && data.validated_sequence.length > 0)
+    ? data.validated_sequence
+    : (data.scent_sequence || null);
 }
 
 async function composeScent(sentence) {
@@ -380,17 +436,26 @@ async function feedbackScent(feedbackText) {
       return null;
     }
     const data = await res.json();
-    if (data.scent_sequence) {
+    const effectiveSequence = (data.validated_sequence && data.validated_sequence.length > 0)
+      ? data.validated_sequence
+      : (data.scent_sequence || null);
+    if (effectiveSequence) {
       if (data.session_id) sessionId = data.session_id;
       sessionHistory.push({
         feedback_text: feedbackText,
         changes_made: data.changes_made || '',
-        resulting_sequence: data.scent_sequence
+        resulting_sequence: effectiveSequence
       });
     }
     console.log('[Feedback] Justification:', data.justification);
     console.log('[Feedback] Changes made:', data.changes_made);
-    return data.scent_sequence || null;
+    console.log('[Feedback] Validation:', data.validation_reasoning, 'removed:', data.removed_scents);
+    if (data.compatibility_warnings && data.compatibility_warnings.length) {
+      console.warn('[Feedback] Compatibility warnings:', data.compatibility_warnings);
+    }
+    console.log('[Feedback] Pulse sequence:', data.pulse_sequence);
+    currentPulseSequence = data.pulse_sequence || null;
+    return effectiveSequence;
   } catch (err) {
     console.error(err);
     alert('Network error calling feedback service. Is the backend running on :8000?');
@@ -468,12 +533,23 @@ function renderProfile(sequence) {
     if (label) label.textContent = '';
   });
 
-  sequence.slice(0, 8).forEach((item, i) => {
+  const visible = sequence.slice(0, 8);
+  // Normalize displayed percentages to the visible set so they sum to 100% even
+  // after the validation layer has dropped some odorants from the original ratios.
+  const ratioTotal = visible.reduce((sum, item) => {
+    return sum + (typeof item.ratio === 'number' && !Number.isNaN(item.ratio) ? item.ratio : 0);
+  }, 0);
+
+  visible.forEach((item, i) => {
     const node = nodes[i];
     if (!node) return;
     const label = node.querySelector('.node-label');
     console.log(item.scent_name);
-    if (label) label.textContent = item.scent_name || '';
+    if (label) {
+      const hasRatio = typeof item.ratio === 'number' && !Number.isNaN(item.ratio) && ratioTotal > 0;
+      const pct = hasRatio ? Math.round((item.ratio / ratioTotal) * 100) + '%' : '';
+      label.textContent = pct ? `${item.scent_name || ''} · ${pct}` : (item.scent_name || '');
+    }
 
     setTimeout(() => {
       node.classList.add('frequency-node-visible');
@@ -520,9 +596,16 @@ async function playSequenceOnDevice() {
     console.warn('Could not refresh cartridge scents', e);
   }
 
+  // Prefer the interleaved hardware pulse train (short repeated rounds meant to
+  // encourage perceptual blending) over the raw conceptual sequence; fall back
+  // if the backend didn't return one.
+  const sourceSequence = (currentPulseSequence && currentPulseSequence.length > 0)
+    ? currentPulseSequence
+    : currentSequence;
+
   // Convert scent names to scent_ids using the location field, skipping unknown scents
   const bleSequence = [];
-  for (const item of currentSequence) {
+  for (const item of sourceSequence) {
     const meta = scentsData[item.scent_name];
     if (!meta || !meta.location) {
       console.warn(`Skipping scent with no device location: ${item.scent_name}`);

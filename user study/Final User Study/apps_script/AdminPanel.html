@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 780px; margin: 24px auto; padding: 0 16px; color: #1a1a1a; }
+    h1 { font-size: 20px; }
+    h2 { font-size: 16px; margin-top: 0; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .muted { color: #666; font-size: 13px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 14px; }
+    textarea { width: 100%; padding: 8px; font-size: 14px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; min-height: 80px; font-family: inherit; }
+    button { background: #2a78d6; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 15px; cursor: pointer; margin-top: 14px; }
+    button.secondary { background: #eee; color: #1a1a1a; }
+    .error { color: #b91c1c; font-size: 13px; margin-top: 8px; }
+    table.results { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 14px; }
+    table.results td, table.results th { border: 1px solid #eee; padding: 6px 8px; text-align: left; }
+    table.results a { color: #2a78d6; word-break: break-all; }
+    .chip { font-size: 11px; padding: 2px 6px; border-radius: 999px; }
+    .chip.generated { background: #e3f6e5; color: #146c2e; }
+    .chip.already_existed { background: #f0f0f0; color: #555; }
+    table.tally { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    table.tally td, table.tally th { border: 1px solid #eee; padding: 3px 6px; text-align: left; }
+    .footer-link { font-size: 12px; color: #888; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <h1>AromaGen Final User Study &mdash; Admin Panel</h1>
+  <div class="muted">Generate participants, review descriptor coverage, and get each participant's data-collection link.</div>
+
+  <div class="card">
+    <h2>Generate participants</h2>
+    <label>Participant name(s) &mdash; one per line, or comma-separated. Works for a single name or a batch.</label>
+    <textarea id="namesInput" placeholder="P1&#10;P2&#10;P3"></textarea>
+    <div id="genError" class="error"></div>
+    <button id="genBtn" onclick="generate()">Generate</button>
+  </div>
+
+  <div id="resultsCard"></div>
+
+  <div class="card">
+    <h2>Descriptor coverage</h2>
+    <button class="secondary" onclick="loadTally()">Refresh coverage</button>
+    <div id="tallyBox"></div>
+  </div>
+
+  <div class="footer-link">
+    <a href="#" id="showSheet">Open master spreadsheet</a>
+  </div>
+
+<script>
+function generate() {
+  var text = document.getElementById('namesInput').value;
+  var err = document.getElementById('genError');
+  err.textContent = '';
+  document.getElementById('genBtn').disabled = true;
+  google.script.run
+    .withSuccessHandler(function (results) {
+      document.getElementById('genBtn').disabled = false;
+      renderResults(results);
+    })
+    .withFailureHandler(function (e) {
+      document.getElementById('genBtn').disabled = false;
+      err.textContent = 'Error: ' + (e && e.message ? e.message : e);
+    })
+    .generateParticipantsBatch(text);
+}
+
+var FEEDBACK_TYPE_LABEL = {
+  freeform: 'Freeform',
+  rating_scale: 'Rating-scale'
+};
+
+function renderResults(results) {
+  var rows = results.map(function (r) {
+    var chip = '<span class="chip ' + r.status + '">' + (r.status === 'generated' ? 'newly generated' : 'already existed') + '</span>';
+    var feedbackType = r.feedbackType ? (FEEDBACK_TYPE_LABEL[r.feedbackType] || r.feedbackType) : '(existing session)';
+    return '<tr>' +
+      '<td>' + escapeHtml(r.name) + '</td>' +
+      '<td>' + chip + '</td>' +
+      '<td>' + escapeHtml(feedbackType) + '</td>' +
+      '<td><a href="' + r.link + '" target="_blank">' + r.link + '</a></td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('resultsCard').innerHTML =
+    '<div class="card">' +
+    '<h2>Participant links</h2>' +
+    '<table class="results"><tr><th>Name</th><th>Status</th><th>Feedback type</th><th>Data collection link</th></tr>' +
+    rows +
+    '</table>' +
+    '<p class="muted">Open a participant\'s link when it\'s their turn to run -- it picks up wherever they left off if reopened.</p>' +
+    '</div>';
+}
+
+function loadTally() {
+  google.script.run.withSuccessHandler(function (data) {
+    var html = '';
+    for (var setId in data) {
+      html += '<h3>' + escapeHtml(data[setId].label) + '</h3><table class="tally"><tr><th>Cluster</th><th>Descriptor</th><th>Count</th></tr>';
+      data[setId].byCluster.forEach(function (c) {
+        c.descriptors.forEach(function (d) {
+          html += '<tr><td>' + escapeHtml(c.cluster) + '</td><td>' + escapeHtml(d.descriptor) + '</td><td>' + d.count + '</td></tr>';
+        });
+      });
+      html += '</table>';
+    }
+    document.getElementById('tallyBox').innerHTML = html;
+  }).getPilotTallyForClient();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+document.getElementById('showSheet').addEventListener('click', function (e) {
+  e.preventDefault();
+  google.script.run.withSuccessHandler(function (url) { window.open(url, '_blank'); }).getMasterSpreadsheetUrlForClient();
+});
+</script>
+</body>
+</html>

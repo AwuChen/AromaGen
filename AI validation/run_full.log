@@ -1,0 +1,64 @@
+Running 50 targets x 10 repeats = 500 /compose calls against http://localhost:8000
+Output: results/2026-08-06T055716Z
+  [1/50] Floral: 'jasmine'
+  [2/50] Floral: 'lilac'
+  [3/50] Floral: 'rose'
+  [4/50] Floral: 'lavender'
+  [5/50] Citrus: 'lemony'
+  [6/50] Citrus: 'currant'
+  [7/50] Citrus: 'tangy'
+  [8/50] Citrus: 'guava'
+  [9/50] Woody & Resinous: 'sandalwood'
+  [10/50] Woody & Resinous: 'Myrrh'
+  [11/50] Woody & Resinous: 'Cedar'
+  [12/50] Woody & Resinous: 'saffron'
+  [13/50] Woody & Resinous: 'piney'
+  [14/50] Herbal & Cooling: 'minty'
+  [15/50] Herbal & Cooling: 'wintergreen'
+  [16/50] Herbal & Cooling: 'rosemary'
+  [17/50] Herbal & Cooling: 'eucalyptus'
+  [18/50] Spice: 'anise'
+  [19/50] Spice: 'cinnamon'
+  [20/50] Spice: 'peppery'
+  [21/50] Spice: 'cumin'
+  [22/50] Spice: 'nutmeg'
+  [23/50] Sweet & Gourmand: 'Honeyed'
+  [24/50] Sweet & Gourmand: 'Vanilla'
+  [25/50] Sweet & Gourmand: 'Maple-syrup'
+  [26/50] Sweet & Gourmand: 'Coconut'
+  [27/50] Roasted & Smoky: 'woodsmoke'
+  [28/50] Roasted & Smoky: 'fresh_bread'
+  [29/50] Roasted & Smoky: 'toasty'
+  [30/50] Roasted & Smoky: 'smoky'
+  [31/50] Fermented & Sour: 'vinegar-like'
+  [32/50] Fermented & Sour: 'yeasty'
+  [33/50] Fermented & Sour: 'sour_milk'
+  [34/50] Fermented & Sour: 'butyric'
+  [35/50] Putrid & Decay: 'rotten-egg'
+  [36/50] Putrid & Decay: 'musty'
+  [37/50] Putrid & Decay: 'rotten_fish'
+  [38/50] Putrid & Decay: 'feces'
+  [39/50] Body & Animalic: 'fishy'
+  [40/50] Body & Animalic: 'wet_dog'
+  [41/50] Body & Animalic: 'bad_breath'
+  [42/50] Body & Animalic: 'sweaty'
+  [43/50] Chemical & Solvent: 'burnt_rubber'
+  [44/50] Chemical & Solvent: 'disinfectant'
+  [45/50] Chemical & Solvent: 'chlorine'
+  [46/50] Chemical & Solvent: 'nail-polisher'
+  [47/50] Perfumed & Clean: 'aftershave'
+  [48/50] Perfumed & Clean: 'air_freshener'
+  [49/50] Perfumed & Clean: 'perfumer'
+  [50/50] Perfumed & Clean: 'skin-care'
+Done in 8298.6s
+
+=== Summary ===
+Avg odorant-set stability across repeats: 57%
+Avg dominant-odorant stability across repeats: 77%
+Targets with set_stability < 60% (n=23): ['lilac', 'currant', 'guava', 'sandalwood', 'saffron', 'wintergreen', 'rosemary', 'anise', 'Maple-syrup', 'Coconut', 'fresh_bread', 'sour_milk', 'rotten-egg', 'musty', 'rotten_fish', 'feces', 'wet_dog', 'disinfectant', 'nail-polisher', 'aftershave', 'air_freshener', 'perfumer', 'skin-care']
+Targets that collapsed to a single odorant in most runs (n=8): ['lavender', 'lemony', 'piney', 'minty', 'Vanilla', 'smoky', 'vinegar-like', 'sweaty']
+Targets with a compatibility_warnings hit (n=32): ['rose', 'currant', 'tangy', 'guava', 'sandalwood', 'Myrrh', 'Cedar', 'saffron', 'rosemary', 'eucalyptus', 'anise', 'peppery', 'cumin', 'Maple-syrup', 'Coconut', 'fresh_bread', 'smoky', 'vinegar-like', 'yeasty', 'sour_milk', 'butyric', 'rotten-egg', 'musty', 'rotten_fish', 'feces', 'fishy', 'wet_dog', 'bad_breath', 'sweaty', 'burnt_rubber', 'disinfectant', 'chlorine']
+Targets with failed/errored calls (n=9): [('rotten_fish', 9, 10), ('bad_breath', 9, 10), ('sweaty', 9, 10), ('chlorine', 6, 10), ('nail-polisher', 0, 10), ('aftershave', 0, 10), ('air_freshener', 0, 10), ('perfumer', 0, 10), ('skin-care', 0, 10)]
+
+Raw responses: results/2026-08-06T055716Z/raw_responses.json
+Review CSV:    results/2026-08-06T055716Z/review.csv

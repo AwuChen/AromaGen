@@ -36,10 +36,16 @@ def filter_relevant_scents(
 
     scored = []
     for name, meta in catalog.items():
-        descriptor_text = f"{meta.get('category', '')} {meta.get('note', '')}"
-        overlap = len(request_tokens & _tokenize(descriptor_text))
-        scored.append((overlap, _tie_break_key(request_text, name), name))
+        # Three-tier relevance, each scored independently so an odorant's own
+        # name always outranks a mere category match, which always outranks a
+        # mere note match -- e.g. request "vanilla ice cream" must keep the
+        # odorant literally named "Vanilla" ahead of anything that only shares
+        # a category or note word, no matter how much overlap those have.
+        name_overlap = len(request_tokens & _tokenize(name))
+        category_overlap = len(request_tokens & _tokenize(meta.get("category", "")))
+        note_overlap = len(request_tokens & _tokenize(meta.get("note", "")))
+        scored.append((name_overlap, category_overlap, note_overlap, _tie_break_key(request_text, name), name))
 
-    scored.sort(key=lambda item: (-item[0], item[1]))
-    selected_names = [name for _, _, name in scored[:top_k]]
+    scored.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3]))
+    selected_names = [name for *_, name in scored[:top_k]]
     return {name: catalog[name] for name in selected_names}

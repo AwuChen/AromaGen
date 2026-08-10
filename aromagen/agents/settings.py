@@ -34,6 +34,17 @@ class Settings:
     sequence_total_seconds: int = int(os.getenv("SEQUENCE_TOTAL_SECONDS", "30"))
     scent_duration_max: int = int(os.getenv("SCENT_DURATION_MAX", "15"))
     descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "8"))
+    pulse_seconds: float = float(os.getenv("PULSE_SECONDS", "1"))
+    pulse_rounds: int = int(os.getenv("PULSE_ROUNDS", "8"))
+    validation_layer_enabled: bool = os.getenv("VALIDATION_LAYER_ENABLED", "false").lower() == "true"
+
+    # Self-consistency ensemble for concrete-smell requests (see openai_client.compose_with_ensemble)
+    ensemble_enabled: bool = os.getenv("ENSEMBLE_ENABLED", "true").lower() == "true"
+    ensemble_predictor_count: int = int(os.getenv("ENSEMBLE_PREDICTOR_COUNT", "10"))
+    ensemble_temperature: float = float(os.getenv("ENSEMBLE_TEMPERATURE", "0.9"))
+    ensemble_strong_threshold: int = int(os.getenv("ENSEMBLE_STRONG_THRESHOLD", "5"))
+    ensemble_weak_threshold: int = int(os.getenv("ENSEMBLE_WEAK_THRESHOLD", "3"))
+    ensemble_retry_predictor_count: int = int(os.getenv("ENSEMBLE_RETRY_PREDICTOR_COUNT", "5"))
 
 
 settings = Settings()
