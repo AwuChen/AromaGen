@@ -36,6 +36,10 @@ function bindImageUploadHandler(onImageSelected) {
   var statusEl = document.getElementById('frequencyTranscriptionStatus');
   var directTextInputEl = document.getElementById('frequencyDirectTextInput');
   var directSubmitBtnEl = document.getElementById('frequencyDirectSubmitBtn');
+  var textualFeedbackToggleBtnEl = document.getElementById('textualFeedbackToggleBtn');
+  var textualFeedbackRowEl = document.getElementById('textualFeedbackRow');
+  var textualFeedbackInputEl = document.getElementById('textualFeedbackInput');
+  var textualFeedbackSubmitBtnEl = document.getElementById('textualFeedbackSubmitBtn');
   if (!recordBtn) return;
 
   var micIcon = recordBtn.querySelector('.record-mic-icon');
@@ -285,6 +289,48 @@ function bindImageUploadHandler(onImageSelected) {
       if (e.key === 'Enter') {
         e.preventDefault();
         directSubmitBtnEl.click();
+      }
+    });
+  }
+
+  // Textual feedback: an alternate input path for the SAME feedback loop
+  // that voice recording feeds (via processInputText -> feedbackScent when
+  // isInFeedbackMode is true) -- just typed instead of spoken/transcribed.
+  // Deliberately does NOT pass forceCompose, so it gets exactly the same
+  // downstream treatment as transcribed voice feedback: routes to
+  // feedbackScent() if already in feedback mode, or starts a fresh
+  // composition otherwise, identical to what a transcribed recording would
+  // do at the same point in the session.
+  if (textualFeedbackToggleBtnEl && textualFeedbackRowEl) {
+    textualFeedbackToggleBtnEl.addEventListener('click', function () {
+      var isHidden = textualFeedbackRowEl.style.display === 'none';
+      textualFeedbackRowEl.style.display = isHidden ? 'block' : 'none';
+      textualFeedbackToggleBtnEl.classList.toggle('is-active', isHidden);
+      if (isHidden && textualFeedbackInputEl) textualFeedbackInputEl.focus();
+    });
+  }
+
+  if (textualFeedbackSubmitBtnEl && textualFeedbackInputEl) {
+    textualFeedbackSubmitBtnEl.addEventListener('click', function () {
+      var feedbackText = (textualFeedbackInputEl.value || '').trim();
+      if (!feedbackText) {
+        setStatus('Please enter feedback text before submitting.', true);
+        return;
+      }
+      showProgress(isInFeedbackMode ? 'Refining scent' : 'Composing scent', 25);
+      setStatus('');
+      processInputText(feedbackText).then(function () {
+        textualFeedbackInputEl.value = '';
+      }).catch(function (err) {
+        setStatus('Textual feedback failed: ' + (err.message || err), true);
+        hideProgress();
+      });
+    });
+
+    textualFeedbackInputEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        textualFeedbackSubmitBtnEl.click();
       }
     });
   }

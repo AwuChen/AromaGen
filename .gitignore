@@ -17,3 +17,8 @@ __pycache__/
 
 #personal notes
 analysis/finetune_learning_guide.txt
+
+# Apps Script deploy secrets (kept locally so control-panel links stay stable
+# across redeploys; never committed)
+.clasp.json
+.admin_token

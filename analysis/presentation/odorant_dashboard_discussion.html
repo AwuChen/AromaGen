@@ -1,0 +1,1526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AromaGen Odorant Usage &mdash; Discussion Deck</title>
+<style>
+  :root {
+    --page-bg:        #f4f4f2;
+    --card-bg:        #ffffff;
+    --text-primary:   #14140f;
+    --text-secondary: #4a4a42;
+    --text-muted:     #8a8a80;
+    --gridline:       #ececE6;
+    --baseline:       #d6d6cd;
+    --accent:         #2a78d6;
+    --accent-bg:      #eaf2fc;
+    --border:         #e6e6e0;
+    --g1-bg:          #eaf2fc;
+    --g1-text:        #184f95;
+    --g2-bg:          #f2f2ee;
+    --g2-text:        #52514e;
+    --g3-bg:          #f7f0e3;
+    --g3-text:        #8a5a00;
+    --shadow: 0 1px 2px rgba(20,20,15,0.04), 0 4px 16px rgba(20,20,15,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 28px 90px; }
+
+  .hero { margin: 0 0 40px; }
+  .hero-eyebrow {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .hero h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 12px;
+  }
+  .hero p {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 32px 0 44px;
+  }
+  .stat-tile {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+  }
+  .stat-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+  }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+  .stat-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 28px 32px 30px;
+    margin: 0 0 22px;
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .card-head h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+  }
+  .card-head .card-note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .chart { position: relative; }
+  .row { display: grid; grid-template-columns: 118px 1fr; align-items: center; height: 32px; position: relative; }
+  .row-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); text-align: right; padding-right: 14px; white-space: nowrap; }
+  .track { position: relative; height: 100%; display: flex; align-items: center; }
+  .bar { height: 18px; background: var(--accent); border-radius: 0 5px 5px 0; }
+  .bar-value { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-primary); margin-left: 9px; white-space: nowrap; }
+  .gridlines { position: absolute; top: 0; bottom: 0; left: 118px; right: 0; pointer-events: none; }
+  .gridline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--gridline); }
+  .gridline-label { position: absolute; bottom: -20px; font-size: 10.5px; color: var(--text-muted); transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+  .baseline { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: var(--baseline); }
+  .axis-footer { height: 24px; }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 52px 0 6px;
+  }
+  .section-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0 0 22px;
+  }
+  .section-desc code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--g2-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  .odorant-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin: 0 0 12px;
+    overflow: hidden;
+  }
+  .odorant-card summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .odorant-card summary::-webkit-details-marker { display: none; }
+  .card-rank {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 26px;
+    flex-shrink: 0;
+  }
+  .card-name {
+    font-size: 15.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 140px;
+  }
+  .card-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip-total { background: var(--accent-bg); color: var(--accent); }
+  .chip-1 { background: var(--g1-bg); color: var(--g1-text); }
+  .chip-2 { background: var(--g2-bg); color: var(--g2-text); }
+  .chip-3 { background: var(--g3-bg); color: var(--g3-text); }
+  .chip-score { background: #14140f; color: #fff; }
+  .card-caret {
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }
+  .odorant-card[open] .card-caret { transform: rotate(180deg); }
+
+  .card-body { padding: 4px 22px 22px; border-top: 1px solid var(--border); }
+  .group-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
+  .group-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .group-1 { background: var(--g1-bg); color: var(--g1-text); }
+  .group-2 { background: var(--g2-bg); color: var(--g2-text); }
+  ul.req-list { list-style: none; margin: 0; padding: 0; }
+  ul.req-list li {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  ul.req-list li.empty { color: var(--text-muted); font-style: italic; justify-content: flex-start; }
+  .req { color: var(--text-secondary); }
+  .req-pct { color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; font-size: 12px; }
+
+  .meta-section {
+    display: grid;
+    grid-template-columns: 1.3fr 1.3fr 1fr;
+    gap: 24px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .meta-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .meta-row:last-of-type { border-bottom: none; }
+  .meta-label { color: var(--text-secondary); }
+  .meta-value { font-weight: 700; color: var(--text-primary); text-align: right; }
+  .meta-rank {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--g2-bg);
+    border-radius: 999px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+  .meta-note {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .meta-strength {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .meta-strength-strong { background: #fbeaea; color: #a3342a; }
+  .meta-strength-medium { background: var(--g2-bg); color: var(--g2-text); }
+  .meta-strength-weak { background: var(--g1-bg); color: var(--g1-text); }
+
+  .score-section {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--page-bg);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .score-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+  .score-value { font-size: 17px; font-weight: 800; color: var(--text-primary); }
+  .score-note {
+    flex-basis: 100%;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .no-ratio-details { margin-top: 18px; }
+  .no-ratio-details summary {
+    padding: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline;
+  }
+  .no-ratio-list { margin-top: 10px; opacity: 0.8; }
+
+  .footer-note {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <p class="hero-eyebrow">AromaGen &middot; For Discussion &middot; Rev. 6</p>
+    <h1>How is the odorant palette actually being used?</h1>
+    <p>A look at 734 compose/feedback requests (567 from dialogue logs, 167
+    from an external batch on a separate machine) against the current 11-odorant catalog, 2026-07-19 to 2026-08-03.
+    Unique-request matching is case-insensitive ("vanilla" and "Vanilla" count once; "vanilla ice cream" is separate).</p>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-tile">
+      <p class="stat-label">Requests analyzed</p>
+      <p class="stat-value">734</p>
+      <p class="stat-sub">567 local + 167 external</p>
+    </div>
+    <div class="stat-tile">
+      <p class="stat-label">Most used overall</p>
+      <p class="stat-value">Vanilla</p>
+      <p class="stat-sub">212 uses &middot; 69 unique requests</p>
+    </div>
+    <div class="stat-tile">
+      <p class="stat-label">Most load-bearing</p>
+      <p class="stat-value">Vanilla</p>
+      <p class="stat-sub">19 requests where it's the top odorant</p>
+    </div>
+    <div class="stat-tile">
+      <p class="stat-label">Least load-bearing</p>
+      <p class="stat-value">Peppermint</p>
+      <p class="stat-sub">4 requests where it's the top odorant</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Overall usage frequency</h2>
+      <span class="card-note">counts every request, including repeats</span>
+    </div>
+    <div class="chart">
+      <div class="gridlines"><div class="gridline" style="left:0.0%"><div class="gridline-label">0</div></div><div class="gridline" style="left:25.0%"><div class="gridline-label">55</div></div><div class="gridline" style="left:50.0%"><div class="gridline-label">110</div></div><div class="gridline" style="left:75.0%"><div class="gridline-label">165</div></div><div class="gridline" style="left:100.0%"><div class="gridline-label">220</div></div></div>
+      
+        <div class="row">
+          <div class="row-label">Vanilla</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:96.36363636363636%"></div>
+            <div class="bar-value">212</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Clove Bud</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:94.54545454545455%"></div>
+            <div class="bar-value">208</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lavender</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:94.54545454545455%"></div>
+            <div class="bar-value">208</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Benz Sal</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:80.9090909090909%"></div>
+            <div class="bar-value">178</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cognac</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:80.9090909090909%"></div>
+            <div class="bar-value">178</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vinegar</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:74.54545454545455%"></div>
+            <div class="bar-value">164</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Isovaleric acid</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:73.18181818181819%"></div>
+            <div class="bar-value">161</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Peppermint</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:68.63636363636364%"></div>
+            <div class="bar-value">151</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cypress</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:66.36363636363637%"></div>
+            <div class="bar-value">146</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lemon</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:60.45454545454545%"></div>
+            <div class="bar-value">133</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Birch tar oil</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:58.63636363636363%"></div>
+            <div class="bar-value">129</div>
+          </div>
+        </div>
+      <div class="axis-footer"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Usage frequency by unique request</h2>
+      <span class="card-note">case-insensitive, each distinct phrasing counted once</span>
+    </div>
+    <div class="chart">
+      <div class="gridlines"><div class="gridline" style="left:0.0%"><div class="gridline-label">0</div></div><div class="gridline" style="left:25.0%"><div class="gridline-label">20</div></div><div class="gridline" style="left:50.0%"><div class="gridline-label">40</div></div><div class="gridline" style="left:75.0%"><div class="gridline-label">60</div></div><div class="gridline" style="left:100.0%"><div class="gridline-label">80</div></div></div>
+      
+        <div class="row">
+          <div class="row-label">Clove Bud</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:88.75%"></div>
+            <div class="bar-value">71</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vanilla</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:86.25%"></div>
+            <div class="bar-value">69</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cognac</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:78.75%"></div>
+            <div class="bar-value">63</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Benz Sal</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:75.0%"></div>
+            <div class="bar-value">60</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lavender</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:75.0%"></div>
+            <div class="bar-value">60</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Peppermint</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:72.5%"></div>
+            <div class="bar-value">58</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vinegar</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:70.0%"></div>
+            <div class="bar-value">56</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cypress</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:66.25%"></div>
+            <div class="bar-value">53</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Birch tar oil</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:62.5%"></div>
+            <div class="bar-value">50</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lemon</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:57.49999999999999%"></div>
+            <div class="bar-value">46</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Isovaleric acid</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:57.49999999999999%"></div>
+            <div class="bar-value">46</div>
+          </div>
+        </div>
+      <div class="axis-footer"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Unique load-bearing requests</h2>
+      <span class="card-note">requests where this odorant wins the argmax most often</span>
+    </div>
+    <div class="chart">
+      <div class="gridlines"><div class="gridline" style="left:0.0%"><div class="gridline-label">0</div></div><div class="gridline" style="left:25.0%"><div class="gridline-label">5</div></div><div class="gridline" style="left:50.0%"><div class="gridline-label">10</div></div><div class="gridline" style="left:75.0%"><div class="gridline-label">15</div></div><div class="gridline" style="left:100.0%"><div class="gridline-label">20</div></div></div>
+      
+        <div class="row">
+          <div class="row-label">Vanilla</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:95.0%"></div>
+            <div class="bar-value">19</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vinegar</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:90.0%"></div>
+            <div class="bar-value">18</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lemon</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:75.0%"></div>
+            <div class="bar-value">15</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Birch tar oil</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:75.0%"></div>
+            <div class="bar-value">15</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Isovaleric acid</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:70.0%"></div>
+            <div class="bar-value">14</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lavender</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:65.0%"></div>
+            <div class="bar-value">13</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Clove Bud</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:55.00000000000001%"></div>
+            <div class="bar-value">11</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cognac</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:45.0%"></div>
+            <div class="bar-value">9</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cypress</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:40.0%"></div>
+            <div class="bar-value">8</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Benz Sal</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:30.0%"></div>
+            <div class="bar-value">6</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Peppermint</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:20.0%"></div>
+            <div class="bar-value">4</div>
+          </div>
+        </div>
+      <div class="axis-footer"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Unique non-load-bearing (supporting) requests</h2>
+      <span class="card-note">requests where this odorant appears but did not win the argmax</span>
+    </div>
+    <div class="chart">
+      <div class="gridlines"><div class="gridline" style="left:0.0%"><div class="gridline-label">0</div></div><div class="gridline" style="left:25.0%"><div class="gridline-label">9</div></div><div class="gridline" style="left:50.0%"><div class="gridline-label">18</div></div><div class="gridline" style="left:75.0%"><div class="gridline-label">26</div></div><div class="gridline" style="left:100.0%"><div class="gridline-label">35</div></div></div>
+      
+        <div class="row">
+          <div class="row-label">Clove Bud</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:88.57142857142857%"></div>
+            <div class="bar-value">31</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vanilla</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:60.0%"></div>
+            <div class="bar-value">21</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cognac</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:48.57142857142857%"></div>
+            <div class="bar-value">17</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cypress</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:45.714285714285715%"></div>
+            <div class="bar-value">16</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Benz Sal</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:42.857142857142854%"></div>
+            <div class="bar-value">15</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lavender</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:40.0%"></div>
+            <div class="bar-value">14</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vinegar</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:34.285714285714285%"></div>
+            <div class="bar-value">12</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Peppermint</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:28.57142857142857%"></div>
+            <div class="bar-value">10</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lemon</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:22.857142857142858%"></div>
+            <div class="bar-value">8</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Birch tar oil</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:17.142857142857142%"></div>
+            <div class="bar-value">6</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Isovaleric acid</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:14.285714285714285%"></div>
+            <div class="bar-value">5</div>
+          </div>
+        </div>
+      <div class="axis-footer"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Cluster accuracy ranking</h2>
+      <span class="card-note">exact-match accuracy per assigned cluster, n=20 held-out test descriptions each</span>
+    </div>
+    <div class="chart">
+      <div class="gridlines"><div class="gridline" style="left:0.0%"><div class="gridline-label">0%</div></div><div class="gridline" style="left:25.0%"><div class="gridline-label">25%</div></div><div class="gridline" style="left:50.0%"><div class="gridline-label">50%</div></div><div class="gridline" style="left:75.0%"><div class="gridline-label">75%</div></div><div class="gridline" style="left:100.0%"><div class="gridline-label">100%</div></div></div>
+      
+        <div class="row">
+          <div class="row-label">Benz Sal</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:65.0%"></div>
+            <div class="bar-value">65%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Isovaleric acid</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:65.0%"></div>
+            <div class="bar-value">65%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lavender</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:55.0%"></div>
+            <div class="bar-value">55%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Peppermint</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:55.0%"></div>
+            <div class="bar-value">55%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cognac</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:50.0%"></div>
+            <div class="bar-value">50%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Birch tar oil</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:40.0%"></div>
+            <div class="bar-value">40%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Lemon</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:40.0%"></div>
+            <div class="bar-value">40%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vanilla</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:35.0%"></div>
+            <div class="bar-value">35%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Cypress</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:30.0%"></div>
+            <div class="bar-value">30%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Clove Bud</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:20.0%"></div>
+            <div class="bar-value">20%</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="row-label">Vinegar</div>
+          <div class="track">
+            <div class="baseline"></div>
+            <div class="bar" style="width:20.0%"></div>
+            <div class="bar-value">20%</div>
+          </div>
+        </div>
+
+      <div class="axis-footer"></div>
+    </div>
+  </div>
+
+  <p class="section-title">Per-odorant review</p>
+  <p class="section-desc">
+    Click an odorant to see which requests used it. Dominance is computed <b>within each individual
+    response first</b> (which odorant had the single highest <code>ratio</code> in that specific
+    composition -- valid, since ratios in one response sum to ~1), then aggregated across repeats of
+    the same request text by majority vote of those per-instance winners. <b>Load-bearing</b> = won
+    the majority of repeats; <b>supporting</b> = did not. Requests with no logged ratio &mdash;
+    predating the <code>ratio</code> field (before 2026-07-31), or from the external batch &mdash;
+    are listed separately, collapsed by default.
+  </p>
+  <p class="section-desc">
+    Cards below are ordered by <b>total ranking score</b> &mdash; the sum of each odorant's rank
+    (1 = best, 11 = worst) across the four metadata metrics (exact-match accuracy, unique requests,
+    load-bearing requests, non-load-bearing requests). Ties within a metric all take the <i>worst</i>
+    rank in the tied group. Lowest total score first: that odorant performs most consistently well
+    across all four; highest total score last: the weakest all-around candidate.
+  </p>
+
+  
+    <details class="odorant-card" open>
+      <summary>
+        <span class="card-rank">#1</span>
+        <span class="card-name">Vanilla</span>
+        <span class="card-chips">
+          <span class="chip chip-total">212 uses</span>
+          <span class="chip chip-1">19 load-bearing</span>
+          <span class="chip chip-2">21 supporting</span>
+          <span class="chip chip-3">29 unrated</span>
+          <span class="chip chip-score">score 13</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 19</div>
+            <ul class="req-list"><li><span class="req">Vanilla</span><span class="req-pct">100% &middot; n=16</span></li><li><span class="req">honeyed</span><span class="req-pct">80% &middot; n=2</span></li><li><span class="req">vanilla ice cream</span><span class="req-pct">80% &middot; n=2</span></li><li><span class="req">vanilla with a splash of peppermint</span><span class="req-pct">75% &middot; n=2</span></li><li><span class="req">sweet</span><span class="req-pct">70%</span></li><li><span class="req">latte</span><span class="req-pct">70% &middot; n=2</span></li><li><span class="req">Brazilian brigadeiro</span><span class="req-pct">70%</span></li><li><span class="req">Banana</span><span class="req-pct">64% &middot; n=4</span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct">62%</span></li><li><span class="req">strawberry shortcake</span><span class="req-pct">60%</span></li><li><span class="req">coffee candy</span><span class="req-pct">50%</span></li><li><span class="req">boba tea</span><span class="req-pct">50%</span></li><li><span class="req">Lemon pie</span><span class="req-pct">50%</span></li><li><span class="req">Sweet and Sour Pork</span><span class="req-pct">50%</span></li><li><span class="req">Increase Vanilla to 40%.</span><span class="req-pct">40%</span></li><li><span class="req">Make it more sweet in a style of kind of the actual hazelnut or Nutella style but more sweet.</span><span class="req-pct">40%</span></li><li><span class="req">Nostalgia</span><span class="req-pct">40% &middot; n=4</span></li><li><span class="req">fresh_bread</span><span class="req-pct">38%</span></li><li><span class="req">anise</span><span class="req-pct">24% &middot; n=3</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 21</div>
+            <ul class="req-list"><li><span class="req">Key Lime pie</span><span class="req-pct">57%</span></li><li><span class="req">lemon pie fresh out of the oven</span><span class="req-pct">40%</span></li><li><span class="req">toasty</span><span class="req-pct">40%</span></li><li><span class="req">steak</span><span class="req-pct">40%</span></li><li><span class="req">skin care</span><span class="req-pct">35% &middot; n=2</span></li><li><span class="req">rose</span><span class="req-pct">35% &middot; n=2</span></li><li><span class="req">saffron</span><span class="req-pct">30%</span></li><li><span class="req">Paris cafe</span><span class="req-pct">30%</span></li><li><span class="req">lemon</span><span class="req-pct">30%</span></li><li><span class="req">Pineapple</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">Oud for glory</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">cinnamon</span><span class="req-pct">30%</span></li><li><span class="req">Bacon cheeseburger</span><span class="req-pct">28% &middot; n=2</span></li><li><span class="req">Chanel No. 5</span><span class="req-pct">25%</span></li><li><span class="req">cumin</span><span class="req-pct">20%</span></li><li><span class="req">Add a little bit of vanilla.</span><span class="req-pct">20%</span></li><li><span class="req">roasted peanuts</span><span class="req-pct">20% &middot; n=2</span></li><li><span class="req">hotdog</span><span class="req-pct">20%</span></li><li><span class="req">Coffee</span><span class="req-pct">10%</span></li><li><span class="req">But like, in this case, I wouldn&#x27;t mind if 11 kind of overshadows the others a little bit. Bring the 11 to the front so that it plays earlier in the sequence.</span><span class="req-pct">10%</span></li><li><span class="req">Add lavender and vanilla.</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (29) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a cognac-soaked evening by a wood fire</span><span class="req-pct"></span></li><li><span class="req">Bergamot</span><span class="req-pct"></span></li><li><span class="req">Brazilian black beans</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">Green tea</span><span class="req-pct"></span></li><li><span class="req">guava</span><span class="req-pct"></span></li><li><span class="req">honey</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">lavendar</span><span class="req-pct"></span></li><li><span class="req">lavender</span><span class="req-pct"></span></li><li><span class="req">lemony</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">lime pie</span><span class="req-pct"></span></li><li><span class="req">maple-syrup</span><span class="req-pct"></span></li><li><span class="req">minty</span><span class="req-pct"></span></li><li><span class="req">Myrrh</span><span class="req-pct"></span></li><li><span class="req">nutmeg</span><span class="req-pct"></span></li><li><span class="req">ocean breeze at the beach</span><span class="req-pct"></span></li><li><span class="req">Oolong tea</span><span class="req-pct"></span></li><li><span class="req">Orange blossom</span><span class="req-pct"></span></li><li><span class="req">perfume</span><span class="req-pct"></span></li><li><span class="req">perfumer</span><span class="req-pct"></span></li><li><span class="req">see you later.</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">sweet vanilla</span><span class="req-pct"></span></li><li><span class="req">Texas barbeque brisket</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Sweet / Gourmand</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">35% <span class="meta-rank">#8 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">69 <span class="meta-rank">#2 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">19 <span class="meta-rank">#1 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">21 <span class="meta-rank">#2 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-medium">Medium</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">13</span>
+          <span class="meta-rank">#1 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#2</span>
+        <span class="card-name">Cognac</span>
+        <span class="card-chips">
+          <span class="chip chip-total">178 uses</span>
+          <span class="chip chip-1">9 load-bearing</span>
+          <span class="chip chip-2">17 supporting</span>
+          <span class="chip chip-3">37 unrated</span>
+          <span class="chip chip-score">score 19</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 9</div>
+            <ul class="req-list"><li><span class="req">toasty</span><span class="req-pct">70%</span></li><li><span class="req">Oud for glory</span><span class="req-pct">60%</span></li><li><span class="req">boozy sour cocktail</span><span class="req-pct">50%</span></li><li><span class="req">disinfectant</span><span class="req-pct">50%</span></li><li><span class="req">anise</span><span class="req-pct">48% &middot; n=2</span></li><li><span class="req">nail-polisher</span><span class="req-pct">45% &middot; n=2</span></li><li><span class="req">Chocolate</span><span class="req-pct">44% &middot; n=2</span></li><li><span class="req">Paris cafe</span><span class="req-pct">40%</span></li><li><span class="req">Chinese Beef vermicelli</span><span class="req-pct">40%</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 17</div>
+            <ul class="req-list"><li><span class="req">Coffee</span><span class="req-pct">50%</span></li><li><span class="req">Vanilla</span><span class="req-pct">47% &middot; n=10</span></li><li><span class="req">Southwestern beef</span><span class="req-pct">42%</span></li><li><span class="req">cofee</span><span class="req-pct">40%</span></li><li><span class="req">Add some cognac.</span><span class="req-pct">40%</span></li><li><span class="req">aftershave</span><span class="req-pct">37%</span></li><li><span class="req">wet_dog</span><span class="req-pct">30%</span></li><li><span class="req">Key Lime pie</span><span class="req-pct">29%</span></li><li><span class="req">strawberry ice cream</span><span class="req-pct">27% &middot; n=5</span></li><li><span class="req">burnt_rubber</span><span class="req-pct">26% &middot; n=3</span></li><li><span class="req">durian</span><span class="req-pct">26% &middot; n=11</span></li><li><span class="req">Strawberry milkshake</span><span class="req-pct">23%</span></li><li><span class="req">feces</span><span class="req-pct">20%</span></li><li><span class="req">coffee candy</span><span class="req-pct">20%</span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct">17%</span></li><li><span class="req">Bacon cheeseburger</span><span class="req-pct">16% &middot; n=2</span></li><li><span class="req">Make it more sweet in a style of kind of the actual hazelnut or Nutella style but more sweet.</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (37) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a cognac-soaked evening by a wood fire</span><span class="req-pct"></span></li><li><span class="req">bad_breath</span><span class="req-pct"></span></li><li><span class="req">Brazilian brigadeiro</span><span class="req-pct"></span></li><li><span class="req">butyric</span><span class="req-pct"></span></li><li><span class="req">chlorine</span><span class="req-pct"></span></li><li><span class="req">cinnamon</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">cumin</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">fishy</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh_bread</span><span class="req-pct"></span></li><li><span class="req">honeyed</span><span class="req-pct"></span></li><li><span class="req">hotdog</span><span class="req-pct"></span></li><li><span class="req">lime</span><span class="req-pct"></span></li><li><span class="req">maple-syrup</span><span class="req-pct"></span></li><li><span class="req">Nostalgia</span><span class="req-pct"></span></li><li><span class="req">nutmeg</span><span class="req-pct"></span></li><li><span class="req">peppery</span><span class="req-pct"></span></li><li><span class="req">perfume</span><span class="req-pct"></span></li><li><span class="req">rotten fish</span><span class="req-pct"></span></li><li><span class="req">rotten-egg</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">sour milk</span><span class="req-pct"></span></li><li><span class="req">sour_milk</span><span class="req-pct"></span></li><li><span class="req">steak</span><span class="req-pct"></span></li><li><span class="req">Stinky mandarin fish</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">texas barbeque</span><span class="req-pct"></span></li><li><span class="req">Texas barbeque brisket</span><span class="req-pct"></span></li><li><span class="req">Tomato soup</span><span class="req-pct"></span></li><li><span class="req">vinegar-like</span><span class="req-pct"></span></li><li><span class="req">wintergreen</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li><li><span class="req">yeasty</span><span class="req-pct"></span></li><li><span class="req">You</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Chemical / Solvent</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">50% <span class="meta-rank">#5 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">63 <span class="meta-rank">#3 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">9 <span class="meta-rank">#8 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">17 <span class="meta-rank">#3 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-weak">Weak</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">19</span>
+          <span class="meta-rank">#2 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#3</span>
+        <span class="card-name">Clove Bud</span>
+        <span class="card-chips">
+          <span class="chip chip-total">208 uses</span>
+          <span class="chip chip-1">11 load-bearing</span>
+          <span class="chip chip-2">31 supporting</span>
+          <span class="chip chip-3">29 unrated</span>
+          <span class="chip chip-score">score 20</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 11</div>
+            <ul class="req-list"><li><span class="req">nutmeg</span><span class="req-pct">100%</span></li><li><span class="req">cinnamon</span><span class="req-pct">87% &middot; n=3</span></li><li><span class="req">cumin</span><span class="req-pct">80%</span></li><li><span class="req">saffron</span><span class="req-pct">70%</span></li><li><span class="req">Southwestern beef</span><span class="req-pct">58%</span></li><li><span class="req">coffee pie</span><span class="req-pct">50%</span></li><li><span class="req">Chocolate</span><span class="req-pct">46% &middot; n=2</span></li><li><span class="req">toasty</span><span class="req-pct">45% &middot; n=2</span></li><li><span class="req">um it&#x27;s not meant to have like peppermint it&#x27;s supposed to be like a mixture of palm oil and like bitter leaf with some spices</span><span class="req-pct">40%</span></li><li><span class="req">Peanuts</span><span class="req-pct">30%</span></li><li><span class="req">rotten egg</span><span class="req-pct">15% &middot; n=2</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 31</div>
+            <ul class="req-list"><li><span class="req">Texas barbecue smoky and spicy</span><span class="req-pct">40% &middot; n=5</span></li><li><span class="req">Stinky mandarin fish</span><span class="req-pct">40%</span></li><li><span class="req">Ofada Rice</span><span class="req-pct">38% &middot; n=2</span></li><li><span class="req">maple-syrup</span><span class="req-pct">38% &middot; n=2</span></li><li><span class="req">fresh_bread</span><span class="req-pct">34%</span></li><li><span class="req">durian</span><span class="req-pct">33% &middot; n=3</span></li><li><span class="req">Tomato soup</span><span class="req-pct">30%</span></li><li><span class="req">Cheese pizza</span><span class="req-pct">30%</span></li><li><span class="req">texas barbeque</span><span class="req-pct">30%</span></li><li><span class="req">coffee and baguette</span><span class="req-pct">30%</span></li><li><span class="req">Maple syrup</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">Paris cafe</span><span class="req-pct">30%</span></li><li><span class="req">boba tea</span><span class="req-pct">30%</span></li><li><span class="req">Brazilian brigadeiro</span><span class="req-pct">30%</span></li><li><span class="req">hotdog</span><span class="req-pct">30%</span></li><li><span class="req">Smoky nigerian jollof</span><span class="req-pct">29% &middot; n=2</span></li><li><span class="req">Myrrh</span><span class="req-pct">28% &middot; n=2</span></li><li><span class="req">Strawberry</span><span class="req-pct">25% &middot; n=4</span></li><li><span class="req">perfumer</span><span class="req-pct">25% &middot; n=2</span></li><li><span class="req">Strawberry milkshake</span><span class="req-pct">23%</span></li><li><span class="req">wet_dog</span><span class="req-pct">22%</span></li><li><span class="req">aftershave</span><span class="req-pct">22%</span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct">21%</span></li><li><span class="req">strawberry ice cream</span><span class="req-pct">20% &middot; n=5</span></li><li><span class="req">smoky</span><span class="req-pct">20%</span></li><li><span class="req">Add some isobaric acid.</span><span class="req-pct">20%</span></li><li><span class="req">Make it more sweet in a style of kind of the actual hazelnut or Nutella style but more sweet.</span><span class="req-pct">20%</span></li><li><span class="req">roasted peanuts</span><span class="req-pct">20%</span></li><li><span class="req">wintergreen</span><span class="req-pct">15% &middot; n=3</span></li><li><span class="req">Onion</span><span class="req-pct">10%</span></li><li><span class="req">Nostalgia</span><span class="req-pct">10% &middot; n=2</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (29) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a cognac-soaked evening by a wood fire</span><span class="req-pct"></span></li><li><span class="req">anise</span><span class="req-pct"></span></li><li><span class="req">Bergamot</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">feces</span><span class="req-pct"></span></li><li><span class="req">flower</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">latte</span><span class="req-pct"></span></li><li><span class="req">Lemon pie</span><span class="req-pct"></span></li><li><span class="req">lemon pie fresh out of the oven</span><span class="req-pct"></span></li><li><span class="req">nail-polisher</span><span class="req-pct"></span></li><li><span class="req">peppery</span><span class="req-pct"></span></li><li><span class="req">piney</span><span class="req-pct"></span></li><li><span class="req">rose</span><span class="req-pct"></span></li><li><span class="req">Rosemary</span><span class="req-pct"></span></li><li><span class="req">rotten-egg</span><span class="req-pct"></span></li><li><span class="req">sandalwood</span><span class="req-pct"></span></li><li><span class="req">sour milk</span><span class="req-pct"></span></li><li><span class="req">steak</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">Vanilla</span><span class="req-pct"></span></li><li><span class="req">wood smoke</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li><li><span class="req">yeasty</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Spice</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">20% <span class="meta-rank">#11 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">71 <span class="meta-rank">#1 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">11 <span class="meta-rank">#7 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">31 <span class="meta-rank">#1 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-medium">Medium</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">20</span>
+          <span class="meta-rank">#3 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#4</span>
+        <span class="card-name">Lavender</span>
+        <span class="card-chips">
+          <span class="chip chip-total">208 uses</span>
+          <span class="chip chip-1">13 load-bearing</span>
+          <span class="chip chip-2">14 supporting</span>
+          <span class="chip chip-3">33 unrated</span>
+          <span class="chip chip-score">score 21</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 13</div>
+            <ul class="req-list"><li><span class="req">lavender</span><span class="req-pct">100% &middot; n=3</span></li><li><span class="req">jasmine</span><span class="req-pct">100%</span></li><li><span class="req">Key Lime pie</span><span class="req-pct">100% &middot; n=2</span></li><li><span class="req">rose</span><span class="req-pct">83% &middot; n=7</span></li><li><span class="req">Orange blossom</span><span class="req-pct">80%</span></li><li><span class="req">lilac</span><span class="req-pct">78% &middot; n=4</span></li><li><span class="req">Bergamot</span><span class="req-pct">65% &middot; n=2</span></li><li><span class="req">Oolong tea</span><span class="req-pct">60%</span></li><li><span class="req">Add some cognac.</span><span class="req-pct">60%</span></li><li><span class="req">skin-care</span><span class="req-pct">50%</span></li><li><span class="req">skin care</span><span class="req-pct">50% &middot; n=2</span></li><li><span class="req">Add a little bit of vanilla.</span><span class="req-pct">50%</span></li><li><span class="req">ocean breeze at the beach</span><span class="req-pct">35% &middot; n=2</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 14</div>
+            <ul class="req-list"><li><span class="req">Nostalgia</span><span class="req-pct">40% &middot; n=3</span></li><li><span class="req">perfumer</span><span class="req-pct">35% &middot; n=2</span></li><li><span class="req">Vanilla</span><span class="req-pct">34% &middot; n=9</span></li><li><span class="req">Chanel No. 5</span><span class="req-pct">32% &middot; n=2</span></li><li><span class="req">eucalyptus</span><span class="req-pct">30%</span></li><li><span class="req">Rosemary</span><span class="req-pct">30% &middot; n=3</span></li><li><span class="req">Add lavender and vanilla.</span><span class="req-pct">30%</span></li><li><span class="req">sandalwood</span><span class="req-pct">30%</span></li><li><span class="req">Increase Vanilla to 40%.</span><span class="req-pct">30%</span></li><li><span class="req">Chinese Beef vermicelli</span><span class="req-pct">30%</span></li><li><span class="req">air_freshener</span><span class="req-pct">30% &middot; n=5</span></li><li><span class="req">sweet</span><span class="req-pct">20%</span></li><li><span class="req">But like, in this case, I wouldn&#x27;t mind if 11 kind of overshadows the others a little bit. Bring the 11 to the front so that it plays earlier in the sequence.</span><span class="req-pct">20%</span></li><li><span class="req">wintergreen</span><span class="req-pct">14%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (33) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a cognac-soaked evening by a wood fire</span><span class="req-pct"></span></li><li><span class="req">aftershave</span><span class="req-pct"></span></li><li><span class="req">air freshener</span><span class="req-pct"></span></li><li><span class="req">anise</span><span class="req-pct"></span></li><li><span class="req">boba tea</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">Chocolate</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">feces</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">Green tea</span><span class="req-pct"></span></li><li><span class="req">guava</span><span class="req-pct"></span></li><li><span class="req">honey</span><span class="req-pct"></span></li><li><span class="req">honeyed</span><span class="req-pct"></span></li><li><span class="req">latte</span><span class="req-pct"></span></li><li><span class="req">lavendar</span><span class="req-pct"></span></li><li><span class="req">Lemon pie</span><span class="req-pct"></span></li><li><span class="req">lemony</span><span class="req-pct"></span></li><li><span class="req">maple-syrup</span><span class="req-pct"></span></li><li><span class="req">minty</span><span class="req-pct"></span></li><li><span class="req">musty</span><span class="req-pct"></span></li><li><span class="req">Myrrh</span><span class="req-pct"></span></li><li><span class="req">nutmeg</span><span class="req-pct"></span></li><li><span class="req">Oh, lemon pie.</span><span class="req-pct"></span></li><li><span class="req">piney</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">sweet vanilla</span><span class="req-pct"></span></li><li><span class="req">tangy</span><span class="req-pct"></span></li><li><span class="req">toasty</span><span class="req-pct"></span></li><li><span class="req">wood smoke</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Floral</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">55% <span class="meta-rank">#4 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">60 <span class="meta-rank">#5 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">13 <span class="meta-rank">#6 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">14 <span class="meta-rank">#6 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-medium">Medium</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">21</span>
+          <span class="meta-rank">#4 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#5</span>
+        <span class="card-name">Benz Sal</span>
+        <span class="card-chips">
+          <span class="chip chip-total">178 uses</span>
+          <span class="chip chip-1">6 load-bearing</span>
+          <span class="chip chip-2">15 supporting</span>
+          <span class="chip chip-3">39 unrated</span>
+          <span class="chip chip-score">score 22</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 6</div>
+            <ul class="req-list"><li><span class="req">maple-syrup</span><span class="req-pct">57% &middot; n=2</span></li><li><span class="req">Chanel No. 5</span><span class="req-pct">55% &middot; n=2</span></li><li><span class="req">Maple syrup</span><span class="req-pct">55% &middot; n=2</span></li><li><span class="req">Strawberry milkshake</span><span class="req-pct">54%</span></li><li><span class="req">strawberry ice cream</span><span class="req-pct">53% &middot; n=5</span></li><li><span class="req">aftershave</span><span class="req-pct">41%</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 15</div>
+            <ul class="req-list"><li><span class="req">Nostalgia</span><span class="req-pct">50%</span></li><li><span class="req">Strawberry</span><span class="req-pct">46% &middot; n=4</span></li><li><span class="req">nail-polisher</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">um it&#x27;s not meant to have like peppermint it&#x27;s supposed to be like a mixture of palm oil and like bitter leaf with some spices</span><span class="req-pct">30%</span></li><li><span class="req">Make it more sweet in a style of kind of the actual hazelnut or Nutella style but more sweet.</span><span class="req-pct">30%</span></li><li><span class="req">durian</span><span class="req-pct">30% &middot; n=3</span></li><li><span class="req">fresh_bread</span><span class="req-pct">28%</span></li><li><span class="req">Banana</span><span class="req-pct">23%</span></li><li><span class="req">Chocolate</span><span class="req-pct">21%</span></li><li><span class="req">watermelon</span><span class="req-pct">20%</span></li><li><span class="req">Ofada Rice</span><span class="req-pct">20%</span></li><li><span class="req">boba tea</span><span class="req-pct">20%</span></li><li><span class="req">vanilla ice cream</span><span class="req-pct">20% &middot; n=2</span></li><li><span class="req">guava</span><span class="req-pct">16% &middot; n=2</span></li><li><span class="req">sweet</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (39) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">air freshener</span><span class="req-pct"></span></li><li><span class="req">air_freshener</span><span class="req-pct"></span></li><li><span class="req">Bacon cheeseburger</span><span class="req-pct"></span></li><li><span class="req">Brazilian brigadeiro</span><span class="req-pct"></span></li><li><span class="req">Cheese pizza</span><span class="req-pct"></span></li><li><span class="req">chlorine</span><span class="req-pct"></span></li><li><span class="req">cinnamon</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">disinfectant</span><span class="req-pct"></span></li><li><span class="req">eucalyptus</span><span class="req-pct"></span></li><li><span class="req">flower</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct"></span></li><li><span class="req">honey</span><span class="req-pct"></span></li><li><span class="req">honeyed</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">latte</span><span class="req-pct"></span></li><li><span class="req">lavendar</span><span class="req-pct"></span></li><li><span class="req">lavender</span><span class="req-pct"></span></li><li><span class="req">lemon pie fresh out of the oven</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">nutmeg</span><span class="req-pct"></span></li><li><span class="req">Orange blossom</span><span class="req-pct"></span></li><li><span class="req">Paris cafe</span><span class="req-pct"></span></li><li><span class="req">perfume</span><span class="req-pct"></span></li><li><span class="req">perfumer</span><span class="req-pct"></span></li><li><span class="req">piney</span><span class="req-pct"></span></li><li><span class="req">rose</span><span class="req-pct"></span></li><li><span class="req">Rosemary</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">sandalwood</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">Sweet and Sour Pork</span><span class="req-pct"></span></li><li><span class="req">toasty</span><span class="req-pct"></span></li><li><span class="req">Vanilla</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Perfumed / Clean</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">65% <span class="meta-rank">#2 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">60 <span class="meta-rank">#5 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">6 <span class="meta-rank">#10 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">15 <span class="meta-rank">#5 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-weak">Weak</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">22</span>
+          <span class="meta-rank">#5 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#6</span>
+        <span class="card-name">Vinegar</span>
+        <span class="card-chips">
+          <span class="chip chip-total">164 uses</span>
+          <span class="chip chip-1">18 load-bearing</span>
+          <span class="chip chip-2">12 supporting</span>
+          <span class="chip chip-3">26 unrated</span>
+          <span class="chip chip-score">score 27</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 18</div>
+            <ul class="req-list"><li><span class="req">chlorine</span><span class="req-pct">100% &middot; n=3</span></li><li><span class="req">vinegar-like</span><span class="req-pct">100%</span></li><li><span class="req">duriant</span><span class="req-pct">100%</span></li><li><span class="req">yeasty</span><span class="req-pct">100% &middot; n=2</span></li><li><span class="req">Onion</span><span class="req-pct">87% &middot; n=3</span></li><li><span class="req">rotten-egg</span><span class="req-pct">85% &middot; n=5</span></li><li><span class="req">rotten_fish</span><span class="req-pct">70% &middot; n=2</span></li><li><span class="req">rain on the asphalt</span><span class="req-pct">70%</span></li><li><span class="req">Tomato soup</span><span class="req-pct">60%</span></li><li><span class="req">sour_milk</span><span class="req-pct">60%</span></li><li><span class="req">sour milk</span><span class="req-pct">60%</span></li><li><span class="req">Stinky mandarin fish</span><span class="req-pct">60%</span></li><li><span class="req">boozy sour cocktail</span><span class="req-pct">50%</span></li><li><span class="req">wet_dog</span><span class="req-pct">48%</span></li><li><span class="req">Sweet and Sour Pork</span><span class="req-pct">45% &middot; n=2</span></li><li><span class="req">Nigerian Egusi soup</span><span class="req-pct">41% &middot; n=8</span></li><li><span class="req">hotpot</span><span class="req-pct">40% &middot; n=2</span></li><li><span class="req">Add some isobaric acid.</span><span class="req-pct">40%</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 12</div>
+            <ul class="req-list"><li><span class="req">citrus with a hint of sweat</span><span class="req-pct">40%</span></li><li><span class="req">disinfectant</span><span class="req-pct">40%</span></li><li><span class="req">strawberry ice cream</span><span class="req-pct">30%</span></li><li><span class="req">Rain on asphalt</span><span class="req-pct">30%</span></li><li><span class="req">bad_breath</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">musty</span><span class="req-pct">30%</span></li><li><span class="req">burnt_rubber</span><span class="req-pct">25% &middot; n=3</span></li><li><span class="req">sweaty</span><span class="req-pct">20%</span></li><li><span class="req">Add lavender and vanilla.</span><span class="req-pct">20%</span></li><li><span class="req">sweaty gym locker room</span><span class="req-pct">20%</span></li><li><span class="req">coffee pie</span><span class="req-pct">10%</span></li><li><span class="req">Vanilla</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (26) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">Bacon cheeseburger</span><span class="req-pct"></span></li><li><span class="req">Bergamot</span><span class="req-pct"></span></li><li><span class="req">Brazilian black beans</span><span class="req-pct"></span></li><li><span class="req">burnt rubber</span><span class="req-pct"></span></li><li><span class="req">butyric</span><span class="req-pct"></span></li><li><span class="req">Cheese pizza</span><span class="req-pct"></span></li><li><span class="req">Chinese Beef vermicelli</span><span class="req-pct"></span></li><li><span class="req">Chocolate</span><span class="req-pct"></span></li><li><span class="req">feces</span><span class="req-pct"></span></li><li><span class="req">fishy</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">hotdog</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">lime</span><span class="req-pct"></span></li><li><span class="req">lime pie</span><span class="req-pct"></span></li><li><span class="req">nail-polisher</span><span class="req-pct"></span></li><li><span class="req">peppery</span><span class="req-pct"></span></li><li><span class="req">rotten egg</span><span class="req-pct"></span></li><li><span class="req">rotten fish</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">tangy</span><span class="req-pct"></span></li><li><span class="req">wet dog</span><span class="req-pct"></span></li><li><span class="req">wintergreen</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li><li><span class="req">You</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Fermented &amp; Sour</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">20% <span class="meta-rank">#11 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">56 <span class="meta-rank">#7 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">18 <span class="meta-rank">#2 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">12 <span class="meta-rank">#7 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-weak">Weak</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">27</span>
+          <span class="meta-rank">#6 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#7</span>
+        <span class="card-name">Isovaleric acid</span>
+        <span class="card-chips">
+          <span class="chip chip-total">161 uses</span>
+          <span class="chip chip-1">14 load-bearing</span>
+          <span class="chip chip-2">5 supporting</span>
+          <span class="chip chip-3">27 unrated</span>
+          <span class="chip chip-score">score 29</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 14</div>
+            <ul class="req-list"><li><span class="req">butyric</span><span class="req-pct">100%</span></li><li><span class="req">fishy</span><span class="req-pct">100% &middot; n=2</span></li><li><span class="req">feces</span><span class="req-pct">85% &middot; n=2</span></li><li><span class="req">sweaty</span><span class="req-pct">83% &middot; n=3</span></li><li><span class="req">durian</span><span class="req-pct">72% &middot; n=17</span></li><li><span class="req">wet dog</span><span class="req-pct">70%</span></li><li><span class="req">Cheese pizza</span><span class="req-pct">70%</span></li><li><span class="req">musty</span><span class="req-pct">70%</span></li><li><span class="req">bad_breath</span><span class="req-pct">65% &middot; n=2</span></li><li><span class="req">sweaty gym locker room</span><span class="req-pct">60%</span></li><li><span class="req">Bacon cheeseburger</span><span class="req-pct">56% &middot; n=2</span></li><li><span class="req">But like, in this case, I wouldn&#x27;t mind if 11 kind of overshadows the others a little bit. Bring the 11 to the front so that it plays earlier in the sequence.</span><span class="req-pct">50%</span></li><li><span class="req">burnt_rubber</span><span class="req-pct">49% &middot; n=3</span></li><li><span class="req">Add some isobaric acid.</span><span class="req-pct">40%</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 5</div>
+            <ul class="req-list"><li><span class="req">sour milk</span><span class="req-pct">40%</span></li><li><span class="req">Nigerian Egusi soup</span><span class="req-pct">33% &middot; n=7</span></li><li><span class="req">Onion</span><span class="req-pct">30%</span></li><li><span class="req">hotpot</span><span class="req-pct">20%</span></li><li><span class="req">Strawberry</span><span class="req-pct">17% &middot; n=3</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (27) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">Brazilian black beans</span><span class="req-pct"></span></li><li><span class="req">burnt rubber</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">chlorine</span><span class="req-pct"></span></li><li><span class="req">Chocolate</span><span class="req-pct"></span></li><li><span class="req">cumin</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">eucalyptus</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">hotdog</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">nail-polisher</span><span class="req-pct"></span></li><li><span class="req">Rain on asphalt</span><span class="req-pct"></span></li><li><span class="req">rotten egg</span><span class="req-pct"></span></li><li><span class="req">rotten fish</span><span class="req-pct"></span></li><li><span class="req">rotten-egg</span><span class="req-pct"></span></li><li><span class="req">rotten_fish</span><span class="req-pct"></span></li><li><span class="req">sour_milk</span><span class="req-pct"></span></li><li><span class="req">steak</span><span class="req-pct"></span></li><li><span class="req">strawberry ice cream</span><span class="req-pct"></span></li><li><span class="req">Strawberry milkshake</span><span class="req-pct"></span></li><li><span class="req">Vanilla</span><span class="req-pct"></span></li><li><span class="req">vinegar-like</span><span class="req-pct"></span></li><li><span class="req">wet_dog</span><span class="req-pct"></span></li><li><span class="req">yeasty</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Animal / Body</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">65% <span class="meta-rank">#2 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">46 <span class="meta-rank">#11 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">14 <span class="meta-rank">#5 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">5 <span class="meta-rank">#11 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-strong">Strong</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">29</span>
+          <span class="meta-rank">#8 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#8</span>
+        <span class="card-name">Peppermint</span>
+        <span class="card-chips">
+          <span class="chip chip-total">151 uses</span>
+          <span class="chip chip-1">4 load-bearing</span>
+          <span class="chip chip-2">10 supporting</span>
+          <span class="chip chip-3">44 unrated</span>
+          <span class="chip chip-score">score 29</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 4</div>
+            <ul class="req-list"><li><span class="req">Rosemary</span><span class="req-pct">82% &middot; n=6</span></li><li><span class="req">peppermint</span><span class="req-pct">75% &middot; n=2</span></li><li><span class="req">Green tea</span><span class="req-pct">60%</span></li><li><span class="req">eucalyptus</span><span class="req-pct">50% &middot; n=3</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 10</div>
+            <ul class="req-list"><li><span class="req">air_freshener</span><span class="req-pct">43% &middot; n=3</span></li><li><span class="req">watermelon</span><span class="req-pct">40%</span></li><li><span class="req">Nigerian Egusi soup</span><span class="req-pct">38%</span></li><li><span class="req">Strawberry</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">vanilla with a splash of peppermint</span><span class="req-pct">25% &middot; n=2</span></li><li><span class="req">strawberry ice cream</span><span class="req-pct">20%</span></li><li><span class="req">Nostalgia</span><span class="req-pct">20%</span></li><li><span class="req">Key Lime pie</span><span class="req-pct">14%</span></li><li><span class="req">Vanilla</span><span class="req-pct">13% &middot; n=3</span></li><li><span class="req">Rain on asphalt</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (44) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">aftershave</span><span class="req-pct"></span></li><li><span class="req">anise</span><span class="req-pct"></span></li><li><span class="req">bad_breath</span><span class="req-pct"></span></li><li><span class="req">Bergamot</span><span class="req-pct"></span></li><li><span class="req">boba tea</span><span class="req-pct"></span></li><li><span class="req">Brazilian brigadeiro</span><span class="req-pct"></span></li><li><span class="req">butyric</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">Chanel No. 5</span><span class="req-pct"></span></li><li><span class="req">Cheese pizza</span><span class="req-pct"></span></li><li><span class="req">chlorine</span><span class="req-pct"></span></li><li><span class="req">cinnamon</span><span class="req-pct"></span></li><li><span class="req">cumin</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">disinfectant</span><span class="req-pct"></span></li><li><span class="req">fishy</span><span class="req-pct"></span></li><li><span class="req">flower</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh_bread</span><span class="req-pct"></span></li><li><span class="req">guava</span><span class="req-pct"></span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct"></span></li><li><span class="req">honeyed</span><span class="req-pct"></span></li><li><span class="req">hotdog</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">latte</span><span class="req-pct"></span></li><li><span class="req">lavendar</span><span class="req-pct"></span></li><li><span class="req">lemony</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">minty</span><span class="req-pct"></span></li><li><span class="req">nail-polisher</span><span class="req-pct"></span></li><li><span class="req">nutmeg</span><span class="req-pct"></span></li><li><span class="req">Paris cafe</span><span class="req-pct"></span></li><li><span class="req">peppery</span><span class="req-pct"></span></li><li><span class="req">piney</span><span class="req-pct"></span></li><li><span class="req">rose</span><span class="req-pct"></span></li><li><span class="req">see you later.</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">smoky</span><span class="req-pct"></span></li><li><span class="req">sour_milk</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">tangy</span><span class="req-pct"></span></li><li><span class="req">texas barbeque</span><span class="req-pct"></span></li><li><span class="req">wintergreen</span><span class="req-pct"></span></li><li><span class="req">You</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Herbal / Cooling</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">55% <span class="meta-rank">#4 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">58 <span class="meta-rank">#6 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">4 <span class="meta-rank">#11 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">10 <span class="meta-rank">#8 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-strong">Strong</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">29</span>
+          <span class="meta-rank">#8 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#9</span>
+        <span class="card-name">Cypress</span>
+        <span class="card-chips">
+          <span class="chip chip-total">146 uses</span>
+          <span class="chip chip-1">8 load-bearing</span>
+          <span class="chip chip-2">16 supporting</span>
+          <span class="chip chip-3">29 unrated</span>
+          <span class="chip chip-score">score 30</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 8</div>
+            <ul class="req-list"><li><span class="req">piney</span><span class="req-pct">100%</span></li><li><span class="req">Cedar</span><span class="req-pct">100% &middot; n=2</span></li><li><span class="req">Myrrh</span><span class="req-pct">62% &middot; n=2</span></li><li><span class="req">Rain on asphalt</span><span class="req-pct">60%</span></li><li><span class="req">sandalwood</span><span class="req-pct">50%</span></li><li><span class="req">ocean breeze at the beach</span><span class="req-pct">50%</span></li><li><span class="req">Oud for glory</span><span class="req-pct">50%</span></li><li><span class="req">perfumer</span><span class="req-pct">40% &middot; n=2</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 16</div>
+            <ul class="req-list"><li><span class="req">watermelon</span><span class="req-pct">40%</span></li><li><span class="req">Texas barbeque brisket</span><span class="req-pct">40%</span></li><li><span class="req">Oolong tea</span><span class="req-pct">40%</span></li><li><span class="req">eucalyptus</span><span class="req-pct">37% &middot; n=3</span></li><li><span class="req">wintergreen</span><span class="req-pct">35% &middot; n=7</span></li><li><span class="req">Rosemary</span><span class="req-pct">30%</span></li><li><span class="req">um it&#x27;s not meant to have like peppermint it&#x27;s supposed to be like a mixture of palm oil and like bitter leaf with some spices</span><span class="req-pct">30%</span></li><li><span class="req">Pineapple</span><span class="req-pct">30%</span></li><li><span class="req">Chinese Beef vermicelli</span><span class="req-pct">30%</span></li><li><span class="req">rain on the asphalt</span><span class="req-pct">30%</span></li><li><span class="req">Nostalgia</span><span class="req-pct">30%</span></li><li><span class="req">guava</span><span class="req-pct">23%</span></li><li><span class="req">Coffee</span><span class="req-pct">20%</span></li><li><span class="req">air_freshener</span><span class="req-pct">20% &middot; n=2</span></li><li><span class="req">Tomato soup</span><span class="req-pct">10%</span></li><li><span class="req">coffee and baguette</span><span class="req-pct">10%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (29) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">aftershave</span><span class="req-pct"></span></li><li><span class="req">anise</span><span class="req-pct"></span></li><li><span class="req">Bergamot</span><span class="req-pct"></span></li><li><span class="req">Brazilian black beans</span><span class="req-pct"></span></li><li><span class="req">butyric</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">cumin</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">flower</span><span class="req-pct"></span></li><li><span class="req">fresh_bread</span><span class="req-pct"></span></li><li><span class="req">Green tea</span><span class="req-pct"></span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">latte</span><span class="req-pct"></span></li><li><span class="req">Lemon pie</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">lime</span><span class="req-pct"></span></li><li><span class="req">minty</span><span class="req-pct"></span></li><li><span class="req">musty</span><span class="req-pct"></span></li><li><span class="req">rose</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">see you later.</span><span class="req-pct"></span></li><li><span class="req">skin-care</span><span class="req-pct"></span></li><li><span class="req">smoky</span><span class="req-pct"></span></li><li><span class="req">texas barbeque</span><span class="req-pct"></span></li><li><span class="req">Vanilla</span><span class="req-pct"></span></li><li><span class="req">wood smoke</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Woody &amp; Resinous</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">30% <span class="meta-rank">#9 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">53 <span class="meta-rank">#8 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">8 <span class="meta-rank">#9 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">16 <span class="meta-rank">#4 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-medium">Medium</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">30</span>
+          <span class="meta-rank">#10 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#10</span>
+        <span class="card-name">Birch tar oil</span>
+        <span class="card-chips">
+          <span class="chip chip-total">129 uses</span>
+          <span class="chip chip-1">15 load-bearing</span>
+          <span class="chip chip-2">6 supporting</span>
+          <span class="chip chip-3">29 unrated</span>
+          <span class="chip chip-score">score 30</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 15</div>
+            <ul class="req-list"><li><span class="req">Brazilian black beans</span><span class="req-pct">100% &middot; n=2</span></li><li><span class="req">Coffee</span><span class="req-pct">90% &middot; n=2</span></li><li><span class="req">smoky</span><span class="req-pct">90% &middot; n=3</span></li><li><span class="req">Ofada Rice</span><span class="req-pct">82% &middot; n=2</span></li><li><span class="req">roasted peanuts</span><span class="req-pct">70% &middot; n=2</span></li><li><span class="req">Smoky nigerian jollof</span><span class="req-pct">66% &middot; n=2</span></li><li><span class="req">wintergreen</span><span class="req-pct">61% &middot; n=5</span></li><li><span class="req">cofee</span><span class="req-pct">60%</span></li><li><span class="req">texas barbeque</span><span class="req-pct">60%</span></li><li><span class="req">coffee and baguette</span><span class="req-pct">60%</span></li><li><span class="req">Texas barbeque brisket</span><span class="req-pct">60%</span></li><li><span class="req">steak</span><span class="req-pct">60%</span></li><li><span class="req">Texas barbecue smoky and spicy</span><span class="req-pct">60% &middot; n=5</span></li><li><span class="req">lemon and smoky campfire together</span><span class="req-pct">50%</span></li><li><span class="req">hotdog</span><span class="req-pct">50%</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 6</div>
+            <ul class="req-list"><li><span class="req">coffee pie</span><span class="req-pct">40%</span></li><li><span class="req">rotten_fish</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">coffee candy</span><span class="req-pct">30%</span></li><li><span class="req">latte</span><span class="req-pct">30% &middot; n=2</span></li><li><span class="req">rotten-egg</span><span class="req-pct">23%</span></li><li><span class="req">Vanilla</span><span class="req-pct">20%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (29) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a rainy morning coffee shop</span><span class="req-pct"></span></li><li><span class="req">burnt rubber</span><span class="req-pct"></span></li><li><span class="req">burnt_rubber</span><span class="req-pct"></span></li><li><span class="req">butyric</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">chlorine</span><span class="req-pct"></span></li><li><span class="req">cumin</span><span class="req-pct"></span></li><li><span class="req">feces</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">fresh_bread</span><span class="req-pct"></span></li><li><span class="req">hazelnut ice cream</span><span class="req-pct"></span></li><li><span class="req">lilac</span><span class="req-pct"></span></li><li><span class="req">maple-syrup</span><span class="req-pct"></span></li><li><span class="req">musty</span><span class="req-pct"></span></li><li><span class="req">Myrrh</span><span class="req-pct"></span></li><li><span class="req">Oolong tea</span><span class="req-pct"></span></li><li><span class="req">piney</span><span class="req-pct"></span></li><li><span class="req">Rosemary</span><span class="req-pct"></span></li><li><span class="req">rotten fish</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">sandalwood</span><span class="req-pct"></span></li><li><span class="req">Southwestern beef</span><span class="req-pct"></span></li><li><span class="req">sweaty</span><span class="req-pct"></span></li><li><span class="req">toasty</span><span class="req-pct"></span></li><li><span class="req">Tomato soup</span><span class="req-pct"></span></li><li><span class="req">wet dog</span><span class="req-pct"></span></li><li><span class="req">wet_dog</span><span class="req-pct"></span></li><li><span class="req">wood smoke</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Roasted / Smoky</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">40% <span class="meta-rank">#7 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">50 <span class="meta-rank">#9 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">15 <span class="meta-rank">#4 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">6 <span class="meta-rank">#10 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-strong">Strong</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">30</span>
+          <span class="meta-rank">#10 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+
+    <details class="odorant-card">
+      <summary>
+        <span class="card-rank">#11</span>
+        <span class="card-name">Lemon</span>
+        <span class="card-chips">
+          <span class="chip chip-total">133 uses</span>
+          <span class="chip chip-1">15 load-bearing</span>
+          <span class="chip chip-2">8 supporting</span>
+          <span class="chip chip-3">23 unrated</span>
+          <span class="chip chip-score">score 31</span>
+        </span>
+        <span class="card-caret">&#9662;</span>
+      </summary>
+      <div class="card-body">
+        <div class="group-cols">
+          <div class="group-col">
+            <div class="group-heading group-1">Load-bearing &middot; wins the argmax in most repeats &middot; 15</div>
+            <ul class="req-list"><li><span class="req">tangy</span><span class="req-pct">100% &middot; n=3</span></li><li><span class="req">lemony</span><span class="req-pct">87% &middot; n=3</span></li><li><span class="req">lemon</span><span class="req-pct">70%</span></li><li><span class="req">watermelon</span><span class="req-pct">68% &middot; n=10</span></li><li><span class="req">citrus with a hint of sweat</span><span class="req-pct">60%</span></li><li><span class="req">Pineapple</span><span class="req-pct">60% &middot; n=3</span></li><li><span class="req">Sweet and Sour Pork</span><span class="req-pct">60%</span></li><li><span class="req">guava</span><span class="req-pct">57% &middot; n=5</span></li><li><span class="req">Strawberry</span><span class="req-pct">52% &middot; n=10</span></li><li><span class="req">lemon pie fresh out of the oven</span><span class="req-pct">50%</span></li><li><span class="req">Lemon pie</span><span class="req-pct">50%</span></li><li><span class="req">lemon and smoky campfire together</span><span class="req-pct">50%</span></li><li><span class="req">air_freshener</span><span class="req-pct">43% &middot; n=4</span></li><li><span class="req">Add lavender and vanilla.</span><span class="req-pct">40%</span></li><li><span class="req">ocean breeze at the beach</span><span class="req-pct">40% &middot; n=2</span></li></ul>
+          </div>
+          <div class="group-col">
+            <div class="group-heading group-2">Supporting &middot; not the majority winner &middot; 8</div>
+            <ul class="req-list"><li><span class="req">strawberry ice cream</span><span class="req-pct">50%</span></li><li><span class="req">Green tea</span><span class="req-pct">40%</span></li><li><span class="req">strawberry shortcake</span><span class="req-pct">40%</span></li><li><span class="req">Vanilla</span><span class="req-pct">40% &middot; n=2</span></li><li><span class="req">Add a little bit of vanilla.</span><span class="req-pct">30%</span></li><li><span class="req">Increase Vanilla to 40%.</span><span class="req-pct">30%</span></li><li><span class="req">But like, in this case, I wouldn&#x27;t mind if 11 kind of overshadows the others a little bit. Bring the 11 to the front so that it plays earlier in the sequence.</span><span class="req-pct">20%</span></li><li><span class="req">Orange blossom</span><span class="req-pct">20%</span></li></ul>
+          </div>
+        </div>
+        <details class="no-ratio-details">
+          <summary>No ratio data (23) &mdash; predates the ratio field (before 2026-07-31), or from the external batch</summary>
+          <ul class="req-list no-ratio-list"><li><span class="req">a rainy morning coffee shop</span><span class="req-pct"></span></li><li><span class="req">air freshener</span><span class="req-pct"></span></li><li><span class="req">boba tea</span><span class="req-pct"></span></li><li><span class="req">Cedar</span><span class="req-pct"></span></li><li><span class="req">Chocolate</span><span class="req-pct"></span></li><li><span class="req">Coconut</span><span class="req-pct"></span></li><li><span class="req">currant</span><span class="req-pct"></span></li><li><span class="req">fresh bread</span><span class="req-pct"></span></li><li><span class="req">fresh-bread</span><span class="req-pct"></span></li><li><span class="req">honeyed</span><span class="req-pct"></span></li><li><span class="req">jasmine</span><span class="req-pct"></span></li><li><span class="req">Key Lime pie</span><span class="req-pct"></span></li><li><span class="req">lavender</span><span class="req-pct"></span></li><li><span class="req">lime</span><span class="req-pct"></span></li><li><span class="req">lime pie</span><span class="req-pct"></span></li><li><span class="req">minty</span><span class="req-pct"></span></li><li><span class="req">Oh, lemon pie.</span><span class="req-pct"></span></li><li><span class="req">Paris cafe</span><span class="req-pct"></span></li><li><span class="req">saffron</span><span class="req-pct"></span></li><li><span class="req">Strawberry milkshake</span><span class="req-pct"></span></li><li><span class="req">wintergreen</span><span class="req-pct"></span></li><li><span class="req">woodsmoke</span><span class="req-pct"></span></li><li><span class="req">You</span><span class="req-pct"></span></li></ul>
+        </details>
+        <div class="meta-section">
+          <div class="meta-col">
+            <div class="meta-heading">Cluster-level Perceptual Representativeness</div>
+            <div class="meta-row"><span class="meta-label">Assigned cluster</span><span class="meta-value">Citrus</span></div>
+            <div class="meta-row"><span class="meta-label">Cluster accuracy (n=20)</span><span class="meta-value">40% <span class="meta-rank">#7 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Generalizability</div>
+            <div class="meta-row"><span class="meta-label">Unique user requests</span><span class="meta-value">46 <span class="meta-rank">#11 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Load-bearing requests</span><span class="meta-value">15 <span class="meta-rank">#4 of 11</span></span></div>
+            <div class="meta-row"><span class="meta-label">Non-load-bearing requests</span><span class="meta-value">8 <span class="meta-rank">#9 of 11</span></span></div>
+          </div>
+          <div class="meta-col">
+            <div class="meta-heading">Strength</div>
+            <div class="meta-row"><span class="meta-label">Reported strength</span><span class="meta-value meta-strength meta-strength-strong">Strong</span></div>
+          </div>
+        </div>
+        <div class="score-section">
+          <span class="score-label">Total ranking score</span>
+          <span class="score-value">31</span>
+          <span class="meta-rank">#11 of 11</span>
+          <span class="score-note">sum of the 4 ranks above &middot; lower = more consistently top-ranked &middot; 1 = best odorant, 11 = weakest candidate, first in line to swap out</span>
+        </div>
+      </div>
+    </details>
+  
+  
+
+</div>
+</body>
+</html>

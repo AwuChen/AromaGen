@@ -103,7 +103,7 @@ def _validate_and_expand(
 
     compatibility_warnings = check_compatibility_warnings(validated_sequence, catalog)
     pulse_sequence = expand_to_pulse_sequence(
-        validated_sequence, settings.pulse_seconds, settings.pulse_rounds, catalog
+        validated_sequence, settings.pulse_seconds, settings.pulse_rounds
     )
     pulse_summary = _format_pulse_summary(pulse_sequence)
     combined_justification = f"{justification}\n\n{pulse_summary}" if pulse_summary else justification

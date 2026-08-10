@@ -1,0 +1,167 @@
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; color: #222; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 15px; margin-top: 28px; color: #444; }
+  textarea { width: 100%; min-height: 140px; font-family: ui-monospace, monospace; font-size: 13px; padding: 8px; box-sizing: border-box; }
+  label { display: block; margin: 8px 0; font-size: 14px; }
+  button { background: #1a73e8; color: white; border: none; padding: 10px 18px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  button:disabled { background: #999; cursor: default; }
+  #report, #coverage, #results, #status { font-size: 13px; margin-top: 10px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+  td, th { border: 1px solid #ddd; padding: 6px 10px; text-align: left; font-size: 13px; }
+  a { color: #1a73e8; }
+  .warn { color: #b3541e; background: #fdf3e7; padding: 8px 10px; border-radius: 4px; }
+</style>
+
+<h1>AromaGen User Study 1 &mdash; Session Generator</h1>
+<p>Paste one participant ID per line (or comma-separated), pick the exposure condition, and generate. Every participant gets their own session link (a custom page, not a Google Form -- each trial saves the instant it's answered, so closing the tab mid-session preserves everything up to that point instead of losing it). All responses are written into one shared spreadsheet.</p>
+<p class="warn">This control panel is only reachable via the exact URL with your admin token in it. Never send that URL to a participant -- only send them their individual session link from the results table below.</p>
+
+<h2>1. Planning: how many participants do I need?</h2>
+<label>Target evaluations per descriptor: <input type="number" id="evalsTarget" value="30" style="width:60px"> <button onclick="refreshReport()" style="padding:4px 10px">Recompute</button></label>
+<div id="report"></div>
+
+<h2>2. Reality check: what does my actual participant count buy me?</h2>
+<label>Participants I can realistically recruit: <input type="number" id="realN" value="30" style="width:60px" oninput="refreshCoverage()"></label>
+<div id="coverage"></div>
+
+<h2>3. Generate sessions</h2>
+<label>Exposure condition:
+  <select id="nExposures">
+    <option value="24">24 descriptors (2 per cluster)</option>
+    <option value="12">12 descriptors (1 per cluster)</option>
+  </select>
+</label>
+<label>Participant IDs (one per line):</label>
+<textarea id="participantIds" placeholder="P001&#10;P002&#10;P003"></textarea>
+<button id="genBtn" onclick="generate()">Generate Sessions</button>
+<div id="status"></div>
+<div id="results"></div>
+
+<h2>4. Live descriptor coverage (actual, from real submissions so far)</h2>
+<p style="font-size:13px;color:#666">Within-cluster spread should never exceed 1 -- if it does, something is wrong. Spread of 1-2 <em>between</em> a 4-item and a 5-item cluster is expected and not fixable without breaking equal-per-cluster representation.</p>
+<button onclick="refreshTally()" style="padding:4px 10px">Refresh</button>
+<div id="tally"></div>
+
+<h2>5. Ground-truth lookup (experimenter reference -- never shown to participants)</h2>
+<p style="font-size:13px;color:#666">Look up a participant's full dispensing order ahead of a session. Not the same as what the participant sees -- they never see the descriptor, only 4 shuffled options with no indication of which is correct.</p>
+<label>Participant ID(s) (one per line):</label>
+<textarea id="gtIds" style="min-height:60px" placeholder="P002&#10;P003"></textarea>
+<button onclick="lookupGroundTruth()" style="padding:4px 10px">Look up</button>
+<div id="groundtruth"></div>
+
+<script>
+  function refreshReport() {
+    var evals = document.getElementById('evalsTarget').value;
+    google.script.run.withSuccessHandler(function (report) {
+      var html = '<table><tr><th>Exposure condition</th><th>Participants needed</th><th>Recruit (with 15% buffer)</th></tr>';
+      [12, 24].forEach(function (n) {
+        html += '<tr><td>' + n + ' descriptors/participant</td><td>' + report[n].participantsNeeded +
+          '</td><td>' + report[n].recruitWithBuffer + '</td></tr>';
+      });
+      html += '</table>';
+      document.getElementById('report').innerHTML = html;
+    }).getSampleSizeReportForClient(evals);
+  }
+
+  function refreshCoverage() {
+    var n = document.getElementById('realN').value;
+    var pending = [12, 24].map(function (nExp) {
+      return new Promise(function (resolve) {
+        google.script.run.withSuccessHandler(function (cov) { resolve({ nExp: nExp, cov: cov }); })
+          .getRealisticCoverageForClient(n, nExp);
+      });
+    });
+    Promise.all(pending).then(function (results) {
+      var html = '<table><tr><th>Exposure condition</th><th>Realistic evals/descriptor</th></tr>';
+      results.forEach(function (r) {
+        html += '<tr><td>' + r.nExp + ' descriptors/participant</td><td>' + r.cov.toFixed(1) + '</td></tr>';
+      });
+      html += '</table>';
+      if (results.some(function (r) { return r.cov < 20; })) {
+        html += '<div class="warn">At this participant count, coverage per descriptor is well below the 30/descriptor target used for the original power estimate -- fine for a pilot / exploratory pass, but worth flagging in the writeup as a smaller benchmark-level n than originally planned.</div>';
+      }
+      document.getElementById('coverage').innerHTML = html;
+    });
+  }
+
+  function generate() {
+    var ids = document.getElementById('participantIds').value;
+    var n = document.getElementById('nExposures').value;
+    document.getElementById('genBtn').disabled = true;
+    document.getElementById('status').innerText = 'Generating sessions...';
+    document.getElementById('results').innerHTML = '';
+    google.script.run
+      .withSuccessHandler(function (result) {
+        document.getElementById('status').innerText = 'Done.';
+        document.getElementById('genBtn').disabled = false;
+        var html = '<p>Master spreadsheet (all responses land here): <a href="' + result.masterSpreadsheetUrl + '" target="_blank">' + result.masterSpreadsheetUrl + '</a></p>';
+        if (result.skipped && result.skipped.length) {
+          html += '<div class="warn">Skipped (already has a session or legacy form from an earlier batch, not regenerated): ' + result.skipped.join(', ') + '</div>';
+        }
+        if (result.sessions.length) {
+          html += '<table><tr><th>Participant</th><th>Session link (send to participant)</th></tr>';
+          result.sessions.forEach(function (s) {
+            html += '<tr><td>' + s.participantId + '</td><td><a href="' + s.sessionUrl + '" target="_blank">' + s.sessionUrl + '</a></td></tr>';
+          });
+          html += '</table>';
+        } else {
+          html += '<p>No new sessions generated.</p>';
+        }
+        document.getElementById('results').innerHTML = html;
+        refreshTally();
+      })
+      .withFailureHandler(function (err) {
+        document.getElementById('status').innerText = 'Error: ' + err.message;
+        document.getElementById('genBtn').disabled = false;
+      })
+      .generateSessionsForParticipants(ids, n);
+  }
+
+  function refreshTally() {
+    google.script.run.withSuccessHandler(function (byCluster) {
+      var html = '<table><tr><th>Cluster</th><th>Descriptor</th><th>Times evaluated</th></tr>';
+      byCluster.forEach(function (c) {
+        var counts = c.descriptors.map(function (d) { return d.count; });
+        var spread = Math.max.apply(null, counts) - Math.min.apply(null, counts);
+        c.descriptors.forEach(function (d, i) {
+          html += '<tr' + (spread > 1 ? ' style="background:#fdf3e7"' : '') + '><td>' + (i === 0 ? c.cluster : '') +
+            '</td><td>' + d.descriptor + '</td><td>' + d.count + '</td></tr>';
+        });
+      });
+      html += '</table>';
+      document.getElementById('tally').innerHTML = html;
+    }).getDescriptorTallyForClient();
+  }
+
+  function lookupGroundTruth() {
+    var ids = document.getElementById('gtIds').value;
+    document.getElementById('groundtruth').innerHTML = '<p>Looking up...</p>';
+    google.script.run.withSuccessHandler(function (result) {
+      var html = '';
+      Object.keys(result).forEach(function (pid) {
+        var entry = result[pid];
+        if (entry.error) {
+          html += '<p><strong>' + pid + '</strong>: ' + entry.error + '</p>';
+          return;
+        }
+        html += '<p><strong>' + pid + '</strong> -- status: ' + entry.status + ', currently on step ' + entry.currentStep + '</p>';
+        html += '<table><tr><th>Trial</th><th>Cluster</th><th>Descriptor (dispense this)</th></tr>';
+        entry.trials.forEach(function (t) {
+          var isDone = entry.status !== "not_started" && t.trialNumber < entry.currentStep;
+          var isCurrent = t.trialNumber === entry.currentStep;
+          var style = isCurrent ? ' style="background:#e8f0fe;font-weight:600"' : (isDone ? ' style="color:#999"' : '');
+          html += '<tr' + style + '><td>' + t.trialNumber + '</td><td>' + t.cluster + '</td><td>' + t.descriptor + '</td></tr>';
+        });
+        html += '</table>';
+      });
+      document.getElementById('groundtruth').innerHTML = html;
+    }).withFailureHandler(function (err) {
+      document.getElementById('groundtruth').innerHTML = '<p>Error: ' + err.message + '</p>';
+    }).getGroundTruthForClient(ids);
+  }
+
+  refreshReport();
+  refreshCoverage();
+  refreshTally();
+</script>
