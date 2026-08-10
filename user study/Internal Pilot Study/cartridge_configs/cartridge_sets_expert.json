@@ -1,0 +1,136 @@
+{
+  "odorants": {
+    "A": {
+      "location": "1",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "B": {
+      "location": "2",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "C": {
+      "location": "3",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "D": {
+      "location": "4",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "E": {
+      "location": "5",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "f": {
+      "location": "6",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "g": {
+      "location": "7",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "h": {
+      "location": "8",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "i": {
+      "location": "9",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "j": {
+      "location": "10",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "k": {
+      "location": "11",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    },
+    "l": {
+      "location": "12",
+      "category": "TBD",
+      "note": "TBD -- placeholder, replace with real odorant name and sensory description",
+      "volatility": 5,
+      "pairs_well_with": [],
+      "avoid_with": [],
+      "mixing_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "avoid_notes_full": "PLACEHOLDER -- fill in once the real expert-chosen odorant for this slot is decided.",
+      "strength": "medium"
+    }
+  }
+}

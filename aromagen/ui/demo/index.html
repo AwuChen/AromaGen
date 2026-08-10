@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
   <div class="page">
@@ -184,14 +184,29 @@
             aria-label="Direct text input"
           >
           <button type="button" id="frequencyDirectSubmitBtn" class="frequency-control-btn">Submit</button>
+          <button type="button" id="textualFeedbackToggleBtn" class="frequency-control-btn">Textual feedback</button>
           <button type="button" id="playSequenceBtn" class="frequency-control-btn frequency-control-btn-primary" onclick="playSequenceOnDevice()">Play</button>
           <button type="button" id="acceptSequenceBtn" class="frequency-control-btn frequency-control-btn-primary">This works</button>
+        </div>
+
+        <div class="frequency-textual-feedback-box" id="textualFeedbackRow" style="display: none;">
+          <p class="frequency-textual-feedback-label">Textual feedback &mdash; type what to change, then Send</p>
+          <div class="frequency-controls-row">
+            <input
+              type="text"
+              id="textualFeedbackInput"
+              class="frequency-direct-text-input"
+              placeholder="e.g. more vanilla, less smoky..."
+              aria-label="Textual feedback input"
+            >
+            <button type="button" id="textualFeedbackSubmitBtn" class="frequency-control-btn frequency-control-btn-primary">Send feedback</button>
+          </div>
         </div>
 
       </div>
 
     </section>
   </div>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>

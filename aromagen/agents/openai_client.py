@@ -47,23 +47,11 @@ def _apportion_counts(order: List[str], ratio_by_name: Dict[str, float], total_s
     return counts
 
 
-# Exponent applied to each odorant's normalized position-in-sequence before
-# placement. 1.0 = unbiased/even spacing. <1.0 skews occurrences later in the
-# timeline (e.g. 0.45 turns fraction 0.1 into ~0.32, fraction 0.5 into ~0.71 --
-# early occurrences get pushed noticeably later, late ones stay late). Used so
-# strong-smelling odorants don't overshadow weaker ones by firing at the same
-# even pace -- see check_compatibility_warnings' sibling concept in cartridge.py.
-_STRENGTH_LATE_BIAS_EXPONENT = {
-    "strong": 0.45,
-    "medium": 1.0,
-}
-
-
 def _nearest_free_slot(slots: List[Optional[str]], pos: int) -> int:
     """Find the closest free slot to `pos`, searching both directions without
-    wrapping around the ends. Wrapping would undermine a late-bias placement
-    (a collision near the end could otherwise wrap a strong odorant's pulse
-    back to position 0, the opposite of the intended effect)."""
+    wrapping around the ends. Wrapping would place a collision on the
+    opposite side of the timeline from where it was supposed to land,
+    undermining the even spacing this resolves collisions for."""
     if slots[pos] is None:
         return pos
     total = len(slots)
@@ -77,39 +65,20 @@ def _nearest_free_slot(slots: List[Optional[str]], pos: int) -> int:
     raise RuntimeError("No free slot available -- more occurrences than total slots")
 
 
-def _interleave_by_count(
-    order: List[str],
-    counts: Dict[str, int],
-    strength_by_name: Optional[Dict[str, str]] = None,
-) -> List[str]:
-    """Arrange each name's occurrences across a single timeline of
-    len == sum(counts). Medium-strength odorants are spread evenly (the
-    original behavior); strong-strength odorants have their occurrences
-    skewed toward later in the timeline, so they don't overshadow weaker
-    odorants by firing at the same even pace -- e.g. a 50/50 vanilla/peppermint
-    (strong) mix plays mostly vanilla early, transitioning to mostly peppermint
-    late, while both still total the same overall count. Highest-count names
-    are placed first so they claim their ideal spacing; collisions resolve to
-    the nearest free slot (not wrapped) to preserve the intended bias."""
-    strength_by_name = strength_by_name or {}
+def _interleave_by_count(order: List[str], counts: Dict[str, int]) -> List[str]:
+    """Arrange each name's occurrences evenly across a single timeline of
+    len == sum(counts) -- every odorant spread at its own uniform pace,
+    with no strength-based bias toward earlier or later placement. Highest-
+    count names are placed first so they claim their ideal even spacing;
+    collisions resolve to the nearest free slot (not wrapped)."""
     total = sum(counts.values())
     slots: List[Optional[str]] = [None] * total
-    # Strong-strength names claim their (late-biased) slots first -- otherwise
-    # a medium-strength name placed first would grab perfectly even spacing
-    # and leave the strong name forced into whatever's complementary, regardless
-    # of its intended late bias. Medium names then fill in around whatever's left.
-    placement_order = sorted(
-        order,
-        key=lambda n: (strength_by_name.get(n, "medium") == "strong", counts[n]),
-        reverse=True,
-    )
+    placement_order = sorted(order, key=lambda n: counts[n], reverse=True)
     for name in placement_order:
         count = counts[name]
-        exponent = _STRENGTH_LATE_BIAS_EXPONENT.get(strength_by_name.get(name, "medium"), 1.0)
         for i in range(count):
             frac = (i + 0.5) / count
-            biased_frac = frac ** exponent
-            pos = min(int(biased_frac * total), total - 1)
+            pos = min(int(frac * total), total - 1)
             pos = _nearest_free_slot(slots, pos)
             slots[pos] = name
     return [name for name in slots if name]
@@ -119,7 +88,6 @@ def expand_to_pulse_sequence(
     scent_sequence: List[ScentItem],
     pulse_seconds: float,
     rounds: int,
-    catalog: Optional[Dict[str, Any]] = None,
 ) -> List[ScentItem]:
     """Deterministically turn the model's conceptual scent pick into an
     interleaved, ratio-weighted pulse train.
@@ -132,6 +100,12 @@ def expand_to_pulse_sequence(
     given odorant count consistent with the old uniform scheme (so raising
     `rounds` still means more perceptible exposure time), while now also
     reflecting how central vs. supporting each odorant is to the blend.
+
+    Occurrences are spread evenly across the timeline for every odorant
+    regardless of `strength` -- no odorant is pushed earlier or later than
+    its ratio-weighted share would naturally place it. (Earlier versions of
+    this system skewed strong-smelling odorants later and weak ones earlier;
+    that bias was removed in favor of even mixing.)
 
     The model's own per-scent durations (opening/heart/closing timing) are
     intentionally not used here; this is a hardware-delivery experiment
@@ -152,10 +126,7 @@ def expand_to_pulse_sequence(
 
     total_slots = rounds * len(order)
     counts = _apportion_counts(order, ratio_by_name, total_slots)
-    strength_by_name = {
-        name: (catalog or {}).get(name, {}).get("strength", "medium") for name in order
-    }
-    names = _interleave_by_count(order, counts, strength_by_name)
+    names = _interleave_by_count(order, counts)
     return [ScentItem(scent_name=name, scent_duration=pulse_seconds) for name in names]
 
 

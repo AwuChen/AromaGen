@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 820px; margin: 24px auto; padding: 0 16px; color: #1a1a1a; }
+    h1 { font-size: 20px; }
+    h2 { font-size: 17px; margin-top: 0; }
+    h3 { font-size: 14px; margin: 0 0 4px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .muted { color: #666; font-size: 13px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 14px; }
+    input[type=text], input[type=number], textarea { width: 100%; padding: 8px; font-size: 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+    textarea { min-height: 60px; }
+    button { background: #2a78d6; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 15px; cursor: pointer; margin-top: 14px; }
+    button:disabled { background: #aac4e8; cursor: not-allowed; }
+    button.secondary { background: #eee; color: #1a1a1a; }
+    button.danger-btn { background: #c0392b; color: #fff; }
+    button.danger-btn:hover { background: #a5281b; }
+    button.small { padding: 4px 10px; font-size: 13px; margin: 0; }
+    .option-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; }
+    .option-slot { font-weight: 700; width: 22px; }
+    .option-kind { font-size: 12px; padding: 2px 6px; border-radius: 4px; background: #f0f0f0; }
+    .option-kind.aromagen_target, .option-kind.aromagen_near { background: #e3edfb; color: #1c4f9c; }
+    .option-kind.real_near, .option-kind.real_far { background: #f5eee0; color: #8a5a00; }
+    .target-word { font-size: 26px; font-weight: 800; margin: 4px 0 2px; }
+    .progress { font-size: 13px; color: #666; margin-bottom: 8px; }
+    .odorant-list { columns: 2; font-size: 14px; }
+    .target-list { font-size: 13px; columns: 2; }
+    .countdown { font-size: 14px; color: #b45309; margin-top: 10px; }
+    .error { color: #b91c1c; font-size: 13px; margin-top: 8px; }
+    .round-block { border: 1px solid #e2e2e2; border-radius: 8px; padding: 14px; margin-top: 14px; }
+    .round-block.done { background: #f7faf7; }
+    .round-block.active { background: #fbfdff; border-color: #b9d4f2; }
+    .round-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+    .round-readonly { font-size: 13px; }
+    .round-readonly div { margin-bottom: 3px; }
+
+    /* Rating-scale odorant rows -- redesigned for readability */
+    .ratio-card { border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin: 8px 0; }
+    .ratio-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .ratio-card .odorant-name { font-weight: 700; font-size: 14px; }
+    .ratio-card .odorant-desc { font-size: 12px; color: #777; margin-bottom: 8px; }
+    .ratio-card-value { font-weight: 700; font-size: 14px; color: #2a78d6; }
+    .ratio-controls { display: flex; align-items: center; gap: 10px; }
+    .ratio-btn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #ccc; background: #f5f5f5; font-size: 18px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; color: #1a1a1a; }
+    .ratio-btn:hover { background: #e8e8e8; }
+    .ratio-slider { flex: 0 0 50%; height: 28px; }
+    .sum-line { font-size: 13px; font-weight: 700; margin-top: 10px; }
+    .sum-line.ok { color: #1a7a3a; }
+    .sum-line.bad { color: #b91c1c; }
+    .ratio-preview { font-size: 12px; margin: 4px 0 0; min-height: 15px; }
+    .ratio-preview.ok { color: #1a7a3a; }
+    .ratio-preview.bad { color: #b91c1c; }
+    .composition-sentence { font-size: 13px; background: #f5f7fa; border-radius: 6px; padding: 10px 12px; margin-top: 10px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1>AromaGen Final User Study &mdash; Data Collection</h1>
+  <div class="muted">Participant: <strong><?= pid ?></strong> &middot; Experimenter-operated. Participant is blindfolded and does not view this screen.</div>
+
+  <div id="app"><p class="muted">Loading session&hellip;</p></div>
+
+<script>
+var currentParticipant = <?!= JSON.stringify(pid) ?>;
+
+function renderView(view) {
+  if (!view.found) {
+    document.getElementById('app').innerHTML = '<div class="card error">No session found for this participant. Return to the admin panel and generate them first.</div>';
+    return;
+  }
+  if (view.screen === 'briefing') return renderBriefing(view);
+  if (view.screen === 'cartridge_check') return renderCartridgeCheck(view);
+  if (view.screen === 'trial') return renderTrial(view);
+  if (view.screen === 'feedback') return renderFeedback(view);
+  if (view.screen === 'section2_briefing') return renderSection2Briefing(view);
+  if (view.screen === 'section2_intake') return renderSection2Intake(view);
+  if (view.screen === 'section2_feedback') return renderSection2Feedback(view);
+  if (view.screen === 'done') return renderDone(view);
+}
+
+function showError(err) {
+  var box = document.getElementById('app');
+  var div = document.createElement('div');
+  div.className = 'error';
+  div.textContent = 'Error: ' + (err && err.message ? err.message : err);
+  box.prepend(div);
+}
+
+function renderBriefing(view) {
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<h2>Section 1 of 2 &mdash; Briefing</h2>' +
+    '<p>Read to the participant (adapt to your own words as needed):</p>' +
+    '<p><em>"Thank you for taking part in this study. You\'ll be smelling a series of scents. ' +
+    'For each one, I\'ll tell you a word describing a target smell, let you smell a reference example, ' +
+    'and ask how familiar it is to you. Then I\'ll present four different scents one at a time, and I\'d ' +
+    'like you to tell me which one best matches the target word and reference smell you were given. ' +
+    'You\'ll also rate how confident you are in each choice. Afterward, I\'ll ask you to compare the real ' +
+    'smell and the device\'s version again, rate how similar they are, and -- if you\'d like -- give feedback ' +
+    'so the device can try to get closer, which we may repeat a few times. There will be a short break between ' +
+    'each item. You\'ll be blindfolded for the smelling portion. There are no right or wrong answers we\'re ' +
+    'testing you on personally -- we\'re evaluating the scents themselves. Let me know if you have any ' +
+    'questions before we begin."</em></p>' +
+    '<p class="muted">Once the participant is blindfolded and ready, click Next.</p>' +
+    '<button onclick="submitAck(\'briefing\')">Next</button>' +
+    '<button type="button" class="danger-btn" style="margin-left:10px;" onclick="skipToSection2_()">TEST ONLY: Skip to Section 2 (Freeform Creation)</button>' +
+    '</div>';
+}
+
+function skipToSection2_() {
+  if (!confirm('This skips all of Section 1 and jumps straight to Section 2 (Freeform Aroma Recreation) -- for testing that section in isolation only. Not for real sessions. Continue?')) return;
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError).skipToSection2ForTesting(currentParticipant);
+}
+
+function renderCartridgeCheck(view) {
+  var odorantsHtml = '<div class="odorant-list"><ol>' +
+    view.odorants.map(function (o) { return '<li>' + escapeHtml(o) + '</li>'; }).join('') +
+    '</ol></div>';
+  var targetsHtml = '<div class="target-list"><ol>' +
+    view.targets.map(function (t) { return '<li>' + escapeHtml(t.target) + ' <span class="muted">(' + escapeHtml(t.cluster) + ')</span></li>'; }).join('') +
+    '</ol></div>';
+
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<h2>Section 1 of 2 &mdash; Cartridge check</h2>' +
+    '<p>Confirm the physical device cartridge is loaded with the fixed odorant set below before starting.</p>' +
+    odorantsHtml +
+    '<p><strong>All ' + view.targets.length + ' target descriptors this session (sanity check):</strong></p>' +
+    targetsHtml +
+    '<button onclick="submitAck(\'cartridge_check\')">Start</button>' +
+    '</div>';
+}
+
+function submitAck(kind) {
+  var fn = kind === 'briefing' ? 'submitBriefingAck' : 'submitCartridgeCheckAck';
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError)[fn](currentParticipant);
+}
+
+// ---- Section 2: Freeform Aroma Recreation ----
+
+function renderSection2Briefing(view) {
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<h2>Section 2 of 2 &mdash; Briefing</h2>' +
+    '<p>Read to the participant (adapt to your own words as needed):</p>' +
+    '<p><em>"For this next part, you get to choose. Five times, think of a favourite food, beverage, ' +
+    'perfume, or any smell you like -- something we haven\'t already covered. Tell me what it is, and ' +
+    'I\'ll have the device try to recreate it for you. Once you smell it, you can give feedback to help ' +
+    'the device get closer to what you had in mind, and we can repeat that a few times if you\'d like. ' +
+    'We\'ll do this five times in total, each with a new smell of your choosing. There are no right or ' +
+    'wrong answers here -- I just want to know what you think it smells like."</em></p>' +
+    '<p class="muted">Once the participant has told you what they\'d like and you\'re ready, click Next.</p>' +
+    '<button onclick="submitSection2BriefingAck_()">Next</button>' +
+    '</div>';
+}
+
+function submitSection2BriefingAck_() {
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError).submitSection2BriefingAck(currentParticipant);
+}
+
+function renderSection2Intake(view) {
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<div class="progress">Section 2 of 2 &middot; Freeform creation ' + view.creationNumber + ' of ' + view.totalCreations + '</div>' +
+    '<h2>Freeform creation</h2>' +
+    '<p>Ask the participant what they\'d like AromaGen to create, then trigger that composition on the ' +
+    'actual AromaGen app/device (this control panel cannot do it for you).</p>' +
+
+    '<label>What did the participant ask AromaGen to create? (their own words)</label>' +
+    '<textarea id="section2RequestText" placeholder="e.g. the smell of my grandmother\'s kitchen at Christmas"></textarea>' +
+
+    '<label>AromaGen\'s base odorant ratio for this creation (read off the AromaGen frontend, e.g. "Vanilla &middot; 60% Orange &middot; 40%")</label>' +
+    '<input type="text" id="section2LlmRatioText" placeholder="Vanilla &middot; 60% Orange &middot; 40%" oninput="updateRatioPreview_(\'section2LlmRatioText\', \'section2LlmRatioPreview\')">' +
+    '<div class="ratio-preview" id="section2LlmRatioPreview"></div>' +
+    '<p class="muted" style="margin-top:2px;">Used to auto-fill the rating-scale feedback screen\'s starting sliders, if that\'s this participant\'s feedback condition.</p>' +
+
+    '<label>Rating in the first round (1 = extremely dissimilar/not a match, 7 = extremely similar/exact match)</label>' +
+    '<input type="number" id="section2InitialRating" min="1" max="7" step="1">' +
+
+    '<div id="section2IntakeError" class="error"></div>' +
+    '<button id="section2IntakeSubmitBtn" onclick="submitSection2Intake_()">Submit &amp; continue to feedback</button>' +
+    '</div>';
+  window.__ratioOdorantNames = view.odorantNames || [];
+}
+
+function submitSection2Intake_() {
+  var requestText = (document.getElementById('section2RequestText').value || '').trim();
+  var llmRatioText = document.getElementById('section2LlmRatioText').value || '';
+  var initialRating = Number(document.getElementById('section2InitialRating').value);
+  var err = document.getElementById('section2IntakeError');
+  if (!requestText) { err.textContent = 'Enter what the participant asked AromaGen to create.'; return; }
+  if (!(initialRating >= 1 && initialRating <= 7)) { err.textContent = 'Rating in the first round must be 1-7.'; return; }
+  err.textContent = '';
+
+  document.getElementById('section2IntakeSubmitBtn').disabled = true;
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
+    document.getElementById('section2IntakeSubmitBtn').disabled = false;
+    showError(e);
+  }).submitSection2Intake(currentParticipant, requestText, llmRatioText, initialRating);
+}
+
+var KIND_LABEL = {
+  aromagen_target: 'AromaGen device composition',
+  aromagen_near: 'AromaGen device composition',
+  real_near: 'Real physical object',
+  real_far: 'Real physical object'
+};
+
+function renderTrial(view) {
+  var optionsHtml = view.options.map(function (opt, i) {
+    return '<div class="option-row">' +
+      '<span class="option-slot">' + (i + 1) + '.</span>' +
+      '<span class="option-kind ' + opt.kind + '">' + KIND_LABEL[opt.kind] + '</span>' +
+      '<span>' + escapeHtml(opt.word) + '</span>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<div class="progress">Section 1 of 2 &middot; Trial ' + view.trialNumber + ' of ' + view.totalTrials + '</div>' +
+    '<div class="target-word">' + escapeHtml(view.target) + '</div>' +
+    '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>' +
+
+    '<h2 style="margin-top:20px;">Step 1</h2>' +
+    '<p>Present a <strong>real physical example</strong> of &ldquo;' + escapeHtml(view.target) + '&rdquo; directly to the participant to smell.</p>' +
+    '<label>Familiarity with this smell (1 = not at all familiar, 7 = extremely familiar)</label>' +
+    '<input type="number" id="familiarity" min="1" max="7" step="1">' +
+
+    '<h2 style="margin-top:20px;">Step 2</h2>' +
+    '<p>Present the following 4 smells to the participant, one at a time, in this order:</p>' +
+    optionsHtml +
+    '<p class="muted">Options tagged &ldquo;AromaGen device composition&rdquo; must be triggered by you on the actual AromaGen app/device (this control panel cannot do it for you) using the word shown.</p>' +
+
+    '<label>AromaGen\'s base odorant ratio for this trial\'s target reconstruction (read off the AromaGen frontend, e.g. "Vanilla &middot; 60% Orange &middot; 40%")</label>' +
+    '<input type="text" id="llmRatioText" placeholder="Vanilla &middot; 60% Orange &middot; 40%" oninput="updateRatioPreview_(\'llmRatioText\', \'llmRatioPreview\')">' +
+    '<div class="ratio-preview" id="llmRatioPreview"></div>' +
+    '<p class="muted" style="margin-top:2px;">Used to auto-fill the rating-scale feedback screen\'s starting sliders for this trial, if that\'s this participant\'s feedback condition.</p>' +
+
+    '<label>Which numbered smell did the participant pick? (1-4)</label>' +
+    '<input type="number" id="selectedSlot" min="1" max="4" step="1">' +
+
+    '<label>Participant\'s confidence in that choice (1 = not at all confident, 7 = extremely confident)</label>' +
+    '<input type="number" id="confidence" min="1" max="7" step="1">' +
+
+    '<div id="trialError" class="error"></div>' +
+    '<button id="submitTrialBtn" onclick="submitTrial()">Submit &amp; continue to feedback</button>' +
+    '</div>';
+  window.__ratioOdorantNames = view.odorantNames || [];
+}
+
+function submitTrial() {
+  var fam = Number(document.getElementById('familiarity').value);
+  var sel = Number(document.getElementById('selectedSlot').value);
+  var conf = Number(document.getElementById('confidence').value);
+  var llmRatioText = document.getElementById('llmRatioText').value || '';
+  var err = document.getElementById('trialError');
+  err.textContent = '';
+  if (!(fam >= 1 && fam <= 7)) { err.textContent = 'Familiarity must be 1-7.'; return; }
+  if (!(sel >= 1 && sel <= 4)) { err.textContent = 'Selected smell must be 1-4.'; return; }
+  if (!(conf >= 1 && conf <= 7)) { err.textContent = 'Confidence must be 1-7.'; return; }
+
+  document.getElementById('submitTrialBtn').disabled = true;
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
+    document.getElementById('submitTrialBtn').disabled = false;
+    showError(e);
+  }).submitTrial(currentParticipant, fam, sel, conf, llmRatioText);
+}
+
+// ---- Live "Parsed as:" preview for the ratio text fields ----
+// Mirrors parseRatioText_ (PilotData.gs) exactly -- same two regexes tried
+// in the same order (name-then-number, falling back to number-then-name),
+// same required '%' sign -- so what the experimenter sees here is exactly
+// what will be used to auto-initialize the rating-scale sliders on the
+// next screen. Lets a typo or unexpected format get caught immediately
+// instead of silently falling back to an even split later.
+function parseRatioTextClient_(text, names) {
+  var ratios = {};
+  if (!text) return ratios;
+  names.forEach(function (name) {
+    var escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var numberPattern = '(\\d+(?:\\.\\d+)?)\\s*%';
+    var afterRe = new RegExp(escaped + '\\s*[\\u00b7:()-]?\\s*' + numberPattern, 'i');
+    var beforeRe = new RegExp(numberPattern + '\\s*[\\u00b7:()-]?\\s*' + escaped, 'i');
+    var m = text.match(afterRe) || text.match(beforeRe);
+    if (m) {
+      var v = Math.max(0, Math.min(1, Number(m[1]) / 100));
+      ratios[name] = Math.round(v * 100) / 100;
+    }
+  });
+  return ratios;
+}
+
+function updateRatioPreview_(inputId, previewId) {
+  var input = document.getElementById(inputId);
+  var preview = document.getElementById(previewId);
+  if (!input || !preview) return;
+  var text = input.value || '';
+  var names = window.__ratioOdorantNames || [];
+  if (!text.trim()) { preview.textContent = ''; preview.className = 'ratio-preview'; return; }
+
+  var ratios = parseRatioTextClient_(text, names);
+  var parts = Object.keys(ratios).map(function (name) { return name + ' ' + Math.round(ratios[name] * 100) + '%'; });
+  if (parts.length === 0) {
+    preview.textContent = 'Parsed as: nothing recognized yet -- check odorant names and that each has a "%" sign.';
+    preview.className = 'ratio-preview bad';
+    return;
+  }
+  var sum = Object.keys(ratios).reduce(function (s, name) { return s + ratios[name]; }, 0);
+  var sumPct = Math.round(sum * 100);
+  preview.textContent = 'Parsed as: ' + parts.join(', ') + ' (sum ' + sumPct + '%, others 0%)';
+  preview.className = 'ratio-preview ' + (Math.abs(sum - 1) < 0.005 ? 'ok' : 'bad');
+}
+
+function startCountdown(seconds, onDone) {
+  var box = document.getElementById('countdownBox');
+  if (!box) { onDone(); return; }
+  var remaining = seconds;
+  box.textContent = 'Break: ' + remaining + 's before the next trial...';
+  var interval = setInterval(function () {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(interval);
+      onDone();
+    } else {
+      box.textContent = 'Break: ' + remaining + 's before the next trial...';
+    }
+  }, 1000);
+}
+
+// ---- Feedback screen ----
+// Shared between Section 1 (per-trial feedback, mode 'section1') and
+// Section 2 (the single freeform creation's feedback, mode 'section2') --
+// same UI shape (initial rating -> up to MAX_FEEDBACK_ROUNDS rounds,
+// freeform or rating-scale per the participant's counterbalanced
+// feedback_type), just different RPC endpoints and instruction text since
+// Section 2 has no real physical reference to compare against.
+
+function renderFeedback(view) {
+  var html = '<div class="card">' +
+    '<div class="progress">Trial ' + view.trialNumber + ' of ' + view.totalTrials + ' &middot; Feedback condition: ' +
+    '<strong>' + escapeHtml(view.feedbackTypeLabel) + '</strong></div>' +
+    '<div class="target-word">' + escapeHtml(view.target) + '</div>' +
+    '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>';
+
+  if (!view.initialSimilaritySubmitted) {
+    html += renderInitialSimilarityForm_();
+  } else {
+    html += '<p class="muted" style="margin-top:16px;">Initial similarity recorded: <strong>' + view.initialSimilarity + ' / 7</strong></p>';
+    html += renderFeedbackRoundsCore_(view, 'section1');
+  }
+
+  html += '</div>';
+  document.getElementById('app').innerHTML = html;
+  if (view.initialSimilaritySubmitted) wireUpFeedbackRoundForm_(view, 'section1');
+}
+
+function renderInitialSimilarityForm_() {
+  return '<h2 style="margin-top:20px;">Initial similarity</h2>' +
+    '<p>Present the <strong>real physical reference</strong> to the participant again, then the ' +
+    '<strong>original AromaGen target reconstruction</strong>. Ask: how similar are these two smells?</p>' +
+    '<label>Perceptual similarity (1 = extremely dissimilar, 7 = extremely similar)</label>' +
+    '<input type="number" id="initialSimilarity" min="1" max="7" step="1">' +
+    '<div id="initialSimError" class="error"></div>' +
+    '<button onclick="submitInitialSimilarity_()">Submit initial similarity</button>';
+}
+
+function submitInitialSimilarity_() {
+  var val = Number(document.getElementById('initialSimilarity').value);
+  var err = document.getElementById('initialSimError');
+  if (!(val >= 1 && val <= 7)) { err.textContent = 'Must be 1-7.'; return; }
+  err.textContent = '';
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError)
+    .submitInitialSimilarity(currentParticipant, val);
+}
+
+// ---- Section 2 feedback screen (freeform creation) ----
+
+function renderSection2Feedback(view) {
+  var html = '<div class="card">' +
+    '<div class="progress">Section 2 of 2 &middot; Freeform creation ' + view.creationNumber + ' of ' + view.totalCreations + ' &middot; Feedback condition: ' +
+    '<strong>' + escapeHtml(view.feedbackTypeLabel) + '</strong></div>' +
+    '<div class="muted">Participant asked for:</div>' +
+    '<div class="target-word" style="font-size:19px;">&ldquo;' + escapeHtml(view.requestText) + '&rdquo;</div>';
+
+  // No initial-rating step here (unlike Section 1) -- straight into
+  // feedback round 1 after intake, since there's no real physical
+  // reference yet to rate against at this point.
+  html += renderFeedbackRoundsCore_(view, 'section2');
+
+  html += '</div>';
+  document.getElementById('app').innerHTML = html;
+  wireUpFeedbackRoundForm_(view, 'section2');
+}
+
+// ---- Shared round-list rendering + wiring (both sections) ----
+
+function renderFeedbackRoundsCore_(view, mode) {
+  var html = '<h2 style="margin-top:20px;">Feedback rounds (up to ' + view.maxRounds + ')</h2>' +
+    '<p class="muted">Each round: the participant gives feedback (via AromaGen\'s real iterative-feedback ' +
+    'function in its frontend), you enter/adjust what happened here, then record a fresh rating. ' +
+    'Not all ' + view.maxRounds + ' rounds are required -- finish whenever the participant is done.</p>';
+
+  // Already-submitted rounds, read-only with an Edit button.
+  view.roundsSoFar.forEach(function (r) {
+    html += '<div class="round-block done" id="roundBlock_' + r.roundNumber + '">' +
+      '<div class="round-title">Feedback ' + r.roundNumber + ' <span class="muted">(saved)</span> ' +
+      '<button class="secondary small" onclick="editRound_(' + r.roundNumber + ', \'' + mode + '\')">Edit</button></div>' +
+      '<div class="round-readonly">' +
+      (view.feedbackType === 'freeform'
+        ? '<div><strong>Feedback text:</strong> ' + escapeHtml(r.inputText) + '</div>' +
+          '<div><strong>Resulting composition:</strong> ' + escapeHtml(r.resultingCompositionJson) + '</div>'
+        : '<div><strong>Ratios:</strong> ' + escapeHtml(r.ratiosJson) + '</div>') +
+      '<div><strong>Rating:</strong> ' + r.similarity + ' / 7</div>' +
+      '</div></div>';
+  });
+
+  // Next round to fill in, if under the cap.
+  if (view.nextRoundNumber <= view.maxRounds) {
+    html += '<div class="round-block active" id="roundBlock_' + view.nextRoundNumber + '">' +
+      '<div class="round-title">Feedback ' + view.nextRoundNumber + '</div>' +
+      '<div id="roundForm_' + view.nextRoundNumber + '"></div>' +
+      '</div>';
+  }
+
+  var finishFn = mode === 'section2' ? 'finishSection2Feedback_' : 'finishTrialFeedback_';
+  var finishLabel = mode === 'section2' ? 'Finish this creation &amp; continue' : 'Finish this trial &amp; continue';
+  html += '<div id="feedbackError" class="error"></div>' +
+    '<button id="finishTrialBtn" onclick="' + finishFn + '()">' + finishLabel + '</button>' +
+    '<div id="countdownBox" class="countdown"></div>';
+
+  return html;
+}
+
+function wireUpFeedbackRoundForm_(view, mode) {
+  if (view.nextRoundNumber > view.maxRounds) return;
+  var container = document.getElementById('roundForm_' + view.nextRoundNumber);
+  if (!container) return;
+  if (view.feedbackType === 'freeform') {
+    renderFreeformRoundForm_(container, view.nextRoundNumber, mode);
+  } else {
+    renderRatingScaleRoundForm_(container, view.nextRoundNumber, view.odorants, view.defaultRatios, mode);
+  }
+}
+
+function renderFreeformRoundForm_(container, roundNumber, mode) {
+  container.innerHTML =
+    '<label>What did the participant say? (free text -- reflects AromaGen\'s real iterative-feedback interaction; edit as needed)</label>' +
+    '<textarea id="roundInput_' + roundNumber + '"></textarea>' +
+    '<label>Resulting base odorants + ratios (read off the AromaGen frontend after this feedback was applied)</label>' +
+    '<textarea id="roundResult_' + roundNumber + '" placeholder="e.g. Vanilla 0.6, Orange 0.4"></textarea>' +
+    '<label>Rating after this round (1 = extremely dissimilar/not a match, 7 = extremely similar/exact match)</label>' +
+    '<input type="number" id="roundSim_' + roundNumber + '" min="1" max="7" step="1">' +
+    '<button onclick="submitFreeformRound_(' + roundNumber + ', \'' + mode + '\')">Save Feedback ' + roundNumber + '</button>';
+}
+
+function submitFreeformRound_(roundNumber, mode) {
+  var text = document.getElementById('roundInput_' + roundNumber).value;
+  var result = document.getElementById('roundResult_' + roundNumber).value;
+  var sim = Number(document.getElementById('roundSim_' + roundNumber).value);
+  var err = document.getElementById('feedbackError');
+  if (!(sim >= 1 && sim <= 7)) { err.textContent = 'Rating must be 1-7.'; return; }
+  err.textContent = '';
+  var fn = mode === 'section2' ? 'submitSection2FeedbackRound' : 'submitFeedbackRound';
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError)
+    [fn](currentParticipant, roundNumber, text, '', result, sim);
+}
+
+// ---- Rating-scale round: redesigned UI ----
+// - sliders auto-initialize from this trial's llm_generated_base_odorant_ratio
+//   text (captured on the trial screen, parsed server-side -- see
+//   startingRatiosForTrial_ in PilotEngine.gs); no manual paste step needed
+// - one readable card per odorant: name + description on top, then a row
+//   with [-] [====slider (~50% width)====] [+] (slider is the widest
+//   element and the ONLY way to set the value -- no free-text number entry)
+// - cards are ordered by CURRENT ratio value, highest first, ties broken
+//   alphabetically -- NOT a fixed odorant order. Re-sorted after every
+//   discrete edit (+/- click, slider release, Normalize), but NOT on every
+//   'input' tick while a slider is actively being dragged (that would
+//   destroy/recreate the DOM node under the mouse mid-drag and break the
+//   gesture) -- see onRatioSliderChange_ (live, no resort) vs
+//   onRatioSliderCommit_ (fires on release, resorts).
+// - element IDs are keyed by each odorant's ORIGINAL index in the
+//   `odorants` array (stable regardless of visual sort order), stored as
+//   data-orig-index on each card so collectRatios_/normalizeRatios_ can
+//   look values up without depending on DOM position.
+// - a live composition-sentence field: "Can you make X odorant x%, ..."
+
+function ratioCardHtml_(roundNumber, name, description, origIndex, val) {
+  return '<div class="ratio-card" data-name="' + escapeHtml(name) + '" data-orig-index="' + origIndex + '">' +
+    '<div class="ratio-card-header">' +
+    '<div><div class="odorant-name">' + escapeHtml(name) + '</div>' +
+    '<div class="odorant-desc">' + escapeHtml(description) + '</div></div>' +
+    '<div class="ratio-card-value" id="ratioPct_' + roundNumber + '_' + origIndex + '">' + Math.round(val * 100) + '%</div>' +
+    '</div>' +
+    '<div class="ratio-controls">' +
+    '<button type="button" class="ratio-btn" onclick="bumpRatio_(' + roundNumber + ', ' + origIndex + ', -0.05)">&minus;</button>' +
+    '<input type="range" class="ratio-slider" id="ratioSlider_' + roundNumber + '_' + origIndex + '" min="0" max="1" step="0.05" value="' + val + '" ' +
+    'oninput="onRatioSliderChange_(' + roundNumber + ', ' + origIndex + ')" onchange="onRatioSliderCommit_(' + roundNumber + ', ' + origIndex + ')">' +
+    '<button type="button" class="ratio-btn" onclick="bumpRatio_(' + roundNumber + ', ' + origIndex + ', 0.05)">+</button>' +
+    '</div></div>';
+}
+
+// Sorts `odorants` (each {name, description}, index = stable origIndex) by
+// `ratios[name]` descending, ties broken alphabetically by name.
+function ratioCardsSortedHtml_(roundNumber, odorants, ratios) {
+  var withValues = odorants.map(function (o, origIndex) {
+    return { name: o.name, description: o.description, origIndex: origIndex, value: ratios[o.name] !== undefined ? ratios[o.name] : 0 };
+  });
+  withValues.sort(function (a, b) {
+    if (b.value !== a.value) return b.value - a.value;
+    return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+  });
+  return withValues.map(function (o) {
+    return ratioCardHtml_(roundNumber, o.name, o.description, o.origIndex, o.value);
+  }).join('');
+}
+
+// Re-reads current values, re-sorts, and rebuilds just the cards container
+// (not the whole form) -- called after any discrete edit.
+function resortRatioCards_(roundNumber) {
+  var odorants = (window.__ratioOdorantsByRound || {})[roundNumber];
+  var cardsContainer = document.getElementById('ratioCards_' + roundNumber);
+  if (!odorants || !cardsContainer) return;
+  var result = collectRatios_(roundNumber, odorants.length);
+  cardsContainer.innerHTML = ratioCardsSortedHtml_(roundNumber, odorants, result.ratios);
+}
+
+function renderRatingScaleRoundForm_(container, roundNumber, odorants, defaultRatios, mode) {
+  window.__ratioOdorantsByRound = window.__ratioOdorantsByRound || {};
+  window.__ratioOdorantsByRound[roundNumber] = odorants;
+
+  container.innerHTML =
+    '<label style="margin-top:0;">Sliders start from the ratio you entered on the trial screen for this target ' +
+    '(edit here if AromaGen\'s frontend shows something slightly different, then refine per participant feedback). ' +
+    'Rows are ordered by ratio, highest first (ties alphabetical) -- the order updates as you adjust values:</label>' +
+    '<div id="ratioCards_' + roundNumber + '">' + ratioCardsSortedHtml_(roundNumber, odorants, defaultRatios) + '</div>' +
+    '<div class="sum-line" id="sumLine_' + roundNumber + '"></div>' +
+    '<button type="button" class="secondary small" onclick="normalizeRatios_(' + roundNumber + ', ' + odorants.length + ')">Normalize to 100%</button>' +
+    '<label>New composition request (auto-generated -- copy this into AromaGen\'s textual feedback box)</label>' +
+    '<div class="composition-sentence" id="compositionSentence_' + roundNumber + '"></div>' +
+    '<label style="margin-top:16px;">Rating after this round (1 = extremely dissimilar/not a match, 7 = extremely similar/exact match)</label>' +
+    '<input type="number" id="roundSim_' + roundNumber + '" min="1" max="7" step="1">' +
+    '<div id="ratioError_' + roundNumber + '" class="error"></div>' +
+    '<button id="saveRatioBtn_' + roundNumber + '" onclick="submitRatingScaleRound_(' + roundNumber + ', ' + odorants.length + ', \'' + mode + '\')">Save Feedback ' + roundNumber + '</button>';
+
+  updateSumLine_(roundNumber, odorants.length);
+  updateCompositionSentence_(roundNumber, odorants.length);
+}
+
+function setRatioValue_(roundNumber, i, val) {
+  document.getElementById('ratioSlider_' + roundNumber + '_' + i).value = val;
+  document.getElementById('ratioPct_' + roundNumber + '_' + i).textContent = Math.round(val * 100) + '%';
+}
+
+// Fires on every 'input' tick while a slider is being dragged -- live value
+// update only, no re-sort (re-sorting would rebuild the DOM node under the
+// mouse mid-drag and break the gesture).
+function onRatioSliderChange_(roundNumber, i) {
+  var slider = document.getElementById('ratioSlider_' + roundNumber + '_' + i);
+  var v = Number(slider.value);
+  setRatioValue_(roundNumber, i, v);
+  updateSumLineForRow_(roundNumber, i);
+  updateCompositionSentenceForRow_(roundNumber, i);
+}
+
+// Fires once on 'change' (slider released) -- safe to re-sort now.
+function onRatioSliderCommit_(roundNumber, i) {
+  resortRatioCards_(roundNumber);
+}
+
+function bumpRatio_(roundNumber, i, delta) {
+  var slider = document.getElementById('ratioSlider_' + roundNumber + '_' + i);
+  var v = Math.max(0, Math.min(1, Math.round((Number(slider.value) + delta) * 100) / 100));
+  setRatioValue_(roundNumber, i, v);
+  updateSumLineForRow_(roundNumber, i);
+  updateCompositionSentenceForRow_(roundNumber, i);
+  resortRatioCards_(roundNumber);
+}
+
+function updateSumLineForRow_(roundNumber, i) {
+  var container = document.getElementById('roundForm_' + roundNumber);
+  var n = container ? container.querySelectorAll('.ratio-card').length : 0;
+  updateSumLine_(roundNumber, n);
+}
+
+function updateCompositionSentenceForRow_(roundNumber, i) {
+  var container = document.getElementById('roundForm_' + roundNumber);
+  var n = container ? container.querySelectorAll('.ratio-card').length : 0;
+  updateCompositionSentence_(roundNumber, n);
+}
+
+function collectRatios_(roundNumber, n) {
+  var ratios = {};
+  var container = document.getElementById('roundForm_' + roundNumber);
+  var rows = container.querySelectorAll('.ratio-card');
+  var sum = 0;
+  rows.forEach(function (row) {
+    var name = row.getAttribute('data-name');
+    var idx = row.getAttribute('data-orig-index');
+    var slider = document.getElementById('ratioSlider_' + roundNumber + '_' + idx);
+    var v = Number(slider.value) || 0;
+    ratios[name] = v;
+    sum += v;
+  });
+  return { ratios: ratios, sum: Math.round(sum * 1000) / 1000 };
+}
+
+function updateSumLine_(roundNumber, n) {
+  var result = collectRatios_(roundNumber, n);
+  var line = document.getElementById('sumLine_' + roundNumber);
+  if (!line) return;
+  var ok = Math.abs(result.sum - 1) < 0.005;
+  line.textContent = 'Sum: ' + Math.round(result.sum * 100) + '% / 100%' + (ok ? ' ✓' : ' -- must equal 100% to save');
+  line.className = 'sum-line ' + (ok ? 'ok' : 'bad');
+  var btn = document.getElementById('saveRatioBtn_' + roundNumber);
+  if (btn) btn.disabled = !ok;
+}
+
+function updateCompositionSentence_(roundNumber, n) {
+  var result = collectRatios_(roundNumber, n);
+  var el = document.getElementById('compositionSentence_' + roundNumber);
+  if (!el) return;
+  var parts = [];
+  for (var name in result.ratios) {
+    if (result.ratios[name] > 0) {
+      parts.push(name + ' ' + Math.round(result.ratios[name] * 100) + '%');
+    }
+  }
+  if (parts.length === 0) {
+    el.textContent = 'Can you make this scent? (no odorants above 0% yet)';
+    return;
+  }
+  var sentence;
+  if (parts.length === 1) {
+    sentence = 'Can you make ' + parts[0] + '?';
+  } else {
+    sentence = 'Can you make ' + parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] + '?';
+  }
+  el.textContent = sentence;
+}
+
+function normalizeRatios_(roundNumber, n) {
+  var result = collectRatios_(roundNumber, n);
+  var container = document.getElementById('roundForm_' + roundNumber);
+  var rows = container.querySelectorAll('.ratio-card');
+  if (result.sum === 0) return;
+  rows.forEach(function (row) {
+    var name = row.getAttribute('data-name');
+    var idx = row.getAttribute('data-orig-index');
+    var normalized = Math.round((result.ratios[name] / result.sum) * 100) / 100;
+    setRatioValue_(roundNumber, idx, normalized);
+  });
+  updateSumLine_(roundNumber, n);
+  updateCompositionSentence_(roundNumber, n);
+  resortRatioCards_(roundNumber);
+}
+
+function submitRatingScaleRound_(roundNumber, n, mode) {
+  var result = collectRatios_(roundNumber, n);
+  var err = document.getElementById('ratioError_' + roundNumber);
+  if (Math.abs(result.sum - 1) >= 0.005) { err.textContent = 'Ratios must sum to exactly 100%.'; return; }
+  var sim = Number(document.getElementById('roundSim_' + roundNumber).value);
+  if (!(sim >= 1 && sim <= 7)) { err.textContent = 'Rating must be 1-7.'; return; }
+  err.textContent = '';
+  var ratiosJson = JSON.stringify(result.ratios);
+  var fn = mode === 'section2' ? 'submitSection2FeedbackRound' : 'submitFeedbackRound';
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(showError)
+    [fn](currentParticipant, roundNumber, '', ratiosJson, ratiosJson, sim);
+}
+
+function editRound_(roundNumber, mode) {
+  // Re-render the round's block as an editable form pre-filled with its
+  // saved values, reusing submitFeedbackRound's/submitSection2FeedbackRound's
+  // upsert behavior to save changes in place.
+  google.script.run.withSuccessHandler(function (view) {
+    var r = view.roundsSoFar.filter(function (x) { return x.roundNumber === roundNumber; })[0];
+    var block = document.getElementById('roundBlock_' + roundNumber);
+    if (!block || !r) return;
+    block.className = 'round-block active';
+    block.innerHTML = '<div class="round-title">Feedback ' + roundNumber + ' (editing)</div><div id="roundForm_' + roundNumber + '"></div>';
+    var container = document.getElementById('roundForm_' + roundNumber);
+    if (view.feedbackType === 'freeform') {
+      renderFreeformRoundForm_(container, roundNumber, mode);
+      document.getElementById('roundInput_' + roundNumber).value = r.inputText;
+      document.getElementById('roundResult_' + roundNumber).value = r.resultingCompositionJson;
+      document.getElementById('roundSim_' + roundNumber).value = r.similarity;
+    } else {
+      var savedRatios = {};
+      try { savedRatios = JSON.parse(r.ratiosJson); } catch (e) {}
+      renderRatingScaleRoundForm_(container, roundNumber, view.odorants, savedRatios, mode);
+      document.getElementById('roundSim_' + roundNumber).value = r.similarity;
+    }
+  }).withFailureHandler(showError).getPilotSessionView(currentParticipant);
+}
+
+function finishTrialFeedback_() {
+  document.getElementById('finishTrialBtn').disabled = true;
+  google.script.run.withSuccessHandler(function (nextView) {
+    startCountdown(10, function () { renderView(nextView); });
+  }).withFailureHandler(function (e) {
+    document.getElementById('finishTrialBtn').disabled = false;
+    showError(e);
+  }).finishTrialFeedback(currentParticipant);
+}
+
+function finishSection2Feedback_() {
+  document.getElementById('finishTrialBtn').disabled = true;
+  google.script.run.withSuccessHandler(function (nextView) {
+    startCountdown(10, function () { renderView(nextView); });
+  }).withFailureHandler(function (e) {
+    document.getElementById('finishTrialBtn').disabled = false;
+    showError(e);
+  }).finishSection2Feedback(currentParticipant);
+}
+
+function renderDone(view) {
+  document.getElementById('app').innerHTML =
+    '<div class="card">' +
+    '<h2>Session complete</h2>' +
+    '<p>Both sections finished for <strong>' + escapeHtml(view.participantName) + '</strong>. Thank the participant and remove the blindfold.</p>' +
+    '<p class="muted">Close this tab and return to the admin panel to open the next participant\'s link.</p>' +
+    '</div>';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+google.script.run.withSuccessHandler(renderView).withFailureHandler(showError).startPilotSession(currentParticipant);
+</script>
+</body>
+</html>
