@@ -13,15 +13,15 @@ both the Preliminary Study's and the Internal Pilot Study's taxonomies
 """
 
 CLUSTERS = {
-    "Floral": ["Lavender", "cherry blossom", "jasmine tea", "rose hand cream"],
+    "Floral": ["Lavender", "rose", "jasmine tea", "cherry blossom cake"],
     "Citrus": ["Orange", "mango", "Lemonade", "Lime soda (Sprite)"],
-    "Woody & Resinous": ["Pine", "oak", "Wooden wine barrel", "Incense"],
+    "Woody & Resinous": ["birch", "patchouli", "Whiskey and oak candle", "Incense"],
     "Herbal & Cooling": ["Basil", "Cucumber", "Peppermint tea", "Mint chewing gum"],
-    "Spice": ["Ginger", "Black pepper", "Chai latte", "Cinnamon roll"],
-    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "Vanilla ice cream"],
-    "Roasted & Smoky": ["Coffee", "Bacon", "barbeque ribs", "Hot dog with hot sauce"],
+    "Spice": ["Ginger", "Black pepper", "chai tea", "Cinnamon roll"],
+    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow-flavored pop tarts"],
+    "Roasted & Smoky": ["coffee beans", "Bacon", "korean bbq beef patty", "Hot dog with hot sauce"],
     "Fermented & Sour": ["Greek yogurt", "Pickled cucumber", "Fries with ranch sauce", "Nacho with sour cream"],
-    "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Sticky tofu with chilli"],
+    "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Natto beans"],
     "Chemical & Solvent": ["Whiskey", "Tequila", "Mint Fluoride mouthwash", "Lavender nail polish remover"],
     "Perfumed & Clean": ["Aloe vera", "Hand sanitizer", "Mint fluoride toothpaste", "Almond oil shampoo"],
     "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in bbq sauce", "Salty popcorn"],
@@ -32,48 +32,61 @@ assert sum(len(v) for v in CLUSTERS.values()) == 50
 
 TRIALS_PER_PARTICIPANT = len(CLUSTERS)  # 12 -- one target per cluster, one pass
 
-# --- Distractor design: dynamic, balanced, randomized (not a static table) ---
+# --- Distractor design: exclusion-list based (replaced the earlier
+# family/ring design entirely -- per explicit instruction). For each TARGET
+# cluster, EXCLUDED_CLUSTERS lists which OTHER clusters may NOT supply
+# distractors; every cluster not excluded (and not the target's own
+# cluster) is eligible. Given verbatim by dictation for 10 of the 12
+# clusters; Spice's and Perfumed & Clean's entries were never dictated
+# directly but are fully recoverable by symmetry (every pair given was
+# confirmed to be mutual: if A excludes B, B excludes A too -- a few pairs
+# were dictated one-directionally and were made symmetric per explicit
+# confirmation). The target's own cluster is ALWAYS implicitly excluded too
+# (not re-stated per cluster below) -- distractors are never drawn from the
+# same cluster as the target itself, consistent with every other distractor
+# design this project has used (near-neighbor rings, family splits) always
+# contrasting DIFFERENT clusters, never the target's own.
 #
-# Same family/ring structure as the Internal Pilot Study (2 families of 6
-# clusters, each cluster has 2 fixed near-neighbor CLUSTERS within its
-# family), but WHICH WORD gets picked from each relevant cluster is decided
-# at runtime, randomly among that cluster's least-used-so-far words, with a
-# running distractor-usage tally mutated as trials are built (same
-# least-used-first balancing principle used for target selection) -- not a
-# fixed per-target lookup table. This is what makes every word in the
-# 50-word list appear roughly evenly as a distractor across a whole batch
-# of participants, while still varying which specific words get picked for
-# any given target from one participant to the next.
-#
-# Family A (6 clusters, ring order): Floral <-> Sweet & Gourmand <-> Spice
-#   <-> Woody & Resinous <-> Herbal & Cooling <-> Citrus <-> (back to Floral)
-# Family B (6 clusters, ring order): Chemical & Solvent <-> Perfumed &
-#   Clean <-> Roasted & Smoky <-> Savoury & Umami <-> Fermented & Sour <->
-#   Putrid & Decay <-> (back to Chemical & Solvent)
-FAMILY_A_RING = ["Floral", "Sweet & Gourmand", "Spice", "Woody & Resinous", "Herbal & Cooling", "Citrus"]
-FAMILY_B_RING = ["Chemical & Solvent", "Perfumed & Clean", "Roasted & Smoky", "Savoury & Umami", "Fermented & Sour", "Putrid & Decay"]
+# WHICH WORD gets picked from each eligible cluster is decided at runtime
+# by two layered rules (see pilot_assignment.py's pick_distractors): (1) a
+# HARD per-cluster non-repeat cycle -- a word already used as a distractor
+# for a given target cluster can't be picked again for that cluster until
+# every eligible word has been used once, then it resets; (2) among
+# whatever's left, least-used-first against a running GLOBAL
+# distractor-usage tally (same balancing principle used for target
+# selection), so usage also stays even across all 50 words as distractors,
+# not just non-repeating per cluster.
+EXCLUDED_CLUSTERS = {
+    "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean"],
+    "Citrus": ["Woody & Resinous", "Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling"],
+    "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Citrus", "Putrid & Decay", "Chemical & Solvent"],
+    "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Sweet & Gourmand", "Chemical & Solvent"],
+    "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand"],
+    "Sweet & Gourmand": ["Citrus", "Herbal & Cooling", "Spice"],
+    "Roasted & Smoky": ["Savoury & Umami", "Fermented & Sour"],
+    "Fermented & Sour": ["Roasted & Smoky", "Putrid & Decay", "Savoury & Umami"],
+    "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami", "Woody & Resinous"],
+    "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous"],
+    "Perfumed & Clean": ["Floral", "Chemical & Solvent"],
+    "Savoury & Umami": ["Fermented & Sour", "Roasted & Smoky", "Putrid & Decay"],
+}
 
-assert set(FAMILY_A_RING) | set(FAMILY_B_RING) == set(CLUSTERS.keys())
-assert len(FAMILY_A_RING) == 6 and len(FAMILY_B_RING) == 6
+assert set(EXCLUDED_CLUSTERS.keys()) == set(CLUSTERS.keys())
+for _c, _excl in EXCLUDED_CLUSTERS.items():
+    for _other in _excl:
+        assert _c in EXCLUDED_CLUSTERS[_other], f"{_c} excludes {_other} but not vice versa"
 
 
-def _ring_neighbors(ring, cluster):
-    i = ring.index(cluster)
-    n = len(ring)
-    return [ring[(i - 1) % n], ring[(i + 1) % n]]
+def eligible_distractor_clusters(cluster):
+    excluded = EXCLUDED_CLUSTERS.get(cluster, [])
+    return [c for c in CLUSTERS if c != cluster and c not in excluded]
 
 
-NEIGHBOR_CLUSTERS = {}
-for _c in FAMILY_A_RING:
-    NEIGHBOR_CLUSTERS[_c] = _ring_neighbors(FAMILY_A_RING, _c)
-for _c in FAMILY_B_RING:
-    NEIGHBOR_CLUSTERS[_c] = _ring_neighbors(FAMILY_B_RING, _c)
-
-FAMILY_OF_CLUSTER = {}
-for _c in FAMILY_A_RING:
-    FAMILY_OF_CLUSTER[_c] = "A"
-for _c in FAMILY_B_RING:
-    FAMILY_OF_CLUSTER[_c] = "B"
+def eligible_distractor_words(cluster):
+    words = []
+    for c in eligible_distractor_clusters(cluster):
+        words.extend(CLUSTERS[c])
+    return words
 
 # --- The single fixed odorant set (no longer an A/B condition) ---
 #

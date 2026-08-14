@@ -38,6 +38,24 @@ class Settings:
     pulse_rounds: int = int(os.getenv("PULSE_ROUNDS", "8"))
     validation_layer_enabled: bool = os.getenv("VALIDATION_LAYER_ENABLED", "false").lower() == "true"
 
+    interaction_log_apps_script_url: str = os.getenv("INTERACTION_LOG_APPS_SCRIPT_URL", "")
+    interaction_log_token: str = os.getenv("INTERACTION_LOG_TOKEN", "")
+
+    # Local copy of the interaction log (fast read-path for retrieval-augmented
+    # composition, dual-written alongside the Apps Script/Sheet on every /log_interaction
+    # call -- see aromagen/agents/interaction_retrieval.py).
+    interaction_log_local_path: Path = Path(
+        os.getenv("INTERACTION_LOG_LOCAL_PATH", DATA_ROOT / "interaction_log.jsonl")
+    )
+    interaction_log_embeddings_path: Path = Path(
+        os.getenv("INTERACTION_LOG_EMBEDDINGS_PATH", DATA_ROOT / "interaction_log_embeddings.json")
+    )
+    interaction_retrieval_enabled: bool = os.getenv("INTERACTION_RETRIEVAL_ENABLED", "true").lower() == "true"
+    interaction_retrieval_top_k: int = int(os.getenv("INTERACTION_RETRIEVAL_TOP_K", "5"))
+    interaction_retrieval_embedding_model: str = os.getenv(
+        "INTERACTION_RETRIEVAL_EMBEDDING_MODEL", "text-embedding-3-small"
+    )
+
     # Self-consistency ensemble for concrete-smell requests (see openai_client.compose_with_ensemble)
     ensemble_enabled: bool = os.getenv("ENSEMBLE_ENABLED", "true").lower() == "true"
     ensemble_predictor_count: int = int(os.getenv("ENSEMBLE_PREDICTOR_COUNT", "10"))

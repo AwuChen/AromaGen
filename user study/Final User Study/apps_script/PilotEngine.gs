@@ -27,7 +27,7 @@
  *   All similarity ratings (round 0 and rounds 1-5) share ONE column,
  *   `similarity_rating`, in the feedback sheet -- not two separate columns.
  *
- * TWO SECTIONS: Section 1 is everything above (12 4-AFC trials, each with
+ * TWO SECTIONS: Section 1 is everything above (12 3-AFC trials, each with
  * its own feedback sub-flow). Section 2, "Freeform Aroma Recreation", runs
  * once a participant finishes all of Section 1: a briefing, then
  * SECTION2_CREATIONS_PER_PARTICIPANT (PilotData.gs, currently 5) separate
@@ -64,7 +64,7 @@
  * cannot trigger the real AromaGen device or read its frontend live (Apps
  * Script runs in Google's cloud; no network path to your local AromaGen
  * backend/frontend or the device's Bluetooth hardware). Applies to the
- * 4-AFC trial's AromaGen options, the feedback sub-flow's "resulting
+ * 3-AFC trial's AromaGen options, the feedback sub-flow's "resulting
  * composition"/starting ratios, AND Section 2's intake (request + ratio)
  * -- the experimenter reads these off the real AromaGen frontend and
  * enters/adjusts them here. Every such field is editable afterward.
@@ -86,8 +86,7 @@ var PHASE_INTAKE = "intake"; // Section 2 main step's pre-feedback phase
 var KIND_LABEL_ = {
   aromagen_target: "aromagen target",
   aromagen_near: "aromagen near",
-  real_near: "real near",
-  real_far: "real far"
+  real_near: "real near"
 };
 
 function formatOption_(opt) {
@@ -95,9 +94,9 @@ function formatOption_(opt) {
 }
 
 /** Creates a session row for `name` if one doesn't already exist (idempotent).
- * `targetTally`/`distractorTally` mutated in place as new plans are built.
- * Returns {created: bool, feedbackType}. */
-function ensureSession_(masterSs, name, targetTally, distractorTally, seqIndex) {
+ * `targetTally`/`distractorTally`/`clusterUsedSets` mutated in place as new
+ * plans are built. Returns {created: bool, feedbackType}. */
+function ensureSession_(masterSs, name, targetTally, distractorTally, seqIndex, clusterUsedSets) {
   var sessionsSheet = masterSs.getSheetByName("sessions");
   var existing = getSessionRow_(sessionsSheet, name);
   if (existing) {
@@ -105,7 +104,7 @@ function ensureSession_(masterSs, name, targetTally, distractorTally, seqIndex) 
     return { created: false, feedbackType: existingPlan.feedback_type };
   }
 
-  var plan = buildParticipantPlan_(seqIndex, targetTally, distractorTally, seqIndex * 7919 + Date.now() % 100000);
+  var plan = buildParticipantPlan_(seqIndex, targetTally, distractorTally, seqIndex * 7919 + Date.now() % 100000, clusterUsedSets);
   var now = new Date();
   sessionsSheet.appendRow([name, JSON.stringify(plan), "in_progress", 0, TRIAL_PHASE_AFC, now, ""]);
 
@@ -145,10 +144,11 @@ function generateParticipantsBatch(namesText) {
   lock.waitLock(30000);
   try {
     var tallies = computePilotTallies_(masterSs);
+    var clusterUsedSets = computeClusterUsedSets_(masterSs);
     var nextSeq = nextSeqIndex_(masterSs);
 
     var results = uniqueNames.map(function (name) {
-      var result = ensureSession_(masterSs, name, tallies.targets, tallies.distractors, nextSeq);
+      var result = ensureSession_(masterSs, name, tallies.targets, tallies.distractors, nextSeq, clusterUsedSets);
       if (result.created) nextSeq += 1; // only consume a sequence slot for genuinely new sessions
       return {
         name: name,
@@ -176,8 +176,9 @@ function startPilotSession(participantName) {
   lock.waitLock(30000);
   try {
     var tallies = computePilotTallies_(masterSs);
+    var clusterUsedSets = computeClusterUsedSets_(masterSs);
     var seqIndex = nextSeqIndex_(masterSs);
-    ensureSession_(masterSs, participantName, tallies.targets, tallies.distractors, seqIndex);
+    ensureSession_(masterSs, participantName, tallies.targets, tallies.distractors, seqIndex, clusterUsedSets);
     return getPilotSessionView(participantName);
   } finally {
     lock.releaseLock();
@@ -388,7 +389,7 @@ function getPilotSessionView(participantName) {
         totalTrials: TRIALS_PER_PARTICIPANT,
         target: trial.target,
         cluster: trial.cluster,
-        options: trial.options,      // [{kind, word}, ...] in presentation (1..4) order
+        options: trial.options,      // [{kind, word}, ...] in presentation (1..3) order
         correctSlot: trial.correct_slot, // 0-indexed
         odorantNames: BASE_ODORANT_SET // for the ratio field's live "Parsed as:" preview
       };
@@ -438,6 +439,12 @@ function getPilotSessionView(participantName) {
       maxRounds: MAX_FEEDBACK_ROUNDS,
       odorants: odorantsWithDescriptions,
       defaultRatios: defaultRatios,
+      // The ratio the experimenter typed on the trial screen for this same
+      // trial (see getTrialLlmRatioText_) -- shown again here so they can
+      // reliably re-trigger the exact same AromaGen composition on the
+      // device before rating initial similarity, without having to recall
+      // or scroll back to what they entered a screen ago.
+      llmRatioText: getTrialLlmRatioText_(masterSs, participantName, trialIndex),
       initialSimilaritySubmitted: !!initialRound,
       initialSimilarity: initialRound ? Number(initialRound.similarity_rating) : null,
       roundsSoFar: feedbackRounds.map(function (r) {
@@ -568,7 +575,7 @@ function submitCartridgeCheckAck(participantName) {
 }
 
 /**
- * familiarity/confidence: 1-7 integers. selectedSlot: 1-4 (which of the 4
+ * familiarity/confidence: 1-7 integers. selectedSlot: 1-3 (which of the 3
  * presented smells the participant picked, as numbered on screen).
  * llmRatioText: free text the experimenter reads off the AromaGen frontend
  * for this trial's target reconstruction, e.g. "Vanilla · 60% Orange ·
@@ -591,7 +598,7 @@ function submitTrial(participantName, familiarity, selectedSlot, confidence, llm
     var phase = row.trial_phase || TRIAL_PHASE_AFC;
     var inTrialRange = (step >= STEP_TRIAL_START && step <= STEP_TRIAL_END);
     if (!(inTrialRange && phase === TRIAL_PHASE_AFC)) {
-      throw new Error("Not at a trial (4-AFC) step (current_step=" + step + ", trial_phase=" + phase + ").");
+      throw new Error("Not at a trial (3-AFC) step (current_step=" + step + ", trial_phase=" + phase + ").");
     }
 
     var plan = JSON.parse(row.plan_json);
@@ -606,7 +613,7 @@ function submitTrial(participantName, familiarity, selectedSlot, confidence, llm
     trialsSheet.appendRow([
       participantName, plan.odorant_set, trialIndex,
       trial.target, trial.cluster,
-      formatOption_(opts[0]), formatOption_(opts[1]), formatOption_(opts[2]), formatOption_(opts[3]),
+      formatOption_(opts[0]), formatOption_(opts[1]), formatOption_(opts[2]),
       trial.correct_slot + 1, Number(familiarity), selectedIndex + 1, isCorrect,
       Number(confidence), new Date(), (llmRatioText || "").trim()
     ]);

@@ -24,6 +24,7 @@ from .schemas import (
 )
 from .settings import settings
 from .example_bank import find_similar
+from .interaction_retrieval import get_top_k_blocks
 
 log = logging.getLogger(__name__)
 
@@ -176,6 +177,7 @@ def _render_prompt(
     scents: Dict[str, Any],
     cartridge_status: Optional[Dict[str, Any]] = None,
     learned_examples: Optional[List[Dict[str, Any]]] = None,
+    interaction_precedent: Optional[List[Dict[str, Any]]] = None,
 ) -> str:
     env = Environment(
         loader=FileSystemLoader(settings.prompts_dir),
@@ -187,11 +189,14 @@ def _render_prompt(
     scents_json = json.dumps(scents, ensure_ascii=False, indent=4)
     cartridge_status_json = json.dumps(cartridge_status or {}, ensure_ascii=False, indent=4)
     learned_examples_json = json.dumps(learned_examples or [], ensure_ascii=False, indent=4)
+    interaction_precedent_json = json.dumps(interaction_precedent or [], ensure_ascii=False, indent=4)
     return template.render(
         scents_json=scents_json,
         cartridge_status_json=cartridge_status_json,
         learned_examples=learned_examples or [],
         learned_examples_json=learned_examples_json,
+        interaction_precedent=interaction_precedent or [],
+        interaction_precedent_json=interaction_precedent_json,
         sequence_total_seconds=settings.sequence_total_seconds,
         scent_duration_max=settings.scent_duration_max,
     )
@@ -435,11 +440,13 @@ def compose_with_openai(
     cartridge_status: Optional[Dict[str, Any]] = None,
 ) -> ComposeResponse:
     learned_examples = find_similar(sentence)
+    interaction_precedent = get_top_k_blocks(sentence)
     system_prompt = _render_prompt(
         "system_prompt.j2",
         scents,
         cartridge_status,
         learned_examples=learned_examples,
+        interaction_precedent=interaction_precedent,
     )
     client = OpenAI(api_key=settings.openai_api_key)
     schema = _build_schema(scents)

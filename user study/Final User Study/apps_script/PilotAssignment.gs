@@ -34,8 +34,52 @@ function pickLeastUsedOne_(cluster, tally, rng) {
   return picked;
 }
 
+/**
+ * Picks 2 distinct distractor words for a target whose cluster is
+ * `cluster`, from the EXCLUDED_CLUSTERS-derived eligible pool
+ * (eligibleDistractorWords_, PilotData.gs) -- NOT a fixed ring-neighbor
+ * pair anymore. Two layered rules, per explicit instruction:
+ *
+ * 1. HARD per-cluster non-repeat cycle: `clusterUsedSets[cluster]` tracks
+ *    every word already used as a distractor for THIS target cluster,
+ *    across every participant so far. A word already in that set cannot be
+ *    picked again for this cluster until the set is exhausted (fewer than
+ *    2 eligible words remain unused), at which point it resets to empty
+ *    and a fresh cycle begins. Mutated in place -- same "continues from
+ *    the true running total" contract as targetTally/distractorTally.
+ * 2. Among whatever's left after rule 1, least-used-first (global
+ *    distractorTally, random tie-break) -- the same balancing principle
+ *    used throughout this project, so usage stays even across all 50
+ *    words as distractors, not just non-repeating per cluster.
+ *
+ * See PilotData.gs's computeClusterUsedSets_ for how `clusterUsedSets` is
+ * reconstructed fresh from history before each new plan is built -- the
+ * reset-check here must stay in sync with that replay logic (checked once
+ * per trial, as a unit, not per individual word).
+ */
+function pickDistractors_(target, cluster, distractorTally, rng, descToCluster, clusterUsedSets) {
+  var eligibleWords = eligibleDistractorWords_(cluster);
+  var usedSet = clusterUsedSets[cluster] || (clusterUsedSets[cluster] = {});
+
+  var available = eligibleWords.filter(function (w) { return !usedSet[w]; });
+  if (available.length < 2) {
+    for (var k in usedSet) delete usedSet[k];
+    available = eligibleWords.slice();
+  }
+
+  var nearA = pickLeastUsedFrom_(available, distractorTally, rng);
+  var remaining = available.filter(function (w) { return w !== nearA; });
+  var nearB = pickLeastUsedFrom_(remaining, distractorTally, rng);
+
+  usedSet[nearA] = true;
+  usedSet[nearB] = true;
+
+  return [nearA, nearB];
+}
+
 /** Same as pickLeastUsedOne_ but over an explicit word list rather than a
- * named cluster (used for far-distractor selection across a family). */
+ * named cluster (used for distractor selection, whose eligible pool spans
+ * several clusters at once, not just one). */
 function pickLeastUsedFrom_(words, tally, rng) {
   var candidates = shuffle_(words, rng);
   candidates.sort(function (a, b) { return (tally[a] || 0) - (tally[b] || 0); });
@@ -44,64 +88,10 @@ function pickLeastUsedFrom_(words, tally, rng) {
   return picked;
 }
 
-// LAZY, not an eagerly-evaluated top-level IIFE -- see allWords_() below for
-// why that distinction is load-bearing here.
-var ALL_WORDS_ = null;
-
-/**
- * Returns the flat 50-word list, computing it on first call and caching it.
- *
- * This MUST be lazy. It used to be `var ALL_WORDS_ = (function () {...})();`
- * -- an IIFE that ran immediately when this file's top-level code executed.
- * Apps Script concatenates a project's .gs files and runs their top-level
- * statements in FILENAME-ALPHABETICAL order before any function is called:
- * "PilotAssignment.gs" sorts before "PilotData.gs" ('A' < 'D'), so that IIFE
- * ran while `CLUSTERS` (declared in PilotData.gs) was still `undefined` --
- * hoisted but not yet assigned. `for (var c in undefined)` doesn't throw, it
- * just iterates zero times, so `ALL_WORDS_` silently became `[]` forever.
- * Every far-distractor pick (`pickLeastUsedFrom_(ALL_WORDS_.filter(...), ...)`
- * in pickDistractors_ below) then filtered an empty array and returned
- * `undefined` -- which is why the `real_far` option kept showing up with no
- * `word` (`JSON.stringify` silently drops `undefined`-valued properties,
- * so it read as a plan with a `real_far` option missing its `word` key
- * entirely, e.g. rendered as literal "undefined (real far)" text).
- * Wrapping the same computation in a function instead means it only runs
- * the first time something actually CALLS allWords_() -- by then every
- * file's top-level code has already finished executing, in any file order,
- * so CLUSTERS is guaranteed to be assigned. Local Node.js simulations of
- * this logic never reproduced the bug because those test harnesses always
- * concatenated PilotData.gs before PilotAssignment.gs (the correct
- * dependency order) -- this is an Apps-Script-execution-model-specific
- * failure mode that a same-order Node simulation can't surface.
- */
-function allWords_() {
-  if (!ALL_WORDS_) {
-    ALL_WORDS_ = [];
-    for (var c in CLUSTERS) { ALL_WORDS_ = ALL_WORDS_.concat(CLUSTERS[c]); }
-  }
-  return ALL_WORDS_;
-}
-
-/** Dynamically chosen (not a fixed table), balanced against the running
- * distractorTally. Returns [nearA, nearB, far]. */
-function pickDistractors_(target, cluster, distractorTally, rng, descToCluster) {
-  var neighbors = NEIGHBOR_CLUSTERS[cluster];
-  var nearA = pickLeastUsedOne_(neighbors[0], distractorTally, rng);
-  var nearB = pickLeastUsedOne_(neighbors[1], distractorTally, rng);
-
-  var family = FAMILY_OF_CLUSTER[cluster];
-  var otherFamilyWords = allWords_().filter(function (w) {
-    return FAMILY_OF_CLUSTER[descToCluster[w]] !== family;
-  });
-  var far = pickLeastUsedFrom_(otherFamilyWords, distractorTally, rng);
-
-  return [nearA, nearB, far];
-}
-
-function buildTrial_(target, rng, distractorTally, descToCluster) {
+function buildTrial_(target, rng, distractorTally, descToCluster, clusterUsedSets) {
   var cluster = descToCluster[target];
-  var distractors = pickDistractors_(target, cluster, distractorTally, rng, descToCluster);
-  var near1 = distractors[0], near2 = distractors[1], far = distractors[2];
+  var distractors = pickDistractors_(target, cluster, distractorTally, rng, descToCluster, clusterUsedSets);
+  var near1 = distractors[0], near2 = distractors[1];
 
   // Which of the 2 near-distractor words gets realized as the AromaGen
   // composition vs. the real physical object is randomized per trial.
@@ -115,8 +105,7 @@ function buildTrial_(target, rng, distractorTally, descToCluster) {
   var unshuffled = [
     { kind: "aromagen_target", word: target },
     { kind: "aromagen_near", word: aromagenNearWord },
-    { kind: "real_near", word: realNearWord },
-    { kind: "real_far", word: far }
+    { kind: "real_near", word: realNearWord }
   ];
   var options = shuffle_(unshuffled, rng);
   var correctSlot = 0;
@@ -133,28 +122,28 @@ function buildTrial_(target, rng, distractorTally, descToCluster) {
   };
 }
 
-function buildTrials_(targetTally, distractorTally, rng, descToCluster) {
+function buildTrials_(targetTally, distractorTally, rng, descToCluster, clusterUsedSets) {
   var targets = [];
   for (var cluster in CLUSTERS) {
     targets.push(pickLeastUsedOne_(cluster, targetTally, rng));
   }
   targets = shuffle_(targets, rng);
-  return targets.map(function (t) { return buildTrial_(t, rng, distractorTally, descToCluster); });
+  return targets.map(function (t) { return buildTrial_(t, rng, distractorTally, descToCluster, clusterUsedSets); });
 }
 
 /**
- * targetTally, distractorTally: {descriptor: count}, both mutated in
- * place -- pass the running tallies from every session ever created, same
- * "continues from the true running total" contract as the Preliminary
- * Study's buildAssignment().
+ * targetTally, distractorTally, clusterUsedSets: all mutated in place --
+ * pass the running state from every session ever created, same "continues
+ * from the true running total" contract as the Preliminary Study's
+ * buildAssignment().
  */
-function buildParticipantPlan_(seqIndex, targetTally, distractorTally, seed) {
+function buildParticipantPlan_(seqIndex, targetTally, distractorTally, seed, clusterUsedSets) {
   var rng = mulberry32_(seed || Date.now());
   var descToCluster = descriptorToCluster_();
   return {
     seq_index: seqIndex,
     feedback_type: feedbackTypeForParticipant_(seqIndex),
     odorant_set: ODORANT_SET_ID,
-    trials: buildTrials_(targetTally, distractorTally, rng, descToCluster)
+    trials: buildTrials_(targetTally, distractorTally, rng, descToCluster, clusterUsedSets || {})
   };
 }

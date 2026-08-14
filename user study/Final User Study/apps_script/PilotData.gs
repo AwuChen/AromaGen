@@ -13,15 +13,15 @@
  */
 
 var CLUSTERS = {
-  "Floral": ["Lavender", "cherry blossom", "jasmine tea", "rose hand cream"],
+  "Floral": ["Lavender", "rose", "jasmine tea", "cherry blossom cake"],
   "Citrus": ["Orange", "mango", "Lemonade", "Lime soda (Sprite)"],
-  "Woody & Resinous": ["Pine", "oak", "Wooden wine barrel", "Incense"],
+  "Woody & Resinous": ["birch", "patchouli", "Whiskey and oak candle", "Incense"],
   "Herbal & Cooling": ["Basil", "Cucumber", "Peppermint tea", "Mint chewing gum"],
-  "Spice": ["Ginger", "Black pepper", "Chai latte", "Cinnamon roll"],
-  "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "Vanilla ice cream"],
-  "Roasted & Smoky": ["Coffee", "Bacon", "barbeque ribs", "Hot dog with hot sauce"],
+  "Spice": ["Ginger", "Black pepper", "chai tea", "Cinnamon roll"],
+  "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow-flavored pop tarts"],
+  "Roasted & Smoky": ["coffee beans", "Bacon", "korean bbq beef patty", "Hot dog with hot sauce"],
   "Fermented & Sour": ["Greek yogurt", "Pickled cucumber", "Fries with ranch sauce", "Nacho with sour cream"],
-  "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Sticky tofu with chilli"],
+  "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Natto beans"],
   "Chemical & Solvent": ["Whiskey", "Tequila", "Mint Fluoride mouthwash", "Lavender nail polish remover"],
   "Perfumed & Clean": ["Aloe vera", "Hand sanitizer", "Mint fluoride toothpaste", "Almond oil shampoo"],
   "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in bbq sauce", "Salty popcorn"]
@@ -29,28 +29,52 @@ var CLUSTERS = {
 
 var TRIALS_PER_PARTICIPANT = 12; // = Object.keys(CLUSTERS).length -- one target per cluster, one pass
 
-// --- Distractor design: dynamic, balanced, randomized -- see
-// pilot_config.py's comment for the full rationale. Near distractors: one
-// word from each of the target's 2 ring-neighbor clusters, picked as the
-// least-used-so-far candidate (random tie-break). Far distractor: least-
-// used-so-far word from the OTHER family. All balanced against a running
-// distractor-usage tally built at plan-generation time -- NOT a fixed
-// per-target lookup table.
-var FAMILY_A_RING = ["Floral", "Sweet & Gourmand", "Spice", "Woody & Resinous", "Herbal & Cooling", "Citrus"];
-var FAMILY_B_RING = ["Chemical & Solvent", "Perfumed & Clean", "Roasted & Smoky", "Savoury & Umami", "Fermented & Sour", "Putrid & Decay"];
+// --- Distractor design: exclusion-list based (replaced the earlier
+// family/ring design entirely -- per explicit instruction). For each
+// TARGET cluster, EXCLUDED_CLUSTERS lists which OTHER clusters may NOT
+// supply distractors; every cluster not excluded (and not the target's own
+// cluster) is eligible. Given verbatim by dictation for 10 of the 12
+// clusters; Spice's and Perfumed & Clean's entries were never dictated
+// directly but are fully recoverable by symmetry (every pair given was
+// confirmed to be mutual: if A excludes B, B excludes A too -- a few pairs
+// were dictated one-directionally and were made symmetric per explicit
+// confirmation, e.g. Citrus->Woody & Resinous existed but not the reverse,
+// Putrid & Decay->Woody & Resinous existed but not the reverse, etc.).
+// The target's own cluster is ALWAYS implicitly excluded too (not
+// re-stated per cluster below) -- distractors are never drawn from the
+// same cluster as the target itself, consistent with every other
+// distractor design this project has used (near-neighbor rings, family
+// splits) always contrasting DIFFERENT clusters, never the target's own.
+var EXCLUDED_CLUSTERS = {
+  "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean"],
+  "Citrus": ["Woody & Resinous", "Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling"],
+  "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Citrus", "Putrid & Decay", "Chemical & Solvent"],
+  "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Sweet & Gourmand", "Chemical & Solvent"],
+  "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand"],
+  "Sweet & Gourmand": ["Citrus", "Herbal & Cooling", "Spice"],
+  "Roasted & Smoky": ["Savoury & Umami", "Fermented & Sour"],
+  "Fermented & Sour": ["Roasted & Smoky", "Putrid & Decay", "Savoury & Umami"],
+  "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami", "Woody & Resinous"],
+  "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous"],
+  "Perfumed & Clean": ["Floral", "Chemical & Solvent"],
+  "Savoury & Umami": ["Fermented & Sour", "Roasted & Smoky", "Putrid & Decay"]
+};
 
-function ringNeighbors_(ring, cluster) {
-  var i = ring.indexOf(cluster), n = ring.length;
-  return [ring[(i - 1 + n) % n], ring[(i + 1) % n]];
+/** All clusters eligible to supply a distractor for a trial whose target is
+ * in `cluster` -- every cluster except itself and EXCLUDED_CLUSTERS[cluster]. */
+function eligibleDistractorClusters_(cluster) {
+  var excluded = EXCLUDED_CLUSTERS[cluster] || [];
+  return Object.keys(CLUSTERS).filter(function (c) {
+    return c !== cluster && excluded.indexOf(c) === -1;
+  });
 }
 
-var NEIGHBOR_CLUSTERS = {};
-FAMILY_A_RING.forEach(function (c) { NEIGHBOR_CLUSTERS[c] = ringNeighbors_(FAMILY_A_RING, c); });
-FAMILY_B_RING.forEach(function (c) { NEIGHBOR_CLUSTERS[c] = ringNeighbors_(FAMILY_B_RING, c); });
-
-var FAMILY_OF_CLUSTER = {};
-FAMILY_A_RING.forEach(function (c) { FAMILY_OF_CLUSTER[c] = "A"; });
-FAMILY_B_RING.forEach(function (c) { FAMILY_OF_CLUSTER[c] = "B"; });
+/** Flat word list across every cluster eligible to distract for `cluster`. */
+function eligibleDistractorWords_(cluster) {
+  var words = [];
+  eligibleDistractorClusters_(cluster).forEach(function (c) { words = words.concat(CLUSTERS[c]); });
+  return words;
+}
 
 // --- The single fixed odorant set (no longer an A/B condition) ---
 // Matches the current live AromaGen catalog (aromagen/cartridge_sets.json)
@@ -161,8 +185,15 @@ var SHEET_SCHEMAS_ = {
     "status", "created_at", "completed_at"],
   sessions: ["participant_name", "plan_json", "status", "current_step", "trial_phase",
     "created_at", "completed_at", "section2_creations_json"],
+  // 3-AFC (was 4-AFC, option_4/"far" distractor removed) -- see
+  // PilotAssignment.gs's pickDistractors_ comment. BREAKING for any
+  // already-collected trials rows under the old 4-column schema: this
+  // isn't just an appended column (which ensureSheetHeaders_ can safely
+  // migrate), it REMOVES one from the middle, so old rows' data would
+  // read misaligned under the new header. Delete any existing `trials`
+  // rows before this takes effect for real data collection.
   trials: ["participant_name", "odorant_set", "trial_index", "target", "cluster",
-    "option_1", "option_2", "option_3", "option_4",
+    "option_1", "option_2", "option_3",
     "correct_slot", "familiarity_1to7", "selected_slot", "is_correct",
     "confidence_1to7", "response_timestamp", "llm_generated_base_odorant_ratio"],
   feedback: ["participant_name", "trial_index", "target", "odorant_set",
@@ -291,6 +322,55 @@ function computePilotTallies_(masterSs) {
     });
   }
   return { targets: targetTally, distractors: distractorTally };
+}
+
+/**
+ * Reconstructs the per-cluster "already used as a distractor for this
+ * target cluster" cycle state by replaying every historical trial in
+ * creation order (sheet row order == participant seq_index order, since
+ * ensureSession_ only ever appends new session rows -- never edits old
+ * ones). Returns {clusterName: {word: true, ...}, ...}.
+ *
+ * This mirrors the EXACT same "check-then-reset-if-exhausted, then mark
+ * both this trial's distractor words as used" logic pickDistractorsForCluster_
+ * (PilotAssignment.gs) applies live when building a NEW plan -- replaying
+ * it here, once per trial as a single unit (not per individual word),
+ * makes the reconstruction well-defined regardless of which of a trial's
+ * two distractor words was originally drawn "first" (that ordering isn't
+ * separately recoverable from the stored sheet data, since which one
+ * becomes aromagen_near vs real_near is independently randomized).
+ */
+function computeClusterUsedSets_(masterSs) {
+  var clusterUsedSets = {};
+  for (var cluster in CLUSTERS) clusterUsedSets[cluster] = {};
+
+  var sessionsSheet = masterSs.getSheetByName("sessions");
+  var data = sessionsSheet.getDataRange().getValues();
+  var header = data[0];
+  var planCol = header.indexOf("plan_json");
+  for (var r = 1; r < data.length; r++) {
+    var planJson = data[r][planCol];
+    if (!planJson) continue;
+    var plan = JSON.parse(planJson);
+    plan.trials.forEach(function (t) {
+      var cluster = t.cluster;
+      var usedSet = clusterUsedSets[cluster];
+      if (!usedSet) return; // unknown/legacy cluster name, skip
+      var distractorWords = t.options
+        .filter(function (o) { return o.kind !== "aromagen_target"; })
+        .map(function (o) { return o.word; })
+        .filter(Boolean);
+      if (distractorWords.length < 2) return; // malformed/legacy row, skip
+
+      var eligibleWords = eligibleDistractorWords_(cluster);
+      var available = eligibleWords.filter(function (w) { return !usedSet[w]; });
+      if (available.length < 2) {
+        for (var k in usedSet) delete usedSet[k];
+      }
+      distractorWords.forEach(function (w) { usedSet[w] = true; });
+    });
+  }
+  return clusterUsedSets;
 }
 
 /** Next 1-indexed sequence position = count of sessions ever created + 1.
