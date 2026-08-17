@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <div class="page">
@@ -184,8 +184,15 @@
             aria-label="Direct text input"
           >
           <button type="button" id="frequencyDirectSubmitBtn" class="frequency-control-btn">Submit</button>
-          <button type="button" id="textualFeedbackToggleBtn" class="frequency-control-btn">Textual feedback</button>
           <button type="button" id="playSequenceBtn" class="frequency-control-btn frequency-control-btn-primary" onclick="playSequenceOnDevice()">Play</button>
+        </div>
+
+        <div class="frequency-controls-row">
+          <button type="button" id="textualFeedbackToggleBtn" class="frequency-control-btn">Textual feedback</button>
+          <button type="button" id="historyToggleBtn" class="frequency-control-btn" onclick="toggleHistoryPanel()">History</button>
+          <button type="button" id="durationToggleBtn" class="frequency-control-btn">Duration</button>
+          <button type="button" id="openLogSheetBtn" class="frequency-control-btn" onclick="openLogSheet()">Open Log Sheet</button>
+          <button type="button" id="logInteractionToggleBtn" class="frequency-control-btn">Log</button>
           <button type="button" id="acceptSequenceBtn" class="frequency-control-btn frequency-control-btn-primary">This works</button>
         </div>
 
@@ -203,10 +210,65 @@
           </div>
         </div>
 
+        <div class="frequency-textual-feedback-box" id="durationRow" style="display: none;">
+          <p class="frequency-textual-feedback-label">Per-scent duration override (seconds) &mdash; blank uses the default pulse playback</p>
+          <div class="frequency-controls-row">
+            <input
+              type="number"
+              id="durationOverrideInput"
+              class="frequency-direct-text-input"
+              placeholder="e.g. 5"
+              min="0.1"
+              step="0.1"
+              aria-label="Per-scent duration override in seconds"
+            >
+          </div>
+        </div>
+
+        <div class="frequency-textual-feedback-box" id="logInteractionRow" style="display: none;">
+          <p class="frequency-textual-feedback-label">Log this generation &mdash; target smell &amp; AromaGen ratio are captured automatically</p>
+          <div class="frequency-controls-row">
+            <label for="logSimilarityInput" style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Similarity (1&ndash;7)</label>
+            <input
+              type="number"
+              id="logSimilarityInput"
+              class="frequency-direct-text-input"
+              style="max-width: 5rem;"
+              min="1"
+              max="7"
+              step="1"
+              placeholder="1-7"
+              aria-label="Similarity rating from 1 to 7"
+            >
+          </div>
+          <div class="frequency-controls-row">
+            <input
+              type="text"
+              id="logFeedbackInput"
+              class="frequency-direct-text-input"
+              placeholder="Feedback on how to improve this smell (optional)"
+              aria-label="Feedback for the log"
+            >
+            <button type="button" id="logInteractionSubmitBtn" class="frequency-control-btn frequency-control-btn-primary">Submit to sheet</button>
+          </div>
+          <p class="frequency-transcription-status" id="logInteractionStatus"></p>
+        </div>
+
       </div>
 
     </section>
   </div>
-  <script src="script.js?v=4"></script>
+
+  <div class="history-backdrop" id="historyBackdrop" onclick="closeHistoryPanel()"></div>
+  <aside class="history-panel" id="historyPanel" aria-hidden="true">
+    <div class="history-panel-header">
+      <h2>Generation history</h2>
+      <button type="button" class="history-close-btn" onclick="closeHistoryPanel()" aria-label="Close history panel">&times;</button>
+    </div>
+    <p class="history-panel-hint">Click an entry to load its prompt and recipe back into the editor. Nothing plays automatically &mdash; press Play when you're ready.</p>
+    <div class="history-list" id="historyList"></div>
+  </aside>
+
+  <script src="script.js?v=8"></script>
 </body>
 </html>

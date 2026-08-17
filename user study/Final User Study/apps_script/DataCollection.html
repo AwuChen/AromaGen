@@ -22,7 +22,7 @@
     .option-slot { font-weight: 700; width: 22px; }
     .option-kind { font-size: 12px; padding: 2px 6px; border-radius: 4px; background: #f0f0f0; }
     .option-kind.aromagen_target, .option-kind.aromagen_near { background: #e3edfb; color: #1c4f9c; }
-    .option-kind.real_near, .option-kind.real_far { background: #f5eee0; color: #8a5a00; }
+    .option-kind.real_near { background: #f5eee0; color: #8a5a00; }
     .target-word { font-size: 26px; font-weight: 800; margin: 4px 0 2px; }
     .progress { font-size: 13px; color: #666; margin-bottom: 8px; }
     .odorant-list { columns: 2; font-size: 14px; }
@@ -94,7 +94,7 @@ function renderBriefing(view) {
     '<p>Read to the participant (adapt to your own words as needed):</p>' +
     '<p><em>"Thank you for taking part in this study. You\'ll be smelling a series of scents. ' +
     'For each one, I\'ll tell you a word describing a target smell, let you smell a reference example, ' +
-    'and ask how familiar it is to you. Then I\'ll present four different scents one at a time, and I\'d ' +
+    'and ask how familiar it is to you. Then I\'ll present three different scents one at a time, and I\'d ' +
     'like you to tell me which one best matches the target word and reference smell you were given. ' +
     'You\'ll also rate how confident you are in each choice. Afterward, I\'ll ask you to compare the real ' +
     'smell and the device\'s version again, rate how similar they are, and -- if you\'d like -- give feedback ' +
@@ -145,8 +145,9 @@ function renderSection2Briefing(view) {
     '<h2>Section 2 of 2 &mdash; Briefing</h2>' +
     '<p>Read to the participant (adapt to your own words as needed):</p>' +
     '<p><em>"For this next part, you get to choose. Five times, think of a favourite food, beverage, ' +
-    'perfume, or any smell you like -- something we haven\'t already covered. Tell me what it is, and ' +
-    'I\'ll have the device try to recreate it for you. Once you smell it, you can give feedback to help ' +
+    'perfume, memory, scene, or even an abstract concept -- any smell you like, however you\'d describe ' +
+    'it -- something we haven\'t already covered. Tell me what it is, and I\'ll have the device try to ' +
+    'recreate it for you. Once you smell it, you can give feedback to help ' +
     'the device get closer to what you had in mind, and we can repeat that a few times if you\'d like. ' +
     'We\'ll do this five times in total, each with a new smell of your choosing. There are no right or ' +
     'wrong answers here -- I just want to know what you think it smells like."</em></p>' +
@@ -203,8 +204,7 @@ function submitSection2Intake_() {
 var KIND_LABEL = {
   aromagen_target: 'AromaGen device composition',
   aromagen_near: 'AromaGen device composition',
-  real_near: 'Real physical object',
-  real_far: 'Real physical object'
+  real_near: 'Real physical object'
 };
 
 function renderTrial(view) {
@@ -228,7 +228,7 @@ function renderTrial(view) {
     '<input type="number" id="familiarity" min="1" max="7" step="1">' +
 
     '<h2 style="margin-top:20px;">Step 2</h2>' +
-    '<p>Present the following 4 smells to the participant, one at a time, in this order:</p>' +
+    '<p>Present the following 3 smells to the participant, one at a time, in this order:</p>' +
     optionsHtml +
     '<p class="muted">Options tagged &ldquo;AromaGen device composition&rdquo; must be triggered by you on the actual AromaGen app/device (this control panel cannot do it for you) using the word shown.</p>' +
 
@@ -237,8 +237,8 @@ function renderTrial(view) {
     '<div class="ratio-preview" id="llmRatioPreview"></div>' +
     '<p class="muted" style="margin-top:2px;">Used to auto-fill the rating-scale feedback screen\'s starting sliders for this trial, if that\'s this participant\'s feedback condition.</p>' +
 
-    '<label>Which numbered smell did the participant pick? (1-4)</label>' +
-    '<input type="number" id="selectedSlot" min="1" max="4" step="1">' +
+    '<label>Which numbered smell did the participant pick? (1-3)</label>' +
+    '<input type="number" id="selectedSlot" min="1" max="3" step="1">' +
 
     '<label>Participant\'s confidence in that choice (1 = not at all confident, 7 = extremely confident)</label>' +
     '<input type="number" id="confidence" min="1" max="7" step="1">' +
@@ -257,7 +257,7 @@ function submitTrial() {
   var err = document.getElementById('trialError');
   err.textContent = '';
   if (!(fam >= 1 && fam <= 7)) { err.textContent = 'Familiarity must be 1-7.'; return; }
-  if (!(sel >= 1 && sel <= 4)) { err.textContent = 'Selected smell must be 1-4.'; return; }
+  if (!(sel >= 1 && sel <= 3)) { err.textContent = 'Selected smell must be 1-3.'; return; }
   if (!(conf >= 1 && conf <= 7)) { err.textContent = 'Confidence must be 1-7.'; return; }
 
   document.getElementById('submitTrialBtn').disabled = true;
@@ -312,22 +312,6 @@ function updateRatioPreview_(inputId, previewId) {
   preview.className = 'ratio-preview ' + (Math.abs(sum - 1) < 0.005 ? 'ok' : 'bad');
 }
 
-function startCountdown(seconds, onDone) {
-  var box = document.getElementById('countdownBox');
-  if (!box) { onDone(); return; }
-  var remaining = seconds;
-  box.textContent = 'Break: ' + remaining + 's before the next trial...';
-  var interval = setInterval(function () {
-    remaining -= 1;
-    if (remaining <= 0) {
-      clearInterval(interval);
-      onDone();
-    } else {
-      box.textContent = 'Break: ' + remaining + 's before the next trial...';
-    }
-  }, 1000);
-}
-
 // ---- Feedback screen ----
 // Shared between Section 1 (per-trial feedback, mode 'section1') and
 // Section 2 (the single freeform creation's feedback, mode 'section2') --
@@ -344,7 +328,7 @@ function renderFeedback(view) {
     '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>';
 
   if (!view.initialSimilaritySubmitted) {
-    html += renderInitialSimilarityForm_();
+    html += renderInitialSimilarityForm_(view.llmRatioText);
   } else {
     html += '<p class="muted" style="margin-top:16px;">Initial similarity recorded: <strong>' + view.initialSimilarity + ' / 7</strong></p>';
     html += renderFeedbackRoundsCore_(view, 'section1');
@@ -355,10 +339,14 @@ function renderFeedback(view) {
   if (view.initialSimilaritySubmitted) wireUpFeedbackRoundForm_(view, 'section1');
 }
 
-function renderInitialSimilarityForm_() {
+function renderInitialSimilarityForm_(llmRatioText) {
+  var ratioHtml = llmRatioText
+    ? '<div class="composition-sentence"><strong>AromaGen\'s generated ratio for this target</strong> (as entered on the trial screen) &mdash; use this to reliably re-trigger the exact same composition on the device: ' + escapeHtml(llmRatioText) + '</div>'
+    : '<p class="muted">No ratio was recorded for this target on the trial screen.</p>';
   return '<h2 style="margin-top:20px;">Initial similarity</h2>' +
     '<p>Present the <strong>real physical reference</strong> to the participant again, then the ' +
     '<strong>original AromaGen target reconstruction</strong>. Ask: how similar are these two smells?</p>' +
+    ratioHtml +
     '<label>Perceptual similarity (1 = extremely dissimilar, 7 = extremely similar)</label>' +
     '<input type="number" id="initialSimilarity" min="1" max="7" step="1">' +
     '<div id="initialSimError" class="error"></div>' +
@@ -426,8 +414,7 @@ function renderFeedbackRoundsCore_(view, mode) {
   var finishFn = mode === 'section2' ? 'finishSection2Feedback_' : 'finishTrialFeedback_';
   var finishLabel = mode === 'section2' ? 'Finish this creation &amp; continue' : 'Finish this trial &amp; continue';
   html += '<div id="feedbackError" class="error"></div>' +
-    '<button id="finishTrialBtn" onclick="' + finishFn + '()">' + finishLabel + '</button>' +
-    '<div id="countdownBox" class="countdown"></div>';
+    '<button id="finishTrialBtn" onclick="' + finishFn + '()">' + finishLabel + '</button>';
 
   return html;
 }
@@ -696,9 +683,7 @@ function editRound_(roundNumber, mode) {
 
 function finishTrialFeedback_() {
   document.getElementById('finishTrialBtn').disabled = true;
-  google.script.run.withSuccessHandler(function (nextView) {
-    startCountdown(10, function () { renderView(nextView); });
-  }).withFailureHandler(function (e) {
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
     document.getElementById('finishTrialBtn').disabled = false;
     showError(e);
   }).finishTrialFeedback(currentParticipant);
@@ -706,9 +691,7 @@ function finishTrialFeedback_() {
 
 function finishSection2Feedback_() {
   document.getElementById('finishTrialBtn').disabled = true;
-  google.script.run.withSuccessHandler(function (nextView) {
-    startCountdown(10, function () { renderView(nextView); });
-  }).withFailureHandler(function (e) {
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
     document.getElementById('finishTrialBtn').disabled = false;
     showError(e);
   }).finishSection2Feedback(currentParticipant);

@@ -100,3 +100,15 @@ class AcceptResponse(BaseModel):
     session_id: str = ""
     message: str = "Composition saved for future learning"
 
+
+class LogInteractionRequest(BaseModel):
+    target_smell: str = Field(min_length=1)
+    aromagen_ratio: str = Field(min_length=1)
+    similarity: int = Field(ge=1, le=7)
+    feedback: str = ""
+    session_id: Optional[str] = None
+
+
+class LogInteractionResponse(BaseModel):
+    success: bool = True
+

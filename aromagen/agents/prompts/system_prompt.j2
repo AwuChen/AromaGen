@@ -114,3 +114,32 @@ Each entry includes:
 
 
 {% endif %}
+{% if interaction_precedent %}
+
+7. Precedent from prior live sessions (semantically similar past requests)
+
+The blocks below are the past device sessions whose target_smell is most SEMANTICALLY similar to the current request -- selected purely by how close that target descriptor's meaning is to the current request (similarity_to_current_request), entirely independent of how well that past session actually turned out. A block can therefore appear here just because its target is a close conceptual match, even if the session itself scored poorly. Each block shows the ratio from whichever round in that session reached its HIGHEST similarity rating (1-7, self-reported by the person smelling the device), that top rating (best_similarity), and the full ordered feedback trail from that session.
+
+These blocks are prior examples to help you reason better, not ground truth to copy. Use best_similarity to decide HOW to use each block -- follow it, learn from it, or avoid repeating it:
+
+- best_similarity 6-7 (strong precedent): this ratio is demonstrated to work well for a closely-matching target. Follow it closely as your starting point, adjusting only for genuine differences between that target and the current request.
+- best_similarity 5 (moderate precedent): a reasonable direction, not a solved answer. Treat it as one input alongside your own catalog reasoning (section 3), and read feedback_history for what still needed fixing even at its best round.
+- best_similarity 1-4 (weak precedent): do NOT reuse this ratio as your answer -- it is a demonstrated near-miss, not a target to imitate. Instead, read feedback_history as a record of things that were tried and didn't fully work, so you know what to avoid repeating and what a real person said was still wrong even after iteration. Then rely primarily on your own perfumery/catalog reasoning from section 3 to construct a composition that does better than this one did.
+- No best_similarity available: treat the block as unrated -- rely on feedback_history and your own reasoning only, do not treat its ratio as either proven or disproven.
+
+Independently of best_similarity, also scale each block's overall influence by similarity_to_current_request: a block whose target is only loosely related to the current request should shape your reasoning less than one that's a close or exact conceptual match, regardless of how that block's own session was rated.
+
+```json
+
+{{ interaction_precedent_json }}
+
+```
+
+Each entry includes:
+- target_smell: the descriptor that past session was composing toward
+- best_ratio: the odorant ratio that achieved that session's highest similarity rating -- see the best_similarity guidance above for whether to follow, learn from, or avoid repeating this
+- best_similarity: that highest rating (1-7)
+- feedback_history: the full sequence of feedback given during that session, in order
+- similarity_to_current_request: how closely target_smell matches the current request in meaning (0-1, higher = closer) -- this determined which blocks were selected, independent of best_similarity
+
+{% endif %}

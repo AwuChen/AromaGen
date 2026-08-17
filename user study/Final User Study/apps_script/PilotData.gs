@@ -13,97 +13,124 @@
  */
 
 var CLUSTERS = {
-  "Floral": ["Lavender", "cherry blossom", "jasmine tea", "rose hand cream"],
+  "Floral": ["Lavender", "rose", "jasmine tea", "peony and rose oil shampoo"],
   "Citrus": ["Orange", "mango", "Lemonade", "Lime soda (Sprite)"],
-  "Woody & Resinous": ["Pine", "oak", "Wooden wine barrel", "Incense"],
+  "Woody & Resinous": ["birch", "patchouli", "Whiskey and oak candle", "Incense"],
   "Herbal & Cooling": ["Basil", "Cucumber", "Peppermint tea", "Mint chewing gum"],
-  "Spice": ["Ginger", "Black pepper", "Chai latte", "Cinnamon roll"],
-  "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "Vanilla ice cream"],
-  "Roasted & Smoky": ["Coffee", "Bacon", "barbeque ribs", "Hot dog with hot sauce"],
+  "Spice": ["Ginger", "Black pepper", "chai tea", "Cinnamon roll"],
+  "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow pop tarts"],
+  "Roasted & Smoky": ["coffee beans", "Bacon", "korean barbeque beef patty", "Hot dog with hot sauce"],
   "Fermented & Sour": ["Greek yogurt", "Pickled cucumber", "Fries with ranch sauce", "Nacho with sour cream"],
-  "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Sticky tofu with chilli"],
+  "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Natto beans"],
   "Chemical & Solvent": ["Whiskey", "Tequila", "Mint Fluoride mouthwash", "Lavender nail polish remover"],
   "Perfumed & Clean": ["Aloe vera", "Hand sanitizer", "Mint fluoride toothpaste", "Almond oil shampoo"],
-  "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in bbq sauce", "Salty popcorn"]
+  "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in barbeque sauce", "Salty popcorn"]
 };
 
 var TRIALS_PER_PARTICIPANT = 12; // = Object.keys(CLUSTERS).length -- one target per cluster, one pass
 
-// --- Distractor design: dynamic, balanced, randomized -- see
-// pilot_config.py's comment for the full rationale. Near distractors: one
-// word from each of the target's 2 ring-neighbor clusters, picked as the
-// least-used-so-far candidate (random tie-break). Far distractor: least-
-// used-so-far word from the OTHER family. All balanced against a running
-// distractor-usage tally built at plan-generation time -- NOT a fixed
-// per-target lookup table.
-var FAMILY_A_RING = ["Floral", "Sweet & Gourmand", "Spice", "Woody & Resinous", "Herbal & Cooling", "Citrus"];
-var FAMILY_B_RING = ["Chemical & Solvent", "Perfumed & Clean", "Roasted & Smoky", "Savoury & Umami", "Fermented & Sour", "Putrid & Decay"];
+// --- Distractor design: exclusion-list based. For each TARGET cluster,
+// EXCLUDED_CLUSTERS lists which OTHER clusters may NOT supply distractors;
+// every cluster not excluded (and not the target's own cluster) is
+// eligible. Given verbatim by dictation for all 12 clusters (revised list,
+// replacing the original 10-of-12 dictation); two pairs (Citrus/Spice,
+// Sweet & Gourmand/Herbal & Cooling) were given one-directionally and were
+// made symmetric per the same "fully symmetric" convention established for
+// the original list. The target's own cluster is ALWAYS implicitly
+// excluded too (not re-stated per cluster below).
+var EXCLUDED_CLUSTERS = {
+  "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean", "Chemical & Solvent"],
+  "Citrus": ["Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling", "Spice"],
+  "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Perfumed & Clean", "Chemical & Solvent"],
+  "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Chemical & Solvent", "Sweet & Gourmand"],
+  "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand", "Citrus"],
+  "Sweet & Gourmand": ["Citrus", "Herbal & Cooling", "Spice"],
+  "Roasted & Smoky": ["Savoury & Umami", "Fermented & Sour"],
+  "Fermented & Sour": ["Roasted & Smoky", "Putrid & Decay", "Savoury & Umami"],
+  "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami"],
+  "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous", "Floral"],
+  "Perfumed & Clean": ["Floral", "Chemical & Solvent", "Woody & Resinous"],
+  "Savoury & Umami": ["Fermented & Sour", "Roasted & Smoky", "Putrid & Decay"]
+};
 
-function ringNeighbors_(ring, cluster) {
-  var i = ring.indexOf(cluster), n = ring.length;
-  return [ring[(i - 1 + n) % n], ring[(i + 1) % n]];
+/** All clusters eligible to supply a distractor for a trial whose target is
+ * in `cluster` -- every cluster except itself and EXCLUDED_CLUSTERS[cluster]. */
+function eligibleDistractorClusters_(cluster) {
+  var excluded = EXCLUDED_CLUSTERS[cluster] || [];
+  return Object.keys(CLUSTERS).filter(function (c) {
+    return c !== cluster && excluded.indexOf(c) === -1;
+  });
 }
 
-var NEIGHBOR_CLUSTERS = {};
-FAMILY_A_RING.forEach(function (c) { NEIGHBOR_CLUSTERS[c] = ringNeighbors_(FAMILY_A_RING, c); });
-FAMILY_B_RING.forEach(function (c) { NEIGHBOR_CLUSTERS[c] = ringNeighbors_(FAMILY_B_RING, c); });
-
-var FAMILY_OF_CLUSTER = {};
-FAMILY_A_RING.forEach(function (c) { FAMILY_OF_CLUSTER[c] = "A"; });
-FAMILY_B_RING.forEach(function (c) { FAMILY_OF_CLUSTER[c] = "B"; });
+/** Flat word list across every cluster eligible to distract for `cluster`. */
+function eligibleDistractorWords_(cluster) {
+  var words = [];
+  eligibleDistractorClusters_(cluster).forEach(function (c) { words = words.concat(CLUSTERS[c]); });
+  return words;
+}
 
 // --- The single fixed odorant set (no longer an A/B condition) ---
 // Matches the current live AromaGen catalog (aromagen/cartridge_sets.json)
-// exactly, including Seaweed Accord as the stand-in for the umami/savoury
-// class.
+// exactly. 6 of the 12 slots are now multi-ingredient blends rather than
+// single raw materials (renamed over the course of production tuning) --
+// kept in sync here so ratio text copied straight off the real AromaGen
+// frontend (which now generates these blend names) parses correctly via
+// parseRatioText_ instead of silently falling back to an even split. This
+// is a prospective change only: already-collected participants' frozen
+// data still shows whatever names were current when they were recorded.
 var ODORANT_SET_ID = "fixed_set";
 var BASE_ODORANT_SET = [
-  "Benz Sal", "Sandalwood", "Clove Bud", "Lavender", "Orange", "Vanilla",
-  "Birch tar oil", "Eucalyptus", "Cognac", "Vinegar", "Isovaleric acid",
-  "Seaweed Accord"
+  "Benz Sal", "Sandalwood", "Clove Bud + Cumin", "Lavender + Rose",
+  "Orange + Lemon", "Vanilla Sugar + Almond Extract",
+  "Birch tar oil + Coffee + Clove Bud", "Eucalyptus", "Cognac", "Vinegar",
+  "Isovaleric acid", "Seaweed + Fenugreek + Garlic"
 ];
 
 var ODORANT_CATEGORY = {
   "Benz Sal": "Perfumed / Clean",
   "Sandalwood": "Woody / Resinous",
-  "Clove Bud": "Spice",
-  "Lavender": "Floral",
-  "Orange": "Citrus",
-  "Vanilla": "Sweet / Gourmand",
-  "Birch tar oil": "Roasted / Smoky",
+  "Clove Bud + Cumin": "Spice",
+  "Lavender + Rose": "Floral",
+  "Orange + Lemon": "Citrus",
+  "Vanilla Sugar + Almond Extract": "Sweet / Gourmand",
+  "Birch tar oil + Coffee + Clove Bud": "Roasted / Smoky",
   "Eucalyptus": "Herbal / Cooling",
   "Cognac": "Chemical / Solvent",
   "Vinegar": "Fermented / Sour",
   "Isovaleric acid": "Animal / Body",
-  "Seaweed Accord": "Umami / Savoury (stand-in)"
+  "Seaweed + Fenugreek + Garlic": "Umami / Savoury"
 };
 
 var ODORANT_VOLATILITY = {
-  "Benz Sal": 4, "Sandalwood": 4, "Clove Bud": 6, "Lavender": 6,
-  "Orange": 8, "Vanilla": 3, "Birch tar oil": 3, "Eucalyptus": 8,
-  "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed Accord": 5
+  "Benz Sal": 4, "Sandalwood": 3, "Clove Bud + Cumin": 6, "Lavender + Rose": 5,
+  "Orange + Lemon": 8, "Vanilla Sugar + Almond Extract": 3,
+  "Birch tar oil + Coffee + Clove Bud": 4, "Eucalyptus": 8,
+  "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed + Fenugreek + Garlic": 6
 };
 
 // Brief sensory description per odorant, shown next to each name on the
-// rating-scale feedback screen. Sourced from aromagen/cartridge_sets.json.
+// feedback screen's reference list. Sourced from aromagen/cartridge_sets.json.
 var ODORANT_DESCRIPTIONS = {
   "Benz Sal": "Sweet, balsamic, soft floral, powdery clean note",
   "Sandalwood": "Woody, creamy, soft, warm, slightly sweet base note",
-  "Clove Bud": "Warm, pungent, spicy",
-  "Lavender": "Floral, herbaceous-sweet, calming",
-  "Orange": "Bright, citrus, sweet, juicy top note",
-  "Vanilla": "Sweet, creamy, warm, gourmand",
-  "Birch tar oil": "Smoky, tarry, leathery, medicinal-burnt",
+  "Clove Bud + Cumin": "Warm spice -- pungent clove combined with earthy, dry, slightly bitter cumin",
+  "Lavender + Rose": "Floral bouquet -- calming, herbaceous-sweet lavender and dewy, rosy petal-sweetness",
+  "Orange + Lemon": "Bright, citrus, sweet-tart -- juicy orange combined with sharp, zesty lemon",
+  "Vanilla Sugar + Almond Extract": "Sweet, creamy gourmand -- warm vanilla-sugar sweetness combined with nutty, marzipan-like almond",
+  "Birch tar oil + Coffee + Clove Bud": "Smoky, roasted base -- tarry, leathery birch tar, dark roasted coffee, and warm clove",
   "Eucalyptus": "Cool, medicinal, camphoraceous, fresh herbal top note",
   "Cognac": "Sharp, alcoholic, boozy, solvent-like pungency",
   "Vinegar": "Sour, sharp, acetic, pungent",
   "Isovaleric acid": "Sweaty, cheesy, animalic",
-  "Seaweed Accord": "Marine, salty, umami, savoury"
+  "Seaweed + Fenugreek + Garlic": "Savoury, marine-umami -- salty seaweed and warm, bittersweet fenugreek, with pungent garlic as an accent"
 };
 
-// --- Feedback-type condition ---
-// Counterbalanced via participant-sequence parity: odd -> freeform, even
-// -> rating_scale.
+// --- Feedback type ---
+// Used to be a counterbalanced condition (odd -> freeform, even ->
+// rating_scale); rating_scale has been dropped, every participant now gets
+// freeform feedback. "rating_scale" stays in FEEDBACK_TYPES only so label
+// lookups for already-collected participants (frozen plan_json from before
+// this change) keep resolving correctly -- new plans never assign it.
 var FEEDBACK_TYPES = {
   "freeform": "Freeform feedback",
   "rating_scale": "Rating-scale feedback"
@@ -116,7 +143,10 @@ var MAX_FEEDBACK_ROUNDS = 5;
 var SECTION2_CREATIONS_PER_PARTICIPANT = 5;
 
 function feedbackTypeForParticipant_(seqIndex) {
-  return (seqIndex % 2 === 1) ? "freeform" : "rating_scale";
+  // Every participant gets freeform feedback (rating_scale condition
+  // removed). seqIndex is unused now but kept in the signature so callers
+  // don't need to change.
+  return "freeform";
 }
 
 function descriptorToCluster_() {
@@ -161,8 +191,15 @@ var SHEET_SCHEMAS_ = {
     "status", "created_at", "completed_at"],
   sessions: ["participant_name", "plan_json", "status", "current_step", "trial_phase",
     "created_at", "completed_at", "section2_creations_json"],
+  // 3-AFC (was 4-AFC, option_4/"far" distractor removed) -- see
+  // PilotAssignment.gs's pickDistractors_ comment. BREAKING for any
+  // already-collected trials rows under the old 4-column schema: this
+  // isn't just an appended column (which ensureSheetHeaders_ can safely
+  // migrate), it REMOVES one from the middle, so old rows' data would
+  // read misaligned under the new header. Delete any existing `trials`
+  // rows before this takes effect for real data collection.
   trials: ["participant_name", "odorant_set", "trial_index", "target", "cluster",
-    "option_1", "option_2", "option_3", "option_4",
+    "option_1", "option_2", "option_3",
     "correct_slot", "familiarity_1to7", "selected_slot", "is_correct",
     "confidence_1to7", "response_timestamp", "llm_generated_base_odorant_ratio"],
   feedback: ["participant_name", "trial_index", "target", "odorant_set",
@@ -291,6 +328,55 @@ function computePilotTallies_(masterSs) {
     });
   }
   return { targets: targetTally, distractors: distractorTally };
+}
+
+/**
+ * Reconstructs the per-cluster "already used as a distractor for this
+ * target cluster" cycle state by replaying every historical trial in
+ * creation order (sheet row order == participant seq_index order, since
+ * ensureSession_ only ever appends new session rows -- never edits old
+ * ones). Returns {clusterName: {word: true, ...}, ...}.
+ *
+ * This mirrors the EXACT same "check-then-reset-if-exhausted, then mark
+ * both this trial's distractor words as used" logic pickDistractorsForCluster_
+ * (PilotAssignment.gs) applies live when building a NEW plan -- replaying
+ * it here, once per trial as a single unit (not per individual word),
+ * makes the reconstruction well-defined regardless of which of a trial's
+ * two distractor words was originally drawn "first" (that ordering isn't
+ * separately recoverable from the stored sheet data, since which one
+ * becomes aromagen_near vs real_near is independently randomized).
+ */
+function computeClusterUsedSets_(masterSs) {
+  var clusterUsedSets = {};
+  for (var cluster in CLUSTERS) clusterUsedSets[cluster] = {};
+
+  var sessionsSheet = masterSs.getSheetByName("sessions");
+  var data = sessionsSheet.getDataRange().getValues();
+  var header = data[0];
+  var planCol = header.indexOf("plan_json");
+  for (var r = 1; r < data.length; r++) {
+    var planJson = data[r][planCol];
+    if (!planJson) continue;
+    var plan = JSON.parse(planJson);
+    plan.trials.forEach(function (t) {
+      var cluster = t.cluster;
+      var usedSet = clusterUsedSets[cluster];
+      if (!usedSet) return; // unknown/legacy cluster name, skip
+      var distractorWords = t.options
+        .filter(function (o) { return o.kind !== "aromagen_target"; })
+        .map(function (o) { return o.word; })
+        .filter(Boolean);
+      if (distractorWords.length < 2) return; // malformed/legacy row, skip
+
+      var eligibleWords = eligibleDistractorWords_(cluster);
+      var available = eligibleWords.filter(function (w) { return !usedSet[w]; });
+      if (available.length < 2) {
+        for (var k in usedSet) delete usedSet[k];
+      }
+      distractorWords.forEach(function (w) { usedSet[w] = true; });
+    });
+  }
+  return clusterUsedSets;
 }
 
 /** Next 1-indexed sequence position = count of sessions ever created + 1.

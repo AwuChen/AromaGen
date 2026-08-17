@@ -13,18 +13,18 @@ both the Preliminary Study's and the Internal Pilot Study's taxonomies
 """
 
 CLUSTERS = {
-    "Floral": ["Lavender", "cherry blossom", "jasmine tea", "rose hand cream"],
+    "Floral": ["Lavender", "rose", "jasmine tea", "peony and rose oil shampoo"],
     "Citrus": ["Orange", "mango", "Lemonade", "Lime soda (Sprite)"],
-    "Woody & Resinous": ["Pine", "oak", "Wooden wine barrel", "Incense"],
+    "Woody & Resinous": ["birch", "patchouli", "Whiskey and oak candle", "Incense"],
     "Herbal & Cooling": ["Basil", "Cucumber", "Peppermint tea", "Mint chewing gum"],
-    "Spice": ["Ginger", "Black pepper", "Chai latte", "Cinnamon roll"],
-    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "Vanilla ice cream"],
-    "Roasted & Smoky": ["Coffee", "Bacon", "barbeque ribs", "Hot dog with hot sauce"],
+    "Spice": ["Ginger", "Black pepper", "chai tea", "Cinnamon roll"],
+    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow pop tarts"],
+    "Roasted & Smoky": ["coffee beans", "Bacon", "korean barbeque beef patty", "Hot dog with hot sauce"],
     "Fermented & Sour": ["Greek yogurt", "Pickled cucumber", "Fries with ranch sauce", "Nacho with sour cream"],
-    "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Sticky tofu with chilli"],
+    "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Natto beans"],
     "Chemical & Solvent": ["Whiskey", "Tequila", "Mint Fluoride mouthwash", "Lavender nail polish remover"],
     "Perfumed & Clean": ["Aloe vera", "Hand sanitizer", "Mint fluoride toothpaste", "Almond oil shampoo"],
-    "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in bbq sauce", "Salty popcorn"],
+    "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in barbeque sauce", "Salty popcorn"],
 }
 
 DESCRIPTOR_TO_CLUSTER = {d: c for c, ds in CLUSTERS.items() for d in ds}
@@ -32,58 +32,76 @@ assert sum(len(v) for v in CLUSTERS.values()) == 50
 
 TRIALS_PER_PARTICIPANT = len(CLUSTERS)  # 12 -- one target per cluster, one pass
 
-# --- Distractor design: dynamic, balanced, randomized (not a static table) ---
+# --- Distractor design: exclusion-list based. For each TARGET cluster,
+# EXCLUDED_CLUSTERS lists which OTHER clusters may NOT supply distractors;
+# every cluster not excluded (and not the target's own cluster) is
+# eligible. Given verbatim by dictation for all 12 clusters (revised list,
+# replacing the original 10-of-12 dictation); one pair (Citrus/Spice) was
+# given one-directionally (Citrus -> Spice only) and was made symmetric per
+# the same "fully symmetric" convention established for the original list.
+# The target's own cluster is ALWAYS implicitly excluded too (not re-stated
+# per cluster below).
 #
-# Same family/ring structure as the Internal Pilot Study (2 families of 6
-# clusters, each cluster has 2 fixed near-neighbor CLUSTERS within its
-# family), but WHICH WORD gets picked from each relevant cluster is decided
-# at runtime, randomly among that cluster's least-used-so-far words, with a
-# running distractor-usage tally mutated as trials are built (same
-# least-used-first balancing principle used for target selection) -- not a
-# fixed per-target lookup table. This is what makes every word in the
-# 50-word list appear roughly evenly as a distractor across a whole batch
-# of participants, while still varying which specific words get picked for
-# any given target from one participant to the next.
-#
-# Family A (6 clusters, ring order): Floral <-> Sweet & Gourmand <-> Spice
-#   <-> Woody & Resinous <-> Herbal & Cooling <-> Citrus <-> (back to Floral)
-# Family B (6 clusters, ring order): Chemical & Solvent <-> Perfumed &
-#   Clean <-> Roasted & Smoky <-> Savoury & Umami <-> Fermented & Sour <->
-#   Putrid & Decay <-> (back to Chemical & Solvent)
-FAMILY_A_RING = ["Floral", "Sweet & Gourmand", "Spice", "Woody & Resinous", "Herbal & Cooling", "Citrus"]
-FAMILY_B_RING = ["Chemical & Solvent", "Perfumed & Clean", "Roasted & Smoky", "Savoury & Umami", "Fermented & Sour", "Putrid & Decay"]
+# WHICH WORD gets picked from each eligible cluster is decided at runtime
+# by THREE layered rules (see pilot_assignment.py's pick_distractors):
+# (1) a HARD per-PARTICIPANT non-repeat rule -- a word already used as a
+# distractor anywhere in this participant's own session (any trial, any
+# cluster) is never reused as a distractor again for that same participant;
+# (2) a HARD per-cluster non-repeat cycle, tracked globally across the
+# whole study -- a word already used as a distractor for a given target
+# cluster can't be picked again for that cluster until every eligible word
+# has been used once, then it resets; (3) among whatever's left,
+# least-used-first against a running GLOBAL distractor-usage tally (same
+# balancing principle used for target selection), so usage also stays even
+# across all 50 words as distractors, not just non-repeating.
+EXCLUDED_CLUSTERS = {
+    "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean", "Chemical & Solvent"],
+    "Citrus": ["Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling", "Spice"],
+    "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Perfumed & Clean", "Chemical & Solvent"],
+    "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Chemical & Solvent", "Sweet & Gourmand"],
+    "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand", "Citrus"],
+    "Sweet & Gourmand": ["Citrus", "Herbal & Cooling", "Spice"],
+    "Roasted & Smoky": ["Savoury & Umami", "Fermented & Sour"],
+    "Fermented & Sour": ["Roasted & Smoky", "Putrid & Decay", "Savoury & Umami"],
+    "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami"],
+    "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous", "Floral"],
+    "Perfumed & Clean": ["Floral", "Chemical & Solvent", "Woody & Resinous"],
+    "Savoury & Umami": ["Fermented & Sour", "Roasted & Smoky", "Putrid & Decay"],
+}
 
-assert set(FAMILY_A_RING) | set(FAMILY_B_RING) == set(CLUSTERS.keys())
-assert len(FAMILY_A_RING) == 6 and len(FAMILY_B_RING) == 6
+assert set(EXCLUDED_CLUSTERS.keys()) == set(CLUSTERS.keys())
+for _c, _excl in EXCLUDED_CLUSTERS.items():
+    for _other in _excl:
+        assert _c in EXCLUDED_CLUSTERS[_other], f"{_c} excludes {_other} but not vice versa"
 
 
-def _ring_neighbors(ring, cluster):
-    i = ring.index(cluster)
-    n = len(ring)
-    return [ring[(i - 1) % n], ring[(i + 1) % n]]
+def eligible_distractor_clusters(cluster):
+    excluded = EXCLUDED_CLUSTERS.get(cluster, [])
+    return [c for c in CLUSTERS if c != cluster and c not in excluded]
 
 
-NEIGHBOR_CLUSTERS = {}
-for _c in FAMILY_A_RING:
-    NEIGHBOR_CLUSTERS[_c] = _ring_neighbors(FAMILY_A_RING, _c)
-for _c in FAMILY_B_RING:
-    NEIGHBOR_CLUSTERS[_c] = _ring_neighbors(FAMILY_B_RING, _c)
-
-FAMILY_OF_CLUSTER = {}
-for _c in FAMILY_A_RING:
-    FAMILY_OF_CLUSTER[_c] = "A"
-for _c in FAMILY_B_RING:
-    FAMILY_OF_CLUSTER[_c] = "B"
+def eligible_distractor_words(cluster):
+    words = []
+    for c in eligible_distractor_clusters(cluster):
+        words.extend(CLUSTERS[c])
+    return words
 
 # --- The single fixed odorant set (no longer an A/B condition) ---
 #
 # Given verbatim, matches the current live AromaGen catalog
-# (aromagen/cartridge_sets.json) exactly, including Seaweed Accord as the
-# stand-in for the umami/savoury class.
+# (aromagen/cartridge_sets.json) exactly. 6 of the 12 slots are now
+# multi-ingredient blends rather than single raw materials (renamed over
+# the course of production tuning) -- kept in sync here so that ratio text
+# copied straight off the real AromaGen frontend (which now generates these
+# blend names) parses correctly via parseRatioText_/parseRatioTextClient_
+# instead of silently falling back to an even split. This is a prospective
+# change only: already-collected participants' frozen data still shows
+# whatever names were current when they were recorded.
 BASE_ODORANT_SET = [
-    "Benz Sal", "Sandalwood", "Clove Bud", "Lavender", "Orange", "Vanilla",
-    "Birch tar oil", "Eucalyptus", "Cognac", "Vinegar", "Isovaleric acid",
-    "Seaweed Accord",
+    "Benz Sal", "Sandalwood", "Clove Bud + Cumin", "Lavender + Rose",
+    "Orange + Lemon", "Vanilla Sugar + Almond Extract",
+    "Birch tar oil + Coffee + Clove Bud", "Eucalyptus", "Cognac", "Vinegar",
+    "Isovaleric acid", "Seaweed + Fenugreek + Garlic",
 ]
 
 # category + volatility as given, kept for reference/logging even though
@@ -91,45 +109,49 @@ BASE_ODORANT_SET = [
 ODORANT_CATEGORY = {
     "Benz Sal": "Perfumed / Clean",
     "Sandalwood": "Woody / Resinous",
-    "Clove Bud": "Spice",
-    "Lavender": "Floral",
-    "Orange": "Citrus",
-    "Vanilla": "Sweet / Gourmand",
-    "Birch tar oil": "Roasted / Smoky",
+    "Clove Bud + Cumin": "Spice",
+    "Lavender + Rose": "Floral",
+    "Orange + Lemon": "Citrus",
+    "Vanilla Sugar + Almond Extract": "Sweet / Gourmand",
+    "Birch tar oil + Coffee + Clove Bud": "Roasted / Smoky",
     "Eucalyptus": "Herbal / Cooling",
     "Cognac": "Chemical / Solvent",
     "Vinegar": "Fermented / Sour",
     "Isovaleric acid": "Animal / Body",
-    "Seaweed Accord": "Umami / Savoury (stand-in)",
+    "Seaweed + Fenugreek + Garlic": "Umami / Savoury",
 }
 ODORANT_VOLATILITY = {
-    "Benz Sal": 4, "Sandalwood": 4, "Clove Bud": 6, "Lavender": 6,
-    "Orange": 8, "Vanilla": 3, "Birch tar oil": 3, "Eucalyptus": 8,
-    "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed Accord": 5,
+    "Benz Sal": 4, "Sandalwood": 3, "Clove Bud + Cumin": 6, "Lavender + Rose": 5,
+    "Orange + Lemon": 8, "Vanilla Sugar + Almond Extract": 3,
+    "Birch tar oil + Coffee + Clove Bud": 4, "Eucalyptus": 8,
+    "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed + Fenugreek + Garlic": 6,
 }
 
 # Brief sensory description per odorant, shown next to each name on the
-# rating-scale feedback screen. Sourced from each odorant's "note" field in
-# aromagen/cartridge_sets.json.
+# feedback screen's reference list. Sourced from each odorant's "note"
+# field in aromagen/cartridge_sets.json.
 ODORANT_DESCRIPTIONS = {
     "Benz Sal": "Sweet, balsamic, soft floral, powdery clean note",
     "Sandalwood": "Woody, creamy, soft, warm, slightly sweet base note",
-    "Clove Bud": "Warm, pungent, spicy",
-    "Lavender": "Floral, herbaceous-sweet, calming",
-    "Orange": "Bright, citrus, sweet, juicy top note",
-    "Vanilla": "Sweet, creamy, warm, gourmand",
-    "Birch tar oil": "Smoky, tarry, leathery, medicinal-burnt",
+    "Clove Bud + Cumin": "Warm spice -- pungent clove combined with earthy, dry, slightly bitter cumin",
+    "Lavender + Rose": "Floral bouquet -- calming, herbaceous-sweet lavender and dewy, rosy petal-sweetness",
+    "Orange + Lemon": "Bright, citrus, sweet-tart -- juicy orange combined with sharp, zesty lemon",
+    "Vanilla Sugar + Almond Extract": "Sweet, creamy gourmand -- warm vanilla-sugar sweetness combined with nutty, marzipan-like almond",
+    "Birch tar oil + Coffee + Clove Bud": "Smoky, roasted base -- tarry, leathery birch tar, dark roasted coffee, and warm clove",
     "Eucalyptus": "Cool, medicinal, camphoraceous, fresh herbal top note",
     "Cognac": "Sharp, alcoholic, boozy, solvent-like pungency",
     "Vinegar": "Sour, sharp, acetic, pungent",
     "Isovaleric acid": "Sweaty, cheesy, animalic",
-    "Seaweed Accord": "Marine, salty, umami, savoury",
+    "Seaweed + Fenugreek + Garlic": "Savoury, marine-umami -- salty seaweed and warm, bittersweet fenugreek, with pungent garlic as an accent",
 }
 
-# --- Feedback-type condition ---
+# --- Feedback type ---
 #
-# A counterbalanced condition assigned via participant-sequence parity:
-# odd -> freeform, even -> rating_scale.
+# Used to be a counterbalanced condition (odd -> freeform, even ->
+# rating_scale); rating_scale has been dropped, every participant now gets
+# freeform feedback. "rating_scale" is kept in FEEDBACK_TYPES only so label
+# lookups for already-collected participants (frozen plan_json from before
+# this change) keep resolving correctly -- new plans never assign it.
 FEEDBACK_TYPES = {
     "freeform": "Freeform feedback",
     "rating_scale": "Rating-scale feedback",
@@ -138,8 +160,10 @@ MAX_FEEDBACK_ROUNDS = 5
 
 
 def feedback_type_for_participant(seq_index: int) -> str:
-    """Odd sequence position -> freeform; even -> rating_scale."""
-    return "freeform" if seq_index % 2 == 1 else "rating_scale"
+    """Every participant gets freeform feedback (rating_scale condition
+    removed). seq_index is unused now but kept in the signature so callers
+    don't need to change."""
+    return "freeform"
 
 
 if __name__ == "__main__":

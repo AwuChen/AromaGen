@@ -3,15 +3,16 @@
 Single fixed 12-odorant set (no A/B condition), 50-word/12-cluster
 descriptor taxonomy. Two sections per participant:
 
-- **Section 1**: 12 4-AFC trials (one pass through all clusters), each
+- **Section 1**: 12 3-AFC trials (one pass through all clusters), each
   followed by a feedback sub-flow (freeform or rating-scale, counterbalanced
   across participants).
 - **Section 2 -- Freeform Aroma Recreation**: after Section 1, the
   participant does this 5 times: freely names a favourite
-  food/beverage/perfume/any smell, the experimenter records what AromaGen
-  produced for it, then the SAME KIND of feedback sub-flow runs (same
-  counterbalanced freeform/rating-scale condition, reused for all 5) to
-  iteratively refine that creation before moving to the next one.
+  food/beverage/perfume/memory/scene/abstract concept/any smell, the
+  experimenter records what AromaGen produced for it, then the SAME KIND
+  of feedback sub-flow runs (same counterbalanced freeform/rating-scale
+  condition, reused for all 5) to iteratively refine that creation before
+  moving to the next one.
 
 ## Revision history (high level)
 
@@ -175,8 +176,84 @@ descriptor taxonomy. Two sections per participant:
     hand-selecting that column in Sheets and applying Format -> Number ->
     Plain number -- the underlying value has been the correct number all
     along.
-
-## The single fixed odorant set
+22. **Section 2's briefing broadened what participants are prompted to
+    recreate.** The read-aloud script (`renderSection2Briefing`,
+    `DataCollection.html`) now suggests a favourite food, beverage,
+    perfume, memory, scene, or abstract concept -- not just
+    food/beverage/perfume -- so participants aren't steered toward only
+    literal, concrete smells.
+23. **9 descriptor words swapped** in `CLUSTERS` (`PilotData.gs`,
+    `pilot_config.py`): Pine->birch, oak->patchouli, cherry
+    blossom->rose, rose hand cream->cherry blossom cake, Wooden wine
+    barrel->Whiskey and oak candle, Chai latte->chai tea, Coffee->coffee
+    beans, barbeque ribs->korean bbq beef patty, Sticky tofu with
+    chilli->Natto beans. Prospective only, per explicit instruction --
+    changes what gets assigned to NEW participants going forward; any
+    already-frozen `plan_json` (existing participants) keeps whatever
+    words it was built with, untouched.
+24. **The Section 1 initial-similarity screen now also shows the
+    AromaGen-generated ratio** the experimenter typed on the preceding
+    trial screen for this same trial (`llmRatioText`, threaded through
+    `getPilotSessionView`'s `feedback` view in `PilotEngine.gs`, displayed
+    in `renderInitialSimilarityForm_`, `DataCollection.html`). Lets the
+    experimenter reliably re-trigger the exact same AromaGen composition
+    on the device right before rating initial similarity, without having
+    to recall or scroll back to what they entered a screen earlier.
+25. **Section 1 changed from 4-AFC to 3-AFC.** Each trial now presents 3
+    options instead of 4: the target + the same 2 near-class distractors
+    as before (one realized as an AromaGen composition, the other as a
+    real physical object), with the "far" distractor (drawn from the
+    other family, realized as a real physical object) removed entirely.
+    The near-distractor SAMPLING itself is unchanged -- still least-used-
+    first from the target's 2 ring-neighbor clusters, random tie-break --
+    only the far pick is gone (`pickDistractors_`, `PilotAssignment.gs`/
+    `pilot_assignment.py`). `FAMILY_OF_CLUSTER` (its only consumer) is
+    removed from `PilotData.gs`/`pilot_config.py`; `FAMILY_A_RING`/
+    `FAMILY_B_RING` stay, since `NEIGHBOR_CLUSTERS` (near-distractor rings)
+    is still built from them. **Prospective only**, per explicit
+    instruction -- doesn't touch any already-frozen `plan_json`. The
+    `trials` sheet's schema shrank from `option_1..option_4` to
+    `option_1..option_3` -- unlike the earlier column-ADDITION migrations
+    (`ensureSheetHeaders_` handles those safely), removing a column from
+    the MIDDLE of the schema is NOT safely migratable: any already-
+    collected `trials` rows would read misaligned under the new header.
+    Delete any existing `trials` rows before running real 3-AFC sessions.
+26. **Distractor design replaced entirely: exclusion lists instead of the
+    family/ring system.** The old design (2 families of 6 clusters, each
+    cluster with exactly 2 fixed ring-neighbor clusters as its near-
+    distractor source) is gone. In its place, `EXCLUDED_CLUSTERS`
+    (`PilotData.gs`/`pilot_config.py`) explicitly lists, per target
+    cluster, which OTHER clusters may NOT supply distractors -- every
+    other cluster (except the target's own, always implicitly excluded)
+    is eligible, not just 2 fixed neighbors. Given verbatim by dictation
+    for 10 of the 12 clusters; Spice's and Perfumed & Clean's entries were
+    never dictated directly but are fully recoverable by symmetry (a
+    handful of dictated pairs were one-directional and were made mutual
+    per explicit confirmation -- e.g. Citrus excluded Woody & Resinous but
+    not vice versa in the raw dictation). `FAMILY_A_RING`/`FAMILY_B_RING`/
+    `ringNeighbors_`/`NEIGHBOR_CLUSTERS` are removed entirely (no consumer
+    left). Distractor SELECTION within the eligible pool now has two
+    layered rules instead of one: (1) a NEW hard per-cluster non-repeat
+    cycle -- `clusterUsedSets`/`cluster_used_sets`, tracking every word
+    already used as a distractor for a given target cluster across every
+    participant so far; a word can't repeat for that cluster until every
+    eligible word has been used once, then the cycle resets -- and (2) the
+    existing least-used-first balancing against the running GLOBAL
+    `distractorTally`, unchanged, so overall usage still stays even across
+    all 50 words. `clusterUsedSets` is reconstructed fresh from history on
+    every call (`computeClusterUsedSets_`, `PilotData.gs`), replaying each
+    historical trial's pair of distractor words as a single unit (checked
+    once per trial, not per word) -- this side-steps an unrecoverable
+    ambiguity in the stored data (which of a trial's 2 distractor words was
+    picked "first" isn't independently retrievable, since which one became
+    `aromagen_near` vs `real_near` is separately randomized). **Prospective
+    only**, same as revision 25 -- doesn't touch already-frozen plans.
+27. **Added one more mutual exclusion: Woody & Resinous &harr; Chemical &
+    Solvent.** Per explicit follow-up instruction -- a Woody & Resinous
+    target can no longer draw a Chemical & Solvent distractor, and vice
+    versa. Both clusters' eligible pools shrink from 6 to 5 clusters as a
+    result (now tied with Herbal & Cooling as the most restricted).
+    Prospective only, same as revisions 25-26.
 
 ```
 Benz Sal          Perfumed / Clean       vol 4
@@ -199,18 +276,19 @@ Matches the live AromaGen catalog (`aromagen/cartridge_sets.json`) exactly.
 
 ## The 50-word / 12-cluster descriptor list
 
-Unchanged from the previous revision:
+9 words swapped in the most recent revision (see revision 23 below) --
+prospective only, does not touch any already-frozen participant plan:
 
 ```
-Floral: Lavender, cherry blossom, jasmine tea, rose hand cream
+Floral: Lavender, rose, jasmine tea, cherry blossom cake
 Citrus: Orange, mango, Lemonade, Lime soda (Sprite)
-Woody & Resinous: Pine, oak, Wooden wine barrel, Incense
+Woody & Resinous: birch, patchouli, Whiskey and oak candle, Incense
 Herbal & Cooling: Basil, Cucumber, Peppermint tea, Mint chewing gum
-Spice: Ginger, Black pepper, Chai latte, Cinnamon roll
-Sweet & Gourmand: Coke, dark chocolate, Apple pie, Sweet popcorn, Vanilla ice cream
-Roasted & Smoky: Coffee, Bacon, barbeque ribs, Hot dog with hot sauce
+Spice: Ginger, Black pepper, chai tea, Cinnamon roll
+Sweet & Gourmand: Coke, dark chocolate, Apple pie, Sweet popcorn, chocolate and marshmallow-flavored pop tarts
+Roasted & Smoky: coffee beans, Bacon, korean bbq beef patty, Hot dog with hot sauce
 Fermented & Sour: Greek yogurt, Pickled cucumber, Fries with ranch sauce, Nacho with sour cream
-Putrid & Decay: Blue cheese, durian, Canned sardines, Sticky tofu with chilli
+Putrid & Decay: Blue cheese, durian, Canned sardines, Natto beans
 Chemical & Solvent: Whiskey, Tequila, Mint Fluoride mouthwash, Lavender nail polish remover
 Perfumed & Clean: Aloe vera, Hand sanitizer, Mint fluoride toothpaste, Almond oil shampoo
 Savoury & Umami: Soy sauce, Parmesan cheese, Garlic, Seasoned pull pork in bbq sauce, Salty popcorn
@@ -218,16 +296,55 @@ Savoury & Umami: Soy sauce, Parmesan cheese, Garlic, Seasoned pull pork in bbq s
 
 ## Dynamic distractor selection
 
-Same family/ring structure as before (Family A: Floral &harr; Sweet &
-Gourmand &harr; Spice &harr; Woody & Resinous &harr; Herbal & Cooling
-&harr; Citrus; Family B: Chemical & Solvent &harr; Perfumed & Clean &harr;
-Roasted & Smoky &harr; Savoury & Umami &harr; Fermented & Sour &harr;
-Putrid & Decay), but the actual WORD chosen from each relevant cluster is
-no longer a fixed table lookup -- it's picked at plan-build time as the
-least-used-so-far candidate (random tie-break) against a running
-distractor-usage tally, mutated across every trial as plans are built.
+Each trial's 2 distractors are drawn from an EXCLUSION-LIST-derived pool,
+not a fixed neighbor/ring structure (see revision 26 above for the design
+history). `EXCLUDED_CLUSTERS` lists, per target cluster, which other
+clusters are OFF LIMITS as a distractor source -- every remaining cluster
+(other than the target's own) is fair game:
+
+```
+Floral:              excludes Woody & Resinous, Herbal & Cooling, Perfumed & Clean
+Citrus:               excludes Woody & Resinous, Sweet & Gourmand, Chemical & Solvent, Herbal & Cooling
+Woody & Resinous:     excludes Floral, Herbal & Cooling, Spice, Citrus, Putrid & Decay, Chemical & Solvent
+Herbal & Cooling:     excludes Floral, Citrus, Woody & Resinous, Spice, Sweet & Gourmand, Chemical & Solvent
+Spice:                excludes Woody & Resinous, Herbal & Cooling, Sweet & Gourmand
+Sweet & Gourmand:     excludes Citrus, Herbal & Cooling, Spice
+Roasted & Smoky:      excludes Savoury & Umami, Fermented & Sour
+Fermented & Sour:     excludes Roasted & Smoky, Putrid & Decay, Savoury & Umami
+Putrid & Decay:       excludes Fermented & Sour, Savoury & Umami, Woody & Resinous
+Chemical & Solvent:   excludes Perfumed & Clean, Citrus, Herbal & Cooling, Woody & Resinous
+Perfumed & Clean:     excludes Floral, Chemical & Solvent
+Savoury & Umami:      excludes Fermented & Sour, Roasted & Smoky, Putrid & Decay
+```
+
+Every pair is symmetric (if A excludes B, B excludes A) -- eligible pool
+sizes range from 5 clusters (Herbal & Cooling and Woody & Resinous, the
+most restricted) to 9
+(Roasted & Smoky and Perfumed & Clean, the least). Within the eligible
+pool, the actual WORD chosen is governed by two layered rules, applied at
+plan-build time:
+
+1. **Hard per-cluster non-repeat cycle**: a word already used as a
+   distractor for a given target cluster can't be picked again for that
+   cluster until every eligible word for it has been used once, at which
+   point the cycle resets. Tracked via `clusterUsedSets`
+   (`PilotEngine.gs`/`PilotAssignment.gs`) / `cluster_used_sets`
+   (`pilot_assignment.py`), reconstructed fresh from every session's
+   frozen `plan_json` before each new plan is built
+   (`computeClusterUsedSets_`).
+2. **Least-used-first, globally**: among whatever's left after rule 1,
+   picked as the least-used-so-far candidate (random tie-break) against a
+   running distractor-usage tally -- same balancing principle used for
+   target selection, mutated across every trial as plans are built.
+
 Verified via `pilot_assignment.py`: after 10 participants, all 50 words
-have been used as a distractor 7-8 times each (spread of 1).
+have been used as a distractor 4-6 times each (spread of 2 -- Woody &
+Resinous and Chemical & Solvent's now-smaller eligible pools, 5 clusters
+each after excluding each other too, spread usage slightly less evenly
+than the rest), and the hard non-repeat cycle held for every cluster
+across the whole run (no word repeated as that cluster's distractor
+before its eligible pool was
+exhausted once).
 
 ## The feedback sub-flow
 
@@ -236,7 +353,7 @@ up to 5 rounds, freeform/rating-scale counterbalanced by participant
 parity), except:
 - The initial-similarity instruction no longer references "the option
   they just judged" -- the comparison happens regardless of whether the
-  4-AFC answer was correct.
+  3-AFC answer was correct.
 - Round 0 (initial similarity) is always logged, with a fixed marker
   string in `round_input_text` instead of a separate column.
 - All similarity ratings (round 0 and rounds 1-5) share the single
@@ -281,8 +398,8 @@ mirroring Section 1's overall briefing -> (per-item content -> feedback)
 shape, just with "creation" in place of "trial."
 
 1. **Briefing** (`section2_briefing`, once): tells the participant they'll
-   freely choose a favourite food/beverage/perfume/any smell, 5 times, and
-   AromaGen will try to recreate each one.
+   freely choose a favourite food/beverage/perfume/memory/scene/abstract
+   concept/any smell, 5 times, and AromaGen will try to recreate each one.
 2. **Intake** (`section2_intake`, once per creation): the experimenter
    enters (a) what the participant asked AromaGen to create this time, in
    their own words, (b) AromaGen's resulting base-odorant ratio (same
@@ -385,7 +502,8 @@ data is believed to exist yet -- only page-load checks were done, no
   Section 2 creation, written incrementally as each creation's intake
   screen is submitted).
 - **trials**: `participant_name`, `odorant_set`, `trial_index`, `target`,
-  `cluster`, `option_1`..`option_4` (merged `"<word> (<kind>)"` format),
+  `cluster`, `option_1`..`option_3` (merged `"<word> (<kind>)"` format --
+  3-AFC as of revision 25, was `option_1`..`option_4`),
   `correct_slot`, `familiarity_1to7`, `selected_slot`, `is_correct`,
   `confidence_1to7`, `response_timestamp`,
   `llm_generated_base_odorant_ratio` (experimenter-entered, e.g. `"Vanilla

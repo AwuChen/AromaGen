@@ -33,10 +33,37 @@ class Settings:
     learned_examples_top_k: int = int(os.getenv("LEARNED_EXAMPLES_TOP_K", "3"))
     sequence_total_seconds: int = int(os.getenv("SEQUENCE_TOTAL_SECONDS", "30"))
     scent_duration_max: int = int(os.getenv("SCENT_DURATION_MAX", "15"))
-    descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "8"))
+    # Kept generously above the current 12-odorant catalog size so
+    # filter_relevant_scents's `top_k >= len(catalog)` guard always returns
+    # the full catalog -- see aromagen/agents/descriptor_filter.py. The
+    # keyword-overlap filter it used to apply at top_k=8 could silently drop
+    # a genuinely relevant odorant whose name/category/note shared no literal
+    # words with the request (e.g. "lime soda" losing "Orange + Lemon"), and
+    # with only 12 odorants total the token savings from narrowing isn't
+    # worth that risk. Lower this back down if the catalog grows much larger
+    # and filtering becomes worth it again.
+    descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "24"))
     pulse_seconds: float = float(os.getenv("PULSE_SECONDS", "1"))
     pulse_rounds: int = int(os.getenv("PULSE_ROUNDS", "8"))
     validation_layer_enabled: bool = os.getenv("VALIDATION_LAYER_ENABLED", "false").lower() == "true"
+
+    interaction_log_apps_script_url: str = os.getenv("INTERACTION_LOG_APPS_SCRIPT_URL", "")
+    interaction_log_token: str = os.getenv("INTERACTION_LOG_TOKEN", "")
+
+    # Local copy of the interaction log (fast read-path for retrieval-augmented
+    # composition, dual-written alongside the Apps Script/Sheet on every /log_interaction
+    # call -- see aromagen/agents/interaction_retrieval.py).
+    interaction_log_local_path: Path = Path(
+        os.getenv("INTERACTION_LOG_LOCAL_PATH", DATA_ROOT / "interaction_log.jsonl")
+    )
+    interaction_log_embeddings_path: Path = Path(
+        os.getenv("INTERACTION_LOG_EMBEDDINGS_PATH", DATA_ROOT / "interaction_log_embeddings.json")
+    )
+    interaction_retrieval_enabled: bool = os.getenv("INTERACTION_RETRIEVAL_ENABLED", "true").lower() == "true"
+    interaction_retrieval_top_k: int = int(os.getenv("INTERACTION_RETRIEVAL_TOP_K", "5"))
+    interaction_retrieval_embedding_model: str = os.getenv(
+        "INTERACTION_RETRIEVAL_EMBEDDING_MODEL", "text-embedding-3-small"
+    )
 
     # Self-consistency ensemble for concrete-smell requests (see openai_client.compose_with_ensemble)
     ensemble_enabled: bool = os.getenv("ENSEMBLE_ENABLED", "true").lower() == "true"

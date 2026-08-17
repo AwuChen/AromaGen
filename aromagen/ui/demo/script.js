@@ -1,5 +1,71 @@
 const API_BASE = window.FREQUENCY_API_BASE || 'http://localhost:8000';
 
+const LOG_SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1TBswegffpBQL_AAeMdSgM6qz9V1eC9aK09OAR_m5Ys4/edit';
+
+function openLogSheet() {
+  window.open(LOG_SPREADSHEET_URL, '_blank', 'noopener');
+}
+
+async function submitLogInteraction() {
+  const statusEl = document.getElementById('logInteractionStatus');
+  const setLogStatus = function (text, isError) {
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.style.color = isError ? '#ff8080' : 'rgba(255, 255, 255, 0.5)';
+  };
+
+  if (!currentSequence || currentSequence.length === 0) {
+    setLogStatus('No generated scent to log yet -- generate one first.', true);
+    return;
+  }
+
+  const similarityInputEl = document.getElementById('logSimilarityInput');
+  const feedbackInputEl = document.getElementById('logFeedbackInput');
+  const submitBtnEl = document.getElementById('logInteractionSubmitBtn');
+
+  const similarity = parseInt((similarityInputEl && similarityInputEl.value) || '', 10);
+  if (isNaN(similarity) || similarity < 1 || similarity > 7) {
+    setLogStatus('Enter a similarity rating from 1 to 7 before submitting.', true);
+    return;
+  }
+
+  const transcriptionEl = document.getElementById('frequencyTranscriptionText');
+  const targetSmell = sessionOriginalSentence || (transcriptionEl && transcriptionEl.textContent) || '';
+  if (!targetSmell) {
+    setLogStatus('No target smell text found to log.', true);
+    return;
+  }
+
+  const payload = {
+    target_smell: targetSmell,
+    aromagen_ratio: summarizeRecipe(currentSequence),
+    similarity: similarity,
+    feedback: (feedbackInputEl && feedbackInputEl.value.trim()) || '',
+    session_id: sessionId || null,
+  };
+
+  try {
+    if (submitBtnEl) submitBtnEl.disabled = true;
+    setLogStatus('Logging...');
+    const response = await fetch(API_BASE + '/log_interaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errBody = await response.json().catch(function () { return {}; });
+      throw new Error(errBody.detail || ('HTTP ' + response.status));
+    }
+    setLogStatus('Logged to sheet.');
+    if (feedbackInputEl) feedbackInputEl.value = '';
+    if (similarityInputEl) similarityInputEl.value = '';
+  } catch (err) {
+    setLogStatus('Failed to log: ' + (err.message || err), true);
+  } finally {
+    if (submitBtnEl) submitBtnEl.disabled = false;
+  }
+}
+
 /**
  * Subtle chromatic emphasis on CTA hover
  */
@@ -40,6 +106,14 @@ function bindImageUploadHandler(onImageSelected) {
   var textualFeedbackRowEl = document.getElementById('textualFeedbackRow');
   var textualFeedbackInputEl = document.getElementById('textualFeedbackInput');
   var textualFeedbackSubmitBtnEl = document.getElementById('textualFeedbackSubmitBtn');
+  var durationToggleBtnEl = document.getElementById('durationToggleBtn');
+  var durationRowEl = document.getElementById('durationRow');
+  var logInteractionToggleBtnEl = document.getElementById('logInteractionToggleBtn');
+  var logInteractionRowEl = document.getElementById('logInteractionRow');
+  var logSimilarityInputEl = document.getElementById('logSimilarityInput');
+  var logFeedbackInputEl = document.getElementById('logFeedbackInput');
+  var logInteractionSubmitBtnEl = document.getElementById('logInteractionSubmitBtn');
+  var logInteractionStatusEl = document.getElementById('logInteractionStatus');
   if (!recordBtn) return;
 
   var micIcon = recordBtn.querySelector('.record-mic-icon');
@@ -135,6 +209,7 @@ function bindImageUploadHandler(onImageSelected) {
         }
         currentSequence = sequence;
         renderProfile(sequence);
+        recordHistoryEntry(trimmedText, sequence, currentPulseSequence);
         updateProgress('Complete', 100);
         setTimeout(hideProgress, 800);
         return Promise.resolve();
@@ -310,6 +385,29 @@ function bindImageUploadHandler(onImageSelected) {
     });
   }
 
+  if (durationToggleBtnEl && durationRowEl) {
+    durationToggleBtnEl.addEventListener('click', function () {
+      var isHidden = durationRowEl.style.display === 'none';
+      durationRowEl.style.display = isHidden ? 'block' : 'none';
+      durationToggleBtnEl.classList.toggle('is-active', isHidden);
+    });
+  }
+
+  if (logInteractionToggleBtnEl && logInteractionRowEl) {
+    logInteractionToggleBtnEl.addEventListener('click', function () {
+      var isHidden = logInteractionRowEl.style.display === 'none';
+      logInteractionRowEl.style.display = isHidden ? 'block' : 'none';
+      logInteractionToggleBtnEl.classList.toggle('is-active', isHidden);
+      if (isHidden && logSimilarityInputEl) logSimilarityInputEl.focus();
+    });
+  }
+
+  if (logInteractionSubmitBtnEl) {
+    logInteractionSubmitBtnEl.addEventListener('click', function () {
+      submitLogInteraction();
+    });
+  }
+
   if (textualFeedbackSubmitBtnEl && textualFeedbackInputEl) {
     textualFeedbackSubmitBtnEl.addEventListener('click', function () {
       var feedbackText = (textualFeedbackInputEl.value || '').trim();
@@ -471,6 +569,162 @@ function resetSession() {
   isInFeedbackMode = false;
 }
 
+// ---- Generation history (client-side, localStorage) ----
+// Every successful compose/feedback call (see processInputText's success
+// branch) gets recorded here: the prompt/feedback text that produced it,
+// the full resulting recipe (base odorants + ratios), and the hardware
+// pulse train if one was returned, so a restored entry can be played back
+// with the exact same timing as the original generation. Capped to the
+// most recent HISTORY_LIMIT entries, newest first.
+const HISTORY_STORAGE_KEY = 'aromagen_generation_history';
+const HISTORY_LIMIT = 50;
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.warn('Could not read generation history from localStorage', e);
+    return [];
+  }
+}
+
+function saveHistory(entries) {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(entries));
+  } catch (e) {
+    console.warn('Could not save generation history to localStorage', e);
+  }
+}
+
+function recordHistoryEntry(prompt, sequence, pulseSequence) {
+  if (!prompt || !sequence || !sequence.length) return;
+  const entries = loadHistory();
+  entries.unshift({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+    prompt: prompt,
+    sequence: sequence,
+    pulseSequence: pulseSequence || null,
+    timestamp: new Date().toISOString()
+  });
+  saveHistory(entries.slice(0, HISTORY_LIMIT));
+}
+
+function formatHistoryTimestamp(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+  } catch (e) {
+    return '';
+  }
+}
+
+function summarizeRecipe(sequence) {
+  const total = sequence.reduce((sum, item) => {
+    return sum + (typeof item.ratio === 'number' && !Number.isNaN(item.ratio) ? item.ratio : 0);
+  }, 0);
+  return sequence.map(function (item) {
+    const hasRatio = typeof item.ratio === 'number' && !Number.isNaN(item.ratio) && total > 0;
+    const pct = hasRatio ? Math.round((item.ratio / total) * 100) + '%' : '';
+    return pct ? (item.scent_name || '') + ' ' + pct : (item.scent_name || '');
+  }).join(', ');
+}
+
+function renderHistoryList() {
+  const listEl = document.getElementById('historyList');
+  if (!listEl) return;
+  const entries = loadHistory();
+
+  if (!entries.length) {
+    listEl.innerHTML = '<p class="history-empty">No generations yet. Compose or refine a scent to start building history.</p>';
+    return;
+  }
+
+  listEl.innerHTML = entries.map(function (entry) {
+    const promptHtml = escapeHtmlText(entry.prompt || '');
+    const recipeHtml = escapeHtmlText(summarizeRecipe(entry.sequence || []));
+    const timeHtml = escapeHtmlText(formatHistoryTimestamp(entry.timestamp));
+    return '<button type="button" class="history-entry" onclick="restoreHistoryEntry(\'' + entry.id + '\')">' +
+      '<p class="history-entry-prompt">' + promptHtml + '</p>' +
+      '<p class="history-entry-recipe">' + recipeHtml + '</p>' +
+      '<p class="history-entry-meta">' + timeHtml + '</p>' +
+      '</button>';
+  }).join('') +
+    '<button type="button" class="history-clear-btn" onclick="clearHistory()">Clear history</button>';
+}
+
+function escapeHtmlText(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function toggleHistoryPanel() {
+  const panel = document.getElementById('historyPanel');
+  if (!panel) return;
+  if (panel.classList.contains('open')) {
+    closeHistoryPanel();
+  } else {
+    openHistoryPanel();
+  }
+}
+
+function openHistoryPanel() {
+  const panel = document.getElementById('historyPanel');
+  const backdrop = document.getElementById('historyBackdrop');
+  renderHistoryList();
+  if (panel) { panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); }
+  if (backdrop) backdrop.classList.add('open');
+}
+
+function closeHistoryPanel() {
+  const panel = document.getElementById('historyPanel');
+  const backdrop = document.getElementById('historyBackdrop');
+  if (panel) { panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true'); }
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+function clearHistory() {
+  saveHistory([]);
+  renderHistoryList();
+}
+
+/**
+ * Loads a past generation back into the editor as the CURRENT generation --
+ * updates the prompt display and recipe (nodes on the wheel), and restores
+ * the exact hardware pulse train if one was saved with the entry, so
+ * pressing Play later reproduces the original timing. Does NOT call
+ * compose/feedback again and does NOT play anything: playback stays a
+ * separate, explicit action (the Play button), same as every other
+ * generation path in this app.
+ */
+function restoreHistoryEntry(id) {
+  const entries = loadHistory();
+  const entry = entries.find(function (e) { return e.id === id; });
+  if (!entry) return;
+
+  sessionHistory = [];
+  sessionOriginalSentence = entry.prompt;
+  sessionOriginalSequence = entry.sequence;
+  isInFeedbackMode = true;
+  currentSequence = entry.sequence;
+  currentPulseSequence = entry.pulseSequence || null;
+
+  const transcriptionEl = document.getElementById('frequencyTranscriptionText');
+  if (transcriptionEl) transcriptionEl.textContent = entry.prompt;
+  const statusEl = document.getElementById('frequencyTranscriptionStatus');
+  if (statusEl) {
+    statusEl.textContent = 'Loaded from history — press Play to release this scent.';
+    statusEl.style.color = 'rgba(255, 255, 255, 0.5)';
+  }
+
+  renderProfile(entry.sequence);
+  closeHistoryPanel();
+}
+
 async function acceptScent() {
   if (!currentSequence || currentSequence.length === 0) {
     alert('No sequence to accept. Generate a scent sequence first!');
@@ -596,12 +850,23 @@ async function playSequenceOnDevice() {
     console.warn('Could not refresh cartridge scents', e);
   }
 
+  // A manual duration override (from the hidden "Duration" field) cycles
+  // through each scent in the current ratio at a fixed X-second duration
+  // instead of the backend's interleaved short-pulse train.
+  const durationOverrideInputEl = document.getElementById('durationOverrideInput');
+  const durationOverrideRaw = durationOverrideInputEl ? durationOverrideInputEl.value : '';
+  const durationOverride = durationOverrideRaw !== '' ? parseFloat(durationOverrideRaw) : NaN;
+  const hasDurationOverride = !isNaN(durationOverride) && durationOverride > 0;
+
   // Prefer the interleaved hardware pulse train (short repeated rounds meant to
   // encourage perceptual blending) over the raw conceptual sequence; fall back
-  // if the backend didn't return one.
-  const sourceSequence = (currentPulseSequence && currentPulseSequence.length > 0)
-    ? currentPulseSequence
-    : currentSequence;
+  // if the backend didn't return one. A duration override always uses the raw
+  // ratio sequence (one entry per scent) rather than the pulse train.
+  const sourceSequence = hasDurationOverride
+    ? currentSequence
+    : (currentPulseSequence && currentPulseSequence.length > 0)
+      ? currentPulseSequence
+      : currentSequence;
 
   // Convert scent names to scent_ids using the location field, skipping unknown scents
   const bleSequence = [];
@@ -616,7 +881,7 @@ async function playSequenceOnDevice() {
       console.warn(`Skipping scent outside device range (1-12): ${item.scent_name} (location=${locId})`);
       continue;
     }
-    bleSequence.push({ scent_id: locId, duration: item.scent_duration });
+    bleSequence.push({ scent_id: locId, duration: hasDurationOverride ? durationOverride : item.scent_duration });
   }
 
   if (bleSequence.length === 0) {

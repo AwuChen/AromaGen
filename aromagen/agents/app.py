@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,6 +14,8 @@ from .schemas import (
     ComposeResponse,
     FeedbackRequest,
     FeedbackResponse,
+    LogInteractionRequest,
+    LogInteractionResponse,
     ScentItem,
 )
 from .settings import settings
@@ -28,6 +31,7 @@ from .openai_client import (
 )
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
+from .interaction_retrieval import append_local_log
 from .cartridge import (
     build_catalog_scents,
     check_compatibility_warnings,
@@ -295,6 +299,36 @@ def accept(request: AcceptRequest) -> AcceptResponse:
     except Exception as e:
         log.error("accept failed for sentence=%r: %s", request.original_sentence, e, exc_info=True)
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.post("/log_interaction", response_model=LogInteractionResponse)
+async def log_interaction(request: LogInteractionRequest) -> LogInteractionResponse:
+    if not settings.interaction_log_apps_script_url or not settings.interaction_log_token:
+        raise HTTPException(status_code=503, detail="Interaction logging is not configured")
+    payload = {
+        "token": settings.interaction_log_token,
+        "target_smell": request.target_smell,
+        "aromagen_ratio": request.aromagen_ratio,
+        "similarity": request.similarity,
+        "feedback": request.feedback,
+        "session_id": request.session_id or "",
+    }
+    # Dual-write: local copy is the fast read-path retrieval index used by
+    # compose_with_openai (see interaction_retrieval.py); the Apps Script
+    # Sheet below stays the human-facing copy. Local write is best-effort and
+    # never blocks/fails this request on its own.
+    append_local_log({k: v for k, v in payload.items() if k != "token"})
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
+            resp = await client.post(settings.interaction_log_apps_script_url, json=payload)
+        resp.raise_for_status()
+        body = resp.json()
+        if body.get("status") != "ok":
+            raise ValueError(f"Apps Script returned: {body}")
+    except Exception as e:
+        log.error("log_interaction failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=502, detail=f"Failed to log interaction: {e}")
+    return LogInteractionResponse()
 
 
 @app.post("/transcribe")
