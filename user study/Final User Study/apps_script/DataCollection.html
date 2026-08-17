@@ -312,22 +312,6 @@ function updateRatioPreview_(inputId, previewId) {
   preview.className = 'ratio-preview ' + (Math.abs(sum - 1) < 0.005 ? 'ok' : 'bad');
 }
 
-function startCountdown(seconds, onDone) {
-  var box = document.getElementById('countdownBox');
-  if (!box) { onDone(); return; }
-  var remaining = seconds;
-  box.textContent = 'Break: ' + remaining + 's before the next trial...';
-  var interval = setInterval(function () {
-    remaining -= 1;
-    if (remaining <= 0) {
-      clearInterval(interval);
-      onDone();
-    } else {
-      box.textContent = 'Break: ' + remaining + 's before the next trial...';
-    }
-  }, 1000);
-}
-
 // ---- Feedback screen ----
 // Shared between Section 1 (per-trial feedback, mode 'section1') and
 // Section 2 (the single freeform creation's feedback, mode 'section2') --
@@ -430,8 +414,7 @@ function renderFeedbackRoundsCore_(view, mode) {
   var finishFn = mode === 'section2' ? 'finishSection2Feedback_' : 'finishTrialFeedback_';
   var finishLabel = mode === 'section2' ? 'Finish this creation &amp; continue' : 'Finish this trial &amp; continue';
   html += '<div id="feedbackError" class="error"></div>' +
-    '<button id="finishTrialBtn" onclick="' + finishFn + '()">' + finishLabel + '</button>' +
-    '<div id="countdownBox" class="countdown"></div>';
+    '<button id="finishTrialBtn" onclick="' + finishFn + '()">' + finishLabel + '</button>';
 
   return html;
 }
@@ -700,9 +683,7 @@ function editRound_(roundNumber, mode) {
 
 function finishTrialFeedback_() {
   document.getElementById('finishTrialBtn').disabled = true;
-  google.script.run.withSuccessHandler(function (nextView) {
-    startCountdown(10, function () { renderView(nextView); });
-  }).withFailureHandler(function (e) {
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
     document.getElementById('finishTrialBtn').disabled = false;
     showError(e);
   }).finishTrialFeedback(currentParticipant);
@@ -710,9 +691,7 @@ function finishTrialFeedback_() {
 
 function finishSection2Feedback_() {
   document.getElementById('finishTrialBtn').disabled = true;
-  google.script.run.withSuccessHandler(function (nextView) {
-    startCountdown(10, function () { renderView(nextView); });
-  }).withFailureHandler(function (e) {
+  google.script.run.withSuccessHandler(renderView).withFailureHandler(function (e) {
     document.getElementById('finishTrialBtn').disabled = false;
     showError(e);
   }).finishSection2Feedback(currentParticipant);

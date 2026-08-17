@@ -29,34 +29,27 @@ var CLUSTERS = {
 
 var TRIALS_PER_PARTICIPANT = 12; // = Object.keys(CLUSTERS).length -- one target per cluster, one pass
 
-// --- Distractor design: exclusion-list based (replaced the earlier
-// family/ring design entirely -- per explicit instruction). For each
-// TARGET cluster, EXCLUDED_CLUSTERS lists which OTHER clusters may NOT
-// supply distractors; every cluster not excluded (and not the target's own
-// cluster) is eligible. Given verbatim by dictation for 10 of the 12
-// clusters; Spice's and Perfumed & Clean's entries were never dictated
-// directly but are fully recoverable by symmetry (every pair given was
-// confirmed to be mutual: if A excludes B, B excludes A too -- a few pairs
-// were dictated one-directionally and were made symmetric per explicit
-// confirmation, e.g. Citrus->Woody & Resinous existed but not the reverse,
-// Putrid & Decay->Woody & Resinous existed but not the reverse, etc.).
-// The target's own cluster is ALWAYS implicitly excluded too (not
-// re-stated per cluster below) -- distractors are never drawn from the
-// same cluster as the target itself, consistent with every other
-// distractor design this project has used (near-neighbor rings, family
-// splits) always contrasting DIFFERENT clusters, never the target's own.
+// --- Distractor design: exclusion-list based. For each TARGET cluster,
+// EXCLUDED_CLUSTERS lists which OTHER clusters may NOT supply distractors;
+// every cluster not excluded (and not the target's own cluster) is
+// eligible. Given verbatim by dictation for all 12 clusters (revised list,
+// replacing the original 10-of-12 dictation); two pairs (Citrus/Spice,
+// Sweet & Gourmand/Herbal & Cooling) were given one-directionally and were
+// made symmetric per the same "fully symmetric" convention established for
+// the original list. The target's own cluster is ALWAYS implicitly
+// excluded too (not re-stated per cluster below).
 var EXCLUDED_CLUSTERS = {
-  "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean"],
-  "Citrus": ["Woody & Resinous", "Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling"],
-  "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Citrus", "Putrid & Decay", "Chemical & Solvent"],
-  "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Sweet & Gourmand", "Chemical & Solvent"],
-  "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand"],
+  "Floral": ["Woody & Resinous", "Herbal & Cooling", "Perfumed & Clean", "Chemical & Solvent"],
+  "Citrus": ["Sweet & Gourmand", "Chemical & Solvent", "Herbal & Cooling", "Spice"],
+  "Woody & Resinous": ["Floral", "Herbal & Cooling", "Spice", "Perfumed & Clean", "Chemical & Solvent"],
+  "Herbal & Cooling": ["Floral", "Citrus", "Woody & Resinous", "Spice", "Chemical & Solvent", "Sweet & Gourmand"],
+  "Spice": ["Woody & Resinous", "Herbal & Cooling", "Sweet & Gourmand", "Citrus"],
   "Sweet & Gourmand": ["Citrus", "Herbal & Cooling", "Spice"],
   "Roasted & Smoky": ["Savoury & Umami", "Fermented & Sour"],
   "Fermented & Sour": ["Roasted & Smoky", "Putrid & Decay", "Savoury & Umami"],
-  "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami", "Woody & Resinous"],
-  "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous"],
-  "Perfumed & Clean": ["Floral", "Chemical & Solvent"],
+  "Putrid & Decay": ["Fermented & Sour", "Savoury & Umami"],
+  "Chemical & Solvent": ["Perfumed & Clean", "Citrus", "Herbal & Cooling", "Woody & Resinous", "Floral"],
+  "Perfumed & Clean": ["Floral", "Chemical & Solvent", "Woody & Resinous"],
   "Savoury & Umami": ["Fermented & Sour", "Roasted & Smoky", "Putrid & Decay"]
 };
 
@@ -78,51 +71,58 @@ function eligibleDistractorWords_(cluster) {
 
 // --- The single fixed odorant set (no longer an A/B condition) ---
 // Matches the current live AromaGen catalog (aromagen/cartridge_sets.json)
-// exactly, including Seaweed Accord as the stand-in for the umami/savoury
-// class.
+// exactly. 6 of the 12 slots are now multi-ingredient blends rather than
+// single raw materials (renamed over the course of production tuning) --
+// kept in sync here so ratio text copied straight off the real AromaGen
+// frontend (which now generates these blend names) parses correctly via
+// parseRatioText_ instead of silently falling back to an even split. This
+// is a prospective change only: already-collected participants' frozen
+// data still shows whatever names were current when they were recorded.
 var ODORANT_SET_ID = "fixed_set";
 var BASE_ODORANT_SET = [
-  "Benz Sal", "Sandalwood", "Clove Bud", "Lavender", "Orange", "Vanilla",
-  "Birch tar oil", "Eucalyptus", "Cognac", "Vinegar", "Isovaleric acid",
-  "Seaweed Accord"
+  "Benz Sal", "Sandalwood", "Clove Bud + Cumin", "Lavender + Rose",
+  "Orange + Lemon", "Vanilla Sugar + Almond Extract",
+  "Birch tar oil + Coffee + Clove Bud", "Eucalyptus", "Cognac", "Vinegar",
+  "Isovaleric acid", "Seaweed + Fenugreek + Garlic"
 ];
 
 var ODORANT_CATEGORY = {
   "Benz Sal": "Perfumed / Clean",
   "Sandalwood": "Woody / Resinous",
-  "Clove Bud": "Spice",
-  "Lavender": "Floral",
-  "Orange": "Citrus",
-  "Vanilla": "Sweet / Gourmand",
-  "Birch tar oil": "Roasted / Smoky",
+  "Clove Bud + Cumin": "Spice",
+  "Lavender + Rose": "Floral",
+  "Orange + Lemon": "Citrus",
+  "Vanilla Sugar + Almond Extract": "Sweet / Gourmand",
+  "Birch tar oil + Coffee + Clove Bud": "Roasted / Smoky",
   "Eucalyptus": "Herbal / Cooling",
   "Cognac": "Chemical / Solvent",
   "Vinegar": "Fermented / Sour",
   "Isovaleric acid": "Animal / Body",
-  "Seaweed Accord": "Umami / Savoury (stand-in)"
+  "Seaweed + Fenugreek + Garlic": "Umami / Savoury"
 };
 
 var ODORANT_VOLATILITY = {
-  "Benz Sal": 4, "Sandalwood": 4, "Clove Bud": 6, "Lavender": 6,
-  "Orange": 8, "Vanilla": 3, "Birch tar oil": 3, "Eucalyptus": 8,
-  "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed Accord": 5
+  "Benz Sal": 4, "Sandalwood": 3, "Clove Bud + Cumin": 6, "Lavender + Rose": 5,
+  "Orange + Lemon": 8, "Vanilla Sugar + Almond Extract": 3,
+  "Birch tar oil + Coffee + Clove Bud": 4, "Eucalyptus": 8,
+  "Cognac": 8, "Vinegar": 8, "Isovaleric acid": 7, "Seaweed + Fenugreek + Garlic": 6
 };
 
 // Brief sensory description per odorant, shown next to each name on the
-// rating-scale feedback screen. Sourced from aromagen/cartridge_sets.json.
+// feedback screen's reference list. Sourced from aromagen/cartridge_sets.json.
 var ODORANT_DESCRIPTIONS = {
   "Benz Sal": "Sweet, balsamic, soft floral, powdery clean note",
   "Sandalwood": "Woody, creamy, soft, warm, slightly sweet base note",
-  "Clove Bud": "Warm, pungent, spicy",
-  "Lavender": "Floral, herbaceous-sweet, calming",
-  "Orange": "Bright, citrus, sweet, juicy top note",
-  "Vanilla": "Sweet, creamy, warm, gourmand",
-  "Birch tar oil": "Smoky, tarry, leathery, medicinal-burnt",
+  "Clove Bud + Cumin": "Warm spice -- pungent clove combined with earthy, dry, slightly bitter cumin",
+  "Lavender + Rose": "Floral bouquet -- calming, herbaceous-sweet lavender and dewy, rosy petal-sweetness",
+  "Orange + Lemon": "Bright, citrus, sweet-tart -- juicy orange combined with sharp, zesty lemon",
+  "Vanilla Sugar + Almond Extract": "Sweet, creamy gourmand -- warm vanilla-sugar sweetness combined with nutty, marzipan-like almond",
+  "Birch tar oil + Coffee + Clove Bud": "Smoky, roasted base -- tarry, leathery birch tar, dark roasted coffee, and warm clove",
   "Eucalyptus": "Cool, medicinal, camphoraceous, fresh herbal top note",
   "Cognac": "Sharp, alcoholic, boozy, solvent-like pungency",
   "Vinegar": "Sour, sharp, acetic, pungent",
   "Isovaleric acid": "Sweaty, cheesy, animalic",
-  "Seaweed Accord": "Marine, salty, umami, savoury"
+  "Seaweed + Fenugreek + Garlic": "Savoury, marine-umami -- salty seaweed and warm, bittersweet fenugreek, with pungent garlic as an accent"
 };
 
 // --- Feedback type ---
