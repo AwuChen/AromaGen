@@ -10,7 +10,7 @@
       ],
       "avoid_with": [
         {
-          "name": "Orange",
+          "name": "Orange + Lemon",
           "reason": "can mute orange's sharp citrus freshness if allowed to dominate"
         },
         {
@@ -40,7 +40,7 @@
       "note": "Woody, creamy, soft, warm, slightly sweet base note",
       "volatility": 3,
       "pairs_well_with": [
-        "Orange",
+        "Orange + Lemon",
         "Lavender + Rose"
       ],
       "avoid_with": [
@@ -91,10 +91,10 @@
     "Lavender + Rose": {
       "location": "4",
       "category": "Floral",
-      "note": "Floral bouquet -- calming, herbaceous-sweet lavender and dewy, rosy petal-sweetness, blended in equal parts",
+      "note": "Floral bouquet -- calming, herbaceous-sweet lavender and dewy, rosy petal-sweetness blended in equal parts",
       "volatility": 5,
       "pairs_well_with": [
-        "Orange",
+        "Orange + Lemon",
         "Vanilla Sugar + Almond Extract"
       ],
       "avoid_with": [
@@ -119,10 +119,10 @@
       "avoid_notes_full": "The same materials that clashed with lavender alone -- isovaleric acid, vinegar, birch tar/coffee/clove, and heavy eucalyptus -- still overwhelm or distort this blend, and now do so across two floral facets at once rather than one, so the antiseptic/medicinal drift happens even faster and is harder to correct for. The added rose also makes the blend noticeably richer and more assertive than lavender alone, so it can read as \"too much perfume\" or \"too sweet/soapy\" for targets that want a clean, transparent, or sharp-fresh character (chemical/solvent targets, crisp citrus-soda freshness) -- in those cases keep this blend to a smaller share of the composition rather than letting it dominate.",
       "strength": "medium"
     },
-    "Orange": {
+    "Orange + Lemon": {
       "location": "5",
       "category": "Citrus",
-      "note": "Bright, citrus, sweet, juicy top note",
+      "note": "Bright, citrus, sweet-tart -- juicy orange sweetness combined with sharp, zesty lemon freshness, blended in equal parts",
       "volatility": 8,
       "pairs_well_with": [
         "Lavender + Rose",
@@ -144,8 +144,8 @@
           "reason": "converts fresh citrus into 'spoiled citrus'"
         }
       ],
-      "mixing_notes_full": "Orange essential oil is one of perfumery's classic citrus top notes, prized for its bright, juicy, sweet freshness and immediate recognizability. Compared with lemon, orange is softer, rounder, and more naturally sweet, allowing it to bridge fresh citrus openings with floral, gourmand, herbal, and woody compositions. Because of its high volatility, orange primarily contributes the opening impression of a fragrance, creating an uplifting effect before gradually revealing the underlying heart and base notes. Professional perfumers frequently use orange to introduce warmth and approachability without the sharp acidity associated with other citrus materials.\n\nOrange pairs exceptionally well with lavender, rosemary, eucalyptus, jasmine, neroli, sandalwood, cedarwood, vanilla, benzoin, cinnamon, clove, cardamom, ginger, and soft musks. Vanilla transforms orange into comforting gourmand accords reminiscent of baked desserts, while spices create familiar seasonal combinations such as mulled citrus or spiced orange. Woody materials provide structure and longevity, whereas aromatic herbs preserve freshness. These combinations make orange one of the most versatile citrus ingredients across fine fragrance, personal care, and household products.",
-      "avoid_notes_full": "Orange performs poorly when combined in large quantities with materials that immediately dominate perception. Highly smoky ingredients such as birch tar, strongly sulfurous animalic materials such as isovaleric acid, or concentrated acidic notes can quickly overwhelm orange's delicate top-note character, causing the fragrance to lose its fresh identity before the opening develops. Rather than enhancing realism, these combinations often suggest spoiled fruit, burnt citrus peel, or industrial cleaning products.\n\nProfessional perfumers therefore typically support orange with bridging materials instead of pairing it directly with multiple aggressive odorants. When smoky or fermented effects are desired, orange is usually present only in trace quantities to introduce brightness before disappearing naturally. Its greatest strength lies in providing freshness, optimism, and recognizability rather than competing against dark or highly persistent materials.",
+      "mixing_notes_full": "This is an equal-parts citrus blend of orange and lemon rather than orange alone. Orange still supplies the soft, round, sweet top-note warmth. Lemon adds a sharper, zestier, more acidic brightness that orange alone doesn't have, giving the blend a crisper, more immediately \"fresh-squeezed citrus\" character -- useful for targets that want sharp/tart citrus (lemonade, soda, cleaning-product freshness) as well as ones that want orange's softer sweetness alone.\n\nProfessionally this blend pairs well with the same partners orange favored individually -- florals (Lavender + Rose), soft woods (Sandalwood), cooling herbs (Eucalyptus), and warm gourmand bases (Vanilla Sugar + Almond Extract) -- while the added lemon gives it more range toward sharp/sour citrus targets that plain orange couldn't reach on its own.",
+      "avoid_notes_full": "Same core caution as orange alone: avoid combining at high levels with materials that immediately dominate perception -- smoky (Birch tar oil + Coffee + Clove Bud), animalic (Isovaleric acid), or acidic (Vinegar) materials still overwhelm this blend's delicate top-note character just as they did orange alone, and now do so across two citrus facets rather than one. The added lemon also makes the blend read as sharper and more acidic than orange alone, so it can tip into \"sour\" faster than pure orange when overdosed -- use restraint in compositions that want only soft, sweet citrus warmth rather than a zesty edge.",
       "strength": "strong"
     },
     "Vanilla Sugar + Almond Extract": {
@@ -157,7 +157,7 @@
         "Lavender + Rose",
         "Benz Sal",
         "Clove Bud + Cumin",
-        "Orange"
+        "Orange + Lemon"
       ],
       "avoid_with": [
         {
@@ -193,7 +193,7 @@
       ],
       "avoid_with": [
         {
-          "name": "Orange",
+          "name": "Orange + Lemon",
           "reason": "birch tar's darkness and combustion overwhelms orange's brightness"
         },
         {
@@ -219,7 +219,7 @@
       "note": "Cool, medicinal, camphoraceous, fresh herbal top note",
       "volatility": 8,
       "pairs_well_with": [
-        "Orange",
+        "Orange + Lemon",
         "Lavender + Rose",
         "Sandalwood",
         "Vanilla Sugar + Almond Extract"
@@ -253,7 +253,7 @@
       ],
       "avoid_with": [
         {
-          "name": "Orange",
+          "name": "Orange + Lemon",
           "reason": "clashes with cognac's warmth/density unless an intentional contrast is meant"
         },
         {
@@ -284,7 +284,7 @@
       ],
       "avoid_with": [
         {
-          "name": "Orange",
+          "name": "Orange + Lemon",
           "reason": "turns 'freshly peeled orange' into 'old orange juice'"
         },
         {
@@ -314,7 +314,7 @@
       ],
       "avoid_with": [
         {
-          "name": "Orange",
+          "name": "Orange + Lemon",
           "reason": "disrupts citrus's clean/hygienic impression"
         },
         {
@@ -338,13 +338,13 @@
       "avoid_notes_full": "The most common mistake when using isovaleric acid is pairing it with fragrances whose identity depends on cleanliness or freshness. Citrus colognes, oceanic aquatics, transparent musks, fresh laundry accords, airy florals, and herbal spa fragrances communicate hygiene. Even trace overdoses of isovaleric acid immediately disrupt this perception because humans are evolutionarily extremely sensitive to body-odor molecules. Instead of increasing realism, the fragrance begins to smell contaminated. Professional perfumers therefore almost never use isovaleric acid in compositions intended to communicate cleanliness unless the amount is so low that it is effectively undetectable.\n\nIsovaleric acid also interacts poorly with other dominant unpleasant materials when no supporting framework exists. Large amounts of vinegar increase sourness, birch tar adds burnt phenolics, and eucalyptus emphasizes medicinal cooling. Together these materials create additive harshness rather than complexity. Experts instead rely on the principle of single-feature dominance: if isovaleric acid provides the biological realism, smoky or acidic materials are reduced to trace levels, and warm bridge notes such as vanilla, woods, tobacco, chocolate, amber, or spices are introduced to integrate the accord. This principle explains why real cheese, coffee, leather, and tobacco fragrances remain pleasant despite containing molecules that are individually offensive.",
       "strength": "strong"
     },
-    "Thyme + Olive Leaf + Seaweed + Garlic": {
+    "Seaweed + Fenugreek + Garlic": {
       "location": "12",
-      "category": "Marine / Umami",
-      "note": "Savoury, herbal-marine -- earthy thyme, bitter-green olive leaf, salty umami seaweed, and pungent garlic, blended in equal parts",
+      "category": "Savoury / Umami",
+      "note": "Savoury, marine-umami -- salty seaweed and warm, bittersweet, curry-like fenugreek in equal lead roles (40/40), with pungent garlic (20%) as an accent",
       "volatility": 6,
       "pairs_well_with": [
-        "Orange",
+        "Orange + Lemon",
         "Sandalwood",
         "Lavender + Rose",
         "Vinegar"
@@ -363,8 +363,8 @@
           "reason": "creates an unnatural sweet marine accord unless intentionally gourmand"
         }
       ],
-      "mixing_notes_full": "This is an equal-parts savoury blend of thyme, olive leaf, seaweed, and garlic rather than seaweed alone. Seaweed still supplies the salty, iodine-rich marine-umami backbone. Thyme adds an earthy, herbal, slightly medicinal-green facet; olive leaf contributes a bitter-green, slightly tannic quality; and garlic adds sharp, pungent, sulfurous realism. Together the four give this odorant far more range across savoury/umami targets than seaweed alone -- particularly pungent allium/vegetable targets (garlic, savoury sauces) and herb-forward savoury food, where the added thyme and garlic facets are the key drivers rather than seaweed's marine character.",
-      "avoid_notes_full": "Because this blend is now both marine AND pungently savoury/herbal at once, it should be used even more cautiously than seaweed alone around sweet, clean, or delicate targets -- feedback data shows seaweed alone already overdosing badly in dessert and fresh-vegetable contexts, and the added garlic and thyme facets make that clash more pronounced, not less. Avoid pairing at high levels with Vanilla Sugar + Almond Extract or other sweet gourmand materials, and use restraint around fresh, watery, or green-vegetal targets (e.g. cucumber) where the salty-pungent character reads as wrong rather than complementary.",
+      "mixing_notes_full": "This is a 40% seaweed / 40% fenugreek / 20% garlic savoury blend, replacing the earlier thyme+olive leaf+seaweed+garlic mix. Seaweed still supplies the salty, iodine-rich marine-umami backbone. Fenugreek is the other lead note here rather than a trace player -- it contributes a warm, bittersweet, slightly maple-and-curry facet with a distinctive savoury depth (its characteristic sotolon compound reads as \"stock/broth-like\" at low levels and \"maple/burnt sugar\" at higher ones), giving this blend a rounder, more cooked-savoury character than the herbal-green thyme/olive-leaf version had. Garlic remains a 20% accent for sharp, pungent, sulfurous realism rather than a co-lead. Together this gives more of a \"savoury broth/curry base\" character than the previous version's \"herb garden\" character -- useful for umami/broth-forward targets, less immediately herbal than before.",
+      "avoid_notes_full": "Same core caution as the seaweed-based blends before it: use restraint around sweet, clean, or delicate targets, where the marine-savoury character reads as wrong rather than complementary. Avoid pairing at high levels with Vanilla Sugar + Almond Extract or other sweet gourmand materials -- fenugreek's own bittersweet, maple-adjacent facet can make this clash read as an odd burnt-sugar/savoury collision rather than a clean contrast. Use restraint around fresh, watery, or green-vegetal targets (e.g. cucumber) for the same reason as before. Fenugreek's assertive character also means this blend may now read as more \"curry/spice-adjacent\" than intended for savoury targets that specifically want a clean marine or herbal-green profile rather than a warm, cooked one.",
       "strength": "medium"
     }
   }

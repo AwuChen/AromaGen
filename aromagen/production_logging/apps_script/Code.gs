@@ -54,12 +54,6 @@ function doGet(e) {
   var ss = getOrCreateSpreadsheet_();
   var sheet = getOrCreateSheet_(ss);
 
-  if (e.parameter.clear_test_rows === "1") {
-    var lastRow = sheet.getLastRow();
-    if (lastRow > 1) sheet.deleteRows(2, lastRow - 1);
-    return jsonOutput_({ status: "ok", cleared: true });
-  }
-
   return jsonOutput_({
     status: "ok",
     spreadsheet_url: ss.getUrl(),

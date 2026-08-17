@@ -12,8 +12,9 @@ A/B comparison -- plus qualitative feedback):
   Descriptor coverage is balanced across participants (`pick_least_used`,
   least-used-first), so that after ~10 participants each descriptor has
   been tested roughly equally often.
-- FEEDBACK TYPE is a counterbalanced condition, assigned via participant-
-  sequence parity: odd -> freeform, even -> rating-scale.
+- FEEDBACK TYPE: every participant gets freeform feedback. Used to be a
+  counterbalanced condition (odd -> freeform, even -> rating-scale); the
+  rating-scale condition has been dropped entirely.
 - Each trial has 3 comparison options (2 distractors per target; 3-AFC).
   Distractors are chosen from pilot_config.EXCLUDED_CLUSTERS's eligible
   pool for the target's cluster (every cluster not excluded and not the
@@ -216,13 +217,14 @@ if __name__ == "__main__":
     print("\n=== Hard no-repeat-per-cluster cycle check ===")
     print("  PASSED -- no cluster's distractor pool repeated a word before exhausting all eligible words once")
 
-    print("\n=== Feedback-type counterbalance check ===")
+    print("\n=== Feedback-type check ===")
     fb_counts = {"freeform": 0, "rating_scale": 0}
     target_tally2, distractor_tally2 = {}, {}
     for i in range(1, n_participants + 1):
         plan = build_participant_plan(i, target_tally2, distractor_tally2, seed=2000 + i)
         fb_counts[plan["feedback_type"]] += 1
-    print(f"  {fb_counts} (should be 5/5 for 10 participants)")
+    assert fb_counts["rating_scale"] == 0, "rating_scale condition should never be assigned anymore"
+    print(f"  {fb_counts} (should be {n_participants}/0 -- rating_scale condition removed, freeform only)")
 
     print("\n=== Sample single-trial structure ===")
     sample_plan = build_participant_plan(1, {}, {}, seed=42)

@@ -33,7 +33,16 @@ class Settings:
     learned_examples_top_k: int = int(os.getenv("LEARNED_EXAMPLES_TOP_K", "3"))
     sequence_total_seconds: int = int(os.getenv("SEQUENCE_TOTAL_SECONDS", "30"))
     scent_duration_max: int = int(os.getenv("SCENT_DURATION_MAX", "15"))
-    descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "8"))
+    # Kept generously above the current 12-odorant catalog size so
+    # filter_relevant_scents's `top_k >= len(catalog)` guard always returns
+    # the full catalog -- see aromagen/agents/descriptor_filter.py. The
+    # keyword-overlap filter it used to apply at top_k=8 could silently drop
+    # a genuinely relevant odorant whose name/category/note shared no literal
+    # words with the request (e.g. "lime soda" losing "Orange + Lemon"), and
+    # with only 12 odorants total the token savings from narrowing isn't
+    # worth that risk. Lower this back down if the catalog grows much larger
+    # and filtering becomes worth it again.
+    descriptor_filter_top_k: int = int(os.getenv("DESCRIPTOR_FILTER_TOP_K", "24"))
     pulse_seconds: float = float(os.getenv("PULSE_SECONDS", "1"))
     pulse_rounds: int = int(os.getenv("PULSE_ROUNDS", "8"))
     validation_layer_enabled: bool = os.getenv("VALIDATION_LAYER_ENABLED", "false").lower() == "true"

@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import re
 import threading
 from typing import Any, Dict, List, Optional
 
@@ -33,6 +34,74 @@ log = logging.getLogger(__name__)
 
 _log_write_lock = threading.Lock()
 _embedding_cache_lock = threading.Lock()
+
+# Historical odorant names -> their current cartridge_sets.json name. Ratio
+# strings in the log are frozen text from whenever they were logged, so a
+# ratio like "Orange 18%, Lavender + Rose 82%" can reference a name that no
+# longer exists in the catalog (renamed after that row was written) -- the
+# structured-output schema only accepts CURRENT odorant names, so an
+# uncanonicalized precedent is one the model can't actually reproduce even
+# if it wanted to. Add one entry here every time an odorant gets renamed in
+# cartridge_sets.json, mapping every historical name straight to whatever
+# the current name is (skip intermediate hops).
+LEGACY_ODORANT_NAMES = {
+    "Orange": "Orange + Lemon",
+    "Lavender": "Lavender + Rose",
+    "Lavender + Jasmine + Rose": "Lavender + Rose",
+    "Vanilla": "Vanilla Sugar + Almond Extract",
+    "Birch tar oil": "Birch tar oil + Coffee + Clove Bud",
+    "Clove Bud": "Clove Bud + Cumin",
+    "Seaweed Accord": "Seaweed + Fenugreek + Garlic",
+    "Thyme + Olive Leaf + Seaweed + Garlic": "Seaweed + Fenugreek + Garlic",
+}
+
+# Current names also need to be recognized (as identity mappings) so the
+# parser below can find them in ratio strings that already use the current
+# name. Sorted longest-first so e.g. "Birch tar oil + Coffee + Clove Bud" is
+# matched whole before its own substring "Clove Bud" (mapped separately to
+# "Clove Bud + Cumin") could be matched inside it.
+_CURRENT_ODORANT_NAMES = [
+    "Benz Sal", "Sandalwood", "Clove Bud + Cumin", "Lavender + Rose",
+    "Orange + Lemon", "Vanilla Sugar + Almond Extract",
+    "Birch tar oil + Coffee + Clove Bud", "Eucalyptus", "Cognac", "Vinegar",
+    "Isovaleric acid", "Seaweed + Fenugreek + Garlic",
+]
+_ALL_KNOWN_NAMES = sorted(
+    set(_CURRENT_ODORANT_NAMES) | set(LEGACY_ODORANT_NAMES.keys()),
+    key=len, reverse=True,
+)
+_RATIO_NAME_PATTERN = re.compile(
+    r"(" + "|".join(re.escape(n) for n in _ALL_KNOWN_NAMES) + r")\s*\xb7?\s*(\d+(?:\.\d+)?)\s*%",
+    re.IGNORECASE,
+)
+
+
+def _canonicalize_ratio(raw: str) -> str:
+    """Rewrite a logged ratio string so every odorant name is the CURRENT
+    cartridge name, merging shares if a rename causes two historical names
+    to collapse into the same current one. Robust to the comma-, newline-,
+    and center-dot ('·')-separated formats seen across the log's history
+    (same technique as the offline analysis script). Falls back to the raw
+    string unchanged if nothing recognizable is found, rather than losing
+    the precedent entirely."""
+    if not raw:
+        return raw
+    merged: "Dict[str, float]" = {}
+    order: List[str] = []
+    for m in _RATIO_NAME_PATTERN.finditer(raw):
+        name = LEGACY_ODORANT_NAMES.get(m.group(1), m.group(1))
+        pct = float(m.group(2))
+        if name not in merged:
+            order.append(name)
+            merged[name] = 0.0
+        merged[name] += pct
+    if not merged:
+        return raw
+
+    def fmt_pct(p: float) -> str:
+        return str(int(p)) if p == int(p) else str(p)
+
+    return ", ".join(f"{name} {fmt_pct(merged[name])}%" for name in order)
 
 
 def append_local_log(record: Dict[str, Any]) -> None:
@@ -80,7 +149,7 @@ def _group_into_blocks(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             blocks[session_id] = {
                 "session_id": session_id,
                 "target_smell": target_smell,
-                "best_ratio": row.get("aromagen_ratio", ""),
+                "best_ratio": _canonicalize_ratio(row.get("aromagen_ratio", "")),
                 "best_similarity": None,
                 "feedback_history": [],
             }
@@ -91,7 +160,7 @@ def _group_into_blocks(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             block["best_similarity"] is None or similarity > block["best_similarity"]
         ):
             block["best_similarity"] = similarity
-            block["best_ratio"] = row.get("aromagen_ratio", block["best_ratio"])
+            block["best_ratio"] = _canonicalize_ratio(row.get("aromagen_ratio", block["best_ratio"]))
         feedback = (row.get("feedback") or "").strip()
         if feedback:
             block["feedback_history"].append(feedback)

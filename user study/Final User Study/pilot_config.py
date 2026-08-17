@@ -13,18 +13,18 @@ both the Preliminary Study's and the Internal Pilot Study's taxonomies
 """
 
 CLUSTERS = {
-    "Floral": ["Lavender", "rose", "jasmine tea", "cherry blossom cake"],
+    "Floral": ["Lavender", "rose", "jasmine tea", "peony and rose oil shampoo"],
     "Citrus": ["Orange", "mango", "Lemonade", "Lime soda (Sprite)"],
     "Woody & Resinous": ["birch", "patchouli", "Whiskey and oak candle", "Incense"],
     "Herbal & Cooling": ["Basil", "Cucumber", "Peppermint tea", "Mint chewing gum"],
     "Spice": ["Ginger", "Black pepper", "chai tea", "Cinnamon roll"],
-    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow-flavored pop tarts"],
-    "Roasted & Smoky": ["coffee beans", "Bacon", "korean bbq beef patty", "Hot dog with hot sauce"],
+    "Sweet & Gourmand": ["Coke", "dark chocolate", "Apple pie", "Sweet popcorn", "chocolate and marshmallow pop tarts"],
+    "Roasted & Smoky": ["coffee beans", "Bacon", "korean barbeque beef patty", "Hot dog with hot sauce"],
     "Fermented & Sour": ["Greek yogurt", "Pickled cucumber", "Fries with ranch sauce", "Nacho with sour cream"],
     "Putrid & Decay": ["Blue cheese", "durian", "Canned sardines", "Natto beans"],
     "Chemical & Solvent": ["Whiskey", "Tequila", "Mint Fluoride mouthwash", "Lavender nail polish remover"],
     "Perfumed & Clean": ["Aloe vera", "Hand sanitizer", "Mint fluoride toothpaste", "Almond oil shampoo"],
-    "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in bbq sauce", "Salty popcorn"],
+    "Savoury & Umami": ["Soy sauce", "Parmesan cheese", "Garlic", "Seasoned pull pork in barbeque sauce", "Salty popcorn"],
 }
 
 DESCRIPTOR_TO_CLUSTER = {d: c for c, ds in CLUSTERS.items() for d in ds}
@@ -139,10 +139,13 @@ ODORANT_DESCRIPTIONS = {
     "Seaweed Accord": "Marine, salty, umami, savoury",
 }
 
-# --- Feedback-type condition ---
+# --- Feedback type ---
 #
-# A counterbalanced condition assigned via participant-sequence parity:
-# odd -> freeform, even -> rating_scale.
+# Used to be a counterbalanced condition (odd -> freeform, even ->
+# rating_scale); rating_scale has been dropped, every participant now gets
+# freeform feedback. "rating_scale" is kept in FEEDBACK_TYPES only so label
+# lookups for already-collected participants (frozen plan_json from before
+# this change) keep resolving correctly -- new plans never assign it.
 FEEDBACK_TYPES = {
     "freeform": "Freeform feedback",
     "rating_scale": "Rating-scale feedback",
@@ -151,8 +154,10 @@ MAX_FEEDBACK_ROUNDS = 5
 
 
 def feedback_type_for_participant(seq_index: int) -> str:
-    """Odd sequence position -> freeform; even -> rating_scale."""
-    return "freeform" if seq_index % 2 == 1 else "rating_scale"
+    """Every participant gets freeform feedback (rating_scale condition
+    removed). seq_index is unused now but kept in the signature so callers
+    don't need to change."""
+    return "freeform"
 
 
 if __name__ == "__main__":

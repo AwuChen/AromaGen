@@ -33,8 +33,8 @@
  * SECTION2_CREATIONS_PER_PARTICIPANT (PilotData.gs, currently 5) separate
  * creations, each its own intake (what the participant asked AromaGen to
  * create + the base odorant ratio AromaGen produced for it) followed
- * DIRECTLY by up to MAX_FEEDBACK_ROUNDS rounds of feedback (freeform or
- * rating-scale per the participant's counterbalanced feedback_type) --
+ * DIRECTLY by up to MAX_FEEDBACK_ROUNDS rounds of freeform feedback
+ * (rating-scale condition has been removed; every participant is freeform) --
  * UNLIKE Section 1, there is no "initial rating" step before the first
  * feedback round: no real physical reference exists yet to compare
  * against at that point, so intake leads straight into round 1. (Each
