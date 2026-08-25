@@ -18,7 +18,7 @@
     button.danger-btn { background: #c0392b; color: #fff; }
     button.danger-btn:hover { background: #a5281b; }
     button.small { padding: 4px 10px; font-size: 13px; margin: 0; }
-    .option-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; }
+    .option-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; }
     .option-slot { font-weight: 700; width: 22px; }
     .option-kind { font-size: 12px; padding: 2px 6px; border-radius: 4px; background: #f0f0f0; }
     .option-kind.aromagen_target, .option-kind.aromagen_near { background: #e3edfb; color: #1c4f9c; }
@@ -53,6 +53,8 @@
     .ratio-preview.ok { color: #1a7a3a; }
     .ratio-preview.bad { color: #b91c1c; }
     .composition-sentence { font-size: 13px; background: #f5f7fa; border-radius: 6px; padding: 10px 12px; margin-top: 10px; line-height: 1.5; }
+    .expert-ratio { font-size: 12px; color: #8a5a00; background: #fdf0d5; border-radius: 4px; padding: 2px 8px; display: inline-block; margin-top: 3px; }
+    .expert-ratio-missing { color: #999; background: #f0f0f0; }
   </style>
 </head>
 <body>
@@ -117,8 +119,13 @@ function renderCartridgeCheck(view) {
   var odorantsHtml = '<div class="odorant-list"><ol>' +
     view.odorants.map(function (o) { return '<li>' + escapeHtml(o) + '</li>'; }).join('') +
     '</ol></div>';
+  var isExpertCheck = view.condition === 'expert';
   var targetsHtml = '<div class="target-list"><ol>' +
-    view.targets.map(function (t) { return '<li>' + escapeHtml(t.target) + ' <span class="muted">(' + escapeHtml(t.cluster) + ')</span></li>'; }).join('') +
+    view.targets.map(function (t) {
+      return '<li>' + escapeHtml(t.target) + ' <span class="muted">(' + escapeHtml(t.cluster) + ')</span>' +
+        (isExpertCheck ? expertRatioHtml_(t.expertRatio) : '') +
+        '</li>';
+    }).join('') +
     '</ol></div>';
 
   document.getElementById('app').innerHTML =
@@ -208,11 +215,13 @@ var KIND_LABEL = {
 };
 
 function renderTrial(view) {
+  var isExpert = view.condition === 'expert';
   var optionsHtml = view.options.map(function (opt, i) {
     return '<div class="option-row">' +
       '<span class="option-slot">' + (i + 1) + '.</span>' +
       '<span class="option-kind ' + opt.kind + '">' + KIND_LABEL[opt.kind] + '</span>' +
       '<span>' + escapeHtml(opt.word) + '</span>' +
+      (isExpert && opt.kind !== 'real_near' ? expertRatioHtml_(opt.expertRatio) : '') +
       '</div>';
   }).join('');
 
@@ -221,6 +230,7 @@ function renderTrial(view) {
     '<div class="progress">Section 1 of 2 &middot; Trial ' + view.trialNumber + ' of ' + view.totalTrials + '</div>' +
     '<div class="target-word">' + escapeHtml(view.target) + '</div>' +
     '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>' +
+    (isExpert ? expertRatioHtml_(view.targetExpertRatio) : '') +
 
     '<h2 style="margin-top:20px;">Step 1</h2>' +
     '<p>Present a <strong>real physical example</strong> of &ldquo;' + escapeHtml(view.target) + '&rdquo; directly to the participant to smell.</p>' +
@@ -325,7 +335,8 @@ function renderFeedback(view) {
     '<div class="progress">Trial ' + view.trialNumber + ' of ' + view.totalTrials + ' &middot; Feedback condition: ' +
     '<strong>' + escapeHtml(view.feedbackTypeLabel) + '</strong></div>' +
     '<div class="target-word">' + escapeHtml(view.target) + '</div>' +
-    '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>';
+    '<div class="muted">Cluster: ' + escapeHtml(view.cluster) + '</div>' +
+    (view.condition === 'expert' ? expertRatioHtml_(view.targetExpertRatio) : '');
 
   if (!view.initialSimilaritySubmitted) {
     html += renderInitialSimilarityForm_(view.llmRatioText);
@@ -704,6 +715,17 @@ function renderDone(view) {
     '<p>Both sections finished for <strong>' + escapeHtml(view.participantName) + '</strong>. Thank the participant and remove the blindfold.</p>' +
     '<p class="muted">Close this tab and return to the admin panel to open the next participant\'s link.</p>' +
     '</div>';
+}
+
+// Shared "expert" condition renderer -- used wherever a smell (target or
+// distractor) is shown, so the experimenter can read off the expert-set
+// base-odorant ratio instead of generating one via the AromaGen app.
+// Degrades gracefully (visible "not yet set" note, not a blank/broken
+// line) for any word EXPERT_RATIOS doesn't have an entry for yet.
+function expertRatioHtml_(ratio) {
+  return ratio
+    ? '<div class="expert-ratio">Expert ratio: ' + escapeHtml(ratio) + '</div>'
+    : '<div class="expert-ratio expert-ratio-missing">Expert ratio: not yet set</div>';
 }
 
 function escapeHtml(s) {

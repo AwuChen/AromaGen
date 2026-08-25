@@ -254,25 +254,50 @@ descriptor taxonomy. Two sections per participant:
     versa. Both clusters' eligible pools shrink from 6 to 5 clusters as a
     result (now tied with Herbal & Cooling as the most restricted).
     Prospective only, same as revisions 25-26.
+28. **Added a ratio-source condition, independent of feedback_type.** A
+    second per-participant condition (`plan.condition`, `"ai"` or
+    `"expert"`), chosen via a new Admin Panel toggle at generation time.
+    Does NOT touch target/distractor selection, balancing, or eligibility
+    at all -- CLUSTERS/EXCLUDED_CLUSTERS/tallies are identical either way.
+    The only difference: in the `"expert"` condition, every smell shown to
+    the experimenter (the trial's target, both AromaGen-realized options
+    -- the true target and the AromaGen-composed near distractor, not the
+    real-object distractor -- and the cartridge-check target list) also
+    displays a fixed expert-derived base-odorant ratio looked up from
+    `EXPERT_RATIOS` (`PilotData.gs`/`pilot_config.py`), instead of (or
+    alongside) the experimenter generating one live via the AromaGen app.
+    `EXPERT_RATIOS` is now filled in for all 50 descriptors, sourced from
+    the expert panel's normalized, majority-selected formulation per
+    target (3-expert rating process; the highest-rated expert's
+    formulation was taken per target, 29/50 from Expert 2, 16/50 from
+    Expert 1, 5/50 from Expert 3). If `EXPERT_RATIOS` is ever short a
+    word in the future (e.g. a new descriptor is added without updating
+    the table), the panel degrades gracefully to a "not yet set" note
+    for just that word rather than erroring. Prospective only, same as
+    revisions 25-27 -- already-generated participants keep whatever
+    condition (implicitly `"ai"`) they were generated under.
 
 ```
-Benz Sal          Perfumed / Clean       vol 4
-Sandalwood        Woody / Resinous       vol 4
-Clove Bud         Spice                  vol 6
-Lavender          Floral                 vol 6
-Orange            Citrus                 vol 8
-Vanilla           Sweet / Gourmand       vol 3
-Birch tar oil     Roasted / Smoky        vol 3
-Eucalyptus        Herbal / Cooling       vol 8
-Cognac            Chemical / Solvent     vol 8
-Vinegar           Fermented / Sour       vol 8
-Isovaleric acid   Animal / Body          vol 7
-Seaweed Accord    Umami / Savoury (stand-in)  vol 5
+Benz Sal                              Perfumed / Clean       vol 4
+Sandalwood                            Woody / Resinous       vol 3
+Clove Bud + Cumin                     Spice                  vol 6
+Lavender + Rose                       Floral                 vol 5
+Orange + Lemon                        Citrus                 vol 8
+Vanilla Sugar + Almond Extract        Sweet / Gourmand       vol 3
+Birch tar oil + Coffee + Clove Bud    Roasted / Smoky        vol 4
+Eucalyptus                            Herbal / Cooling       vol 8
+Cognac                                Chemical / Solvent     vol 8
+Vinegar                               Fermented / Sour       vol 8
+Isovaleric acid                       Animal / Body          vol 7
+Seaweed + Fenugreek + Garlic          Umami / Savoury        vol 6
 ```
 
-Matches the live AromaGen catalog (`aromagen/cartridge_sets.json`) exactly.
+Matches the live AromaGen catalog (`aromagen/cartridge_sets.json`) exactly
+as of revision 28 -- 6 of the 12 slots are now multi-ingredient blends
+rather than single raw materials (renamed over the course of production
+tuning; see `aromagen/cartridge_sets.json`'s own history for why).
 `cartridge_configs/cartridge_sets.json` is a snapshot copy for reference
-(re-sync if the live catalog changes).
+(re-sync if the live catalog changes again).
 
 ## The 50-word / 12-cluster descriptor list
 

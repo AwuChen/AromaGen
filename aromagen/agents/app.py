@@ -145,8 +145,13 @@ app.add_middleware(
 
 
 @app.get("/health")
-def health() -> Dict[str, str]:
-    return {"status": "ok"}
+def health() -> Dict[str, Any]:
+    return {
+        "status": "ok",
+        "interaction_logging_configured": bool(
+            settings.interaction_log_apps_script_url and settings.interaction_log_token
+        ),
+    }
 
 
 @app.get("/cartridge/status")

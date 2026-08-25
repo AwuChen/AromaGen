@@ -478,6 +478,25 @@ function loadActiveCartridgeScents() {
 
 loadActiveCartridgeScents();
 
+// Interaction logging (the "Log" button + "Open Log Sheet") depends on a
+// private Google Sheet + Apps Script deployment specific to this
+// installation (see aromagen/production_logging/apps_script/) -- someone
+// cloning the repo fresh won't have that configured, and clicking "Log"
+// would otherwise surface a raw "Interaction logging is not configured"
+// backend error. Check on load and hide those controls entirely rather
+// than let an unrelated feature look broken to a new user.
+function applyInteractionLoggingAvailability(configured) {
+  ['logInteractionToggleBtn', 'openLogSheetBtn'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = configured ? '' : 'none';
+  });
+}
+
+fetch(API_BASE + '/health')
+  .then(function (r) { return r.ok ? r.json() : { interaction_logging_configured: false }; })
+  .then(function (data) { applyInteractionLoggingAvailability(!!data.interaction_logging_configured); })
+  .catch(function () { applyInteractionLoggingAvailability(false); });
+
 let currentPulseSequence = null; // Interleaved hardware pulse train from the last compose/feedback call
 
 function handleComposeResponse(data) {
