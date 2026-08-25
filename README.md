@@ -103,7 +103,7 @@ Produces `training_compose.jsonl`, `training_feedback.jsonl`, and `training_acce
 
 ## Configuration
 
-Environment variables (`.env`):
+Environment variables (`.env`, see `.env.example` for the full annotated list):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -113,6 +113,12 @@ Environment variables (`.env`):
 | `LEARNED_EXAMPLES_TOP_K` | `3` | Retrieved examples |
 | `DIALOGUE_LOGGING` | `true` | Write JSONL logs |
 | `SEQUENCE_TOTAL_SECONDS` | `30` | Total sequence duration |
+| `DESCRIPTOR_FILTER_TOP_K` | `24` | Odorants shown to the model per request (≥ catalog size = no filtering) |
+| `ENSEMBLE_ENABLED` | `true` | Self-consistency ensemble for concrete-smell requests |
+| `PULSE_SECONDS` / `PULSE_ROUNDS` | `1` / `8` | Interleaved hardware pulse-train timing |
+| `INTERACTION_LOG_APPS_SCRIPT_URL` / `INTERACTION_LOG_TOKEN` | — | **Optional, per-installation.** Frontend "Log"/"Open Log Sheet" buttons; points at a private Google Sheet you deploy yourself (see `aromagen/production_logging/apps_script/`). Leave unset and those controls auto-hide — no error, nothing to configure unless you want this feature. |
+| `INTERACTION_RETRIEVAL_ENABLED` | `true` | Inject precedent from the interaction log above into the initial compose call (no-op if the log above isn't configured/populated) |
+| `VALIDATION_LAYER_ENABLED` | `false` | Extra relevance-validation pass after compose |
 
 ---
 

@@ -22,6 +22,10 @@
     table.tally { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
     table.tally td, table.tally th { border: 1px solid #eee; padding: 3px 6px; text-align: left; }
     .footer-link { font-size: 12px; color: #888; margin-top: 24px; }
+    .condition-toggle { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .radio-label { display: flex; align-items: baseline; gap: 6px; font-weight: normal; font-size: 14px; margin: 0; }
+    .chip.expert { background: #fdf0d5; color: #8a5a00; }
+    .chip.ai { background: #e3edfb; color: #1c4f9c; }
   </style>
 </head>
 <body>
@@ -32,6 +36,11 @@
     <h2>Generate participants</h2>
     <label>Participant name(s) &mdash; one per line, or comma-separated. Works for a single name or a batch.</label>
     <textarea id="namesInput" placeholder="P1&#10;P2&#10;P3"></textarea>
+    <label>Condition &mdash; applies to newly generated names in this batch only; already-existing sessions keep whatever condition they were originally generated under.</label>
+    <div class="condition-toggle">
+      <label class="radio-label"><input type="radio" name="condition" value="ai" checked> AI-generated ratio (existing behavior)</label>
+      <label class="radio-label"><input type="radio" name="condition" value="expert"> Expert-derived ratio (also shows the expert-set base-odorant ratio next to every target/distractor shown to the experimenter)</label>
+    </div>
     <div id="genError" class="error"></div>
     <button id="genBtn" onclick="generate()">Generate</button>
   </div>
@@ -51,6 +60,7 @@
 <script>
 function generate() {
   var text = document.getElementById('namesInput').value;
+  var condition = document.querySelector('input[name="condition"]:checked').value;
   var err = document.getElementById('genError');
   err.textContent = '';
   document.getElementById('genBtn').disabled = true;
@@ -63,7 +73,7 @@ function generate() {
       document.getElementById('genBtn').disabled = false;
       err.textContent = 'Error: ' + (e && e.message ? e.message : e);
     })
-    .generateParticipantsBatch(text);
+    .generateParticipantsBatch(text, condition);
 }
 
 var FEEDBACK_TYPE_LABEL = {
@@ -71,14 +81,21 @@ var FEEDBACK_TYPE_LABEL = {
   rating_scale: 'Rating-scale'
 };
 
+var CONDITION_LABEL = {
+  ai: 'AI-generated',
+  expert: 'Expert-derived'
+};
+
 function renderResults(results) {
   var rows = results.map(function (r) {
     var chip = '<span class="chip ' + r.status + '">' + (r.status === 'generated' ? 'newly generated' : 'already existed') + '</span>';
     var feedbackType = r.feedbackType ? (FEEDBACK_TYPE_LABEL[r.feedbackType] || r.feedbackType) : '(existing session)';
+    var conditionChip = r.condition ? '<span class="chip ' + r.condition + '">' + (CONDITION_LABEL[r.condition] || r.condition) + '</span>' : '&mdash;';
     return '<tr>' +
       '<td>' + escapeHtml(r.name) + '</td>' +
       '<td>' + chip + '</td>' +
       '<td>' + escapeHtml(feedbackType) + '</td>' +
+      '<td>' + conditionChip + '</td>' +
       '<td><a href="' + r.link + '" target="_blank">' + r.link + '</a></td>' +
       '</tr>';
   }).join('');
@@ -86,7 +103,7 @@ function renderResults(results) {
   document.getElementById('resultsCard').innerHTML =
     '<div class="card">' +
     '<h2>Participant links</h2>' +
-    '<table class="results"><tr><th>Name</th><th>Status</th><th>Feedback type</th><th>Data collection link</th></tr>' +
+    '<table class="results"><tr><th>Name</th><th>Status</th><th>Feedback type</th><th>Condition</th><th>Data collection link</th></tr>' +
     rows +
     '</table>' +
     '<p class="muted">Open a participant\'s link when it\'s their turn to run -- it picks up wherever they left off if reopened.</p>' +

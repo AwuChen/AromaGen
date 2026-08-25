@@ -226,13 +226,18 @@ function buildTrials_(targetTally, distractorTally, rng, descToCluster, clusterU
  * from the true running total" contract as the Preliminary Study's
  * buildAssignment().
  */
-function buildParticipantPlan_(seqIndex, targetTally, distractorTally, seed, clusterUsedSets) {
+/** condition: "ai" (default) or "expert" -- see CONDITIONS in PilotData.gs.
+ * Does not affect trial/target/distractor selection at all, only frozen
+ * into the plan so the data collection panel knows whether to show
+ * expert-derived ratios alongside targets/distractors. */
+function buildParticipantPlan_(seqIndex, targetTally, distractorTally, seed, clusterUsedSets, condition) {
   var rng = mulberry32_(seed || Date.now());
   var descToCluster = descriptorToCluster_();
   return {
     seq_index: seqIndex,
     feedback_type: feedbackTypeForParticipant_(seqIndex),
     odorant_set: ODORANT_SET_ID,
+    condition: condition || DEFAULT_CONDITION,
     trials: buildTrials_(targetTally, distractorTally, rng, descToCluster, clusterUsedSets || {})
   };
 }

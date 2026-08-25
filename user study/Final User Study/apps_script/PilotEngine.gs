@@ -96,25 +96,25 @@ function formatOption_(opt) {
 /** Creates a session row for `name` if one doesn't already exist (idempotent).
  * `targetTally`/`distractorTally`/`clusterUsedSets` mutated in place as new
  * plans are built. Returns {created: bool, feedbackType}. */
-function ensureSession_(masterSs, name, targetTally, distractorTally, seqIndex, clusterUsedSets) {
+function ensureSession_(masterSs, name, targetTally, distractorTally, seqIndex, clusterUsedSets, condition) {
   var sessionsSheet = masterSs.getSheetByName("sessions");
   var existing = getSessionRow_(sessionsSheet, name);
   if (existing) {
     var existingPlan = JSON.parse(existing.plan_json);
-    return { created: false, feedbackType: existingPlan.feedback_type };
+    return { created: false, feedbackType: existingPlan.feedback_type, condition: existingPlan.condition || DEFAULT_CONDITION };
   }
 
-  var plan = buildParticipantPlan_(seqIndex, targetTally, distractorTally, seqIndex * 7919 + Date.now() % 100000, clusterUsedSets);
+  var plan = buildParticipantPlan_(seqIndex, targetTally, distractorTally, seqIndex * 7919 + Date.now() % 100000, clusterUsedSets, condition);
   var now = new Date();
   sessionsSheet.appendRow([name, JSON.stringify(plan), "in_progress", 0, TRIAL_PHASE_AFC, now, ""]);
 
   var participantsSheet = masterSs.getSheetByName("participants");
   participantsSheet.appendRow([
     name, seqIndex, plan.odorant_set, plan.feedback_type,
-    "in_progress", now, ""
+    "in_progress", now, "", plan.condition
   ]);
 
-  return { created: true, feedbackType: plan.feedback_type };
+  return { created: true, feedbackType: plan.feedback_type, condition: plan.condition };
 }
 
 function pilotDataCollectionLink_(name) {
@@ -128,7 +128,10 @@ function pilotDataCollectionLink_(name) {
  * their link returned, so re-submitting a bigger list that includes
  * earlier names is safe and idempotent.
  */
-function generateParticipantsBatch(namesText) {
+/** condition: "ai" or "expert" (Admin Panel toggle) -- applied to every
+ * NEWLY generated name in this batch; already-existing sessions keep
+ * whatever condition they were originally generated under. */
+function generateParticipantsBatch(namesText, condition) {
   var names = (namesText || "")
     .split(/[\n,]/)
     .map(function (s) { return s.trim(); })
@@ -137,6 +140,9 @@ function generateParticipantsBatch(namesText) {
   var uniqueNames = Array.from(new Set(names));
   if (uniqueNames.length !== names.length) {
     throw new Error("Duplicate participant names in the input -- each name must be unique.");
+  }
+  if (condition && !CONDITIONS[condition]) {
+    throw new Error("Unknown condition: " + condition);
   }
 
   var masterSs = getOrCreatePilotMasterSpreadsheet_();
@@ -148,12 +154,13 @@ function generateParticipantsBatch(namesText) {
     var nextSeq = nextSeqIndex_(masterSs);
 
     var results = uniqueNames.map(function (name) {
-      var result = ensureSession_(masterSs, name, tallies.targets, tallies.distractors, nextSeq, clusterUsedSets);
+      var result = ensureSession_(masterSs, name, tallies.targets, tallies.distractors, nextSeq, clusterUsedSets, condition);
       if (result.created) nextSeq += 1; // only consume a sequence slot for genuinely new sessions
       return {
         name: name,
         link: pilotDataCollectionLink_(name),
         feedbackType: result.feedbackType,
+        condition: result.condition,
         status: result.created ? "generated" : "already_existed"
       };
     });
@@ -357,6 +364,7 @@ function getPilotSessionView(participantName) {
   var step = Number(row.current_step);
   var phase = row.trial_phase || TRIAL_PHASE_AFC;
   var feedbackType = plan.feedback_type;
+  var condition = plan.condition || DEFAULT_CONDITION;
 
   if (row.status === "completed" || step >= STEP_DONE) {
     return { found: true, screen: "done", participantName: participantName };
@@ -372,13 +380,25 @@ function getPilotSessionView(participantName) {
       screen: "cartridge_check",
       participantName: participantName,
       odorants: BASE_ODORANT_SET,
-      targets: plan.trials.map(function (t) { return { target: t.target, cluster: t.cluster }; })
+      condition: condition,
+      targets: plan.trials.map(function (t) {
+        return { target: t.target, cluster: t.cluster, expertRatio: condition === "expert" ? expertRatioFor_(t.target) : null };
+      })
     };
   }
 
   if (step >= STEP_TRIAL_START && step <= STEP_TRIAL_END) {
     var trialIndex = step - STEP_TRIAL_START + 1; // 1..TRIALS_PER_PARTICIPANT
     var trial = plan.trials[trialIndex - 1];
+    // In the "expert" condition, every option (target AND distractors alike)
+    // gets its expert-derived reference ratio attached so the experimenter
+    // can see it next to the word wherever it's shown -- real_near options
+    // are real physical objects, not AromaGen compositions, but a lookup is
+    // harmless/null for those too since EXPERT_RATIOS is only ever keyed by
+    // the 50 study descriptors, not by odorant names.
+    var optionsWithRatios = trial.options.map(function (o) {
+      return { kind: o.kind, word: o.word, expertRatio: condition === "expert" ? expertRatioFor_(o.word) : null };
+    });
 
     if (phase === TRIAL_PHASE_AFC) {
       return {
@@ -389,7 +409,9 @@ function getPilotSessionView(participantName) {
         totalTrials: TRIALS_PER_PARTICIPANT,
         target: trial.target,
         cluster: trial.cluster,
-        options: trial.options,      // [{kind, word}, ...] in presentation (1..3) order
+        condition: condition,
+        targetExpertRatio: condition === "expert" ? expertRatioFor_(trial.target) : null,
+        options: optionsWithRatios,      // [{kind, word, expertRatio}, ...] in presentation (1..3) order
         correctSlot: trial.correct_slot, // 0-indexed
         odorantNames: BASE_ODORANT_SET // for the ratio field's live "Parsed as:" preview
       };
@@ -434,6 +456,8 @@ function getPilotSessionView(participantName) {
       totalTrials: TRIALS_PER_PARTICIPANT,
       target: trial.target,
       cluster: trial.cluster,
+      condition: condition,
+      targetExpertRatio: condition === "expert" ? expertRatioFor_(trial.target) : null,
       feedbackType: feedbackType,
       feedbackTypeLabel: FEEDBACK_TYPES[feedbackType],
       maxRounds: MAX_FEEDBACK_ROUNDS,

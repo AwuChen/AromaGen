@@ -55,6 +55,7 @@ from pilot_config import (
     BASE_ODORANT_SET,
     TRIALS_PER_PARTICIPANT,
     feedback_type_for_participant,
+    DEFAULT_CONDITION,
 )
 
 ODORANT_SET_ID = "fixed_set"
@@ -220,11 +221,16 @@ def build_trials(target_tally: dict, distractor_tally: dict, rng, cluster_used_s
 
 
 def build_participant_plan(seq_index: int, target_tally: dict, distractor_tally: dict, seed=None,
-                            cluster_used_sets: dict = None) -> dict:
+                            cluster_used_sets: dict = None, condition: str = None) -> dict:
     """target_tally, distractor_tally, cluster_used_sets: all mutated in
     place -- pass the running state from every participant assigned so
     far, same "continues from the true running total" contract as the
-    Preliminary Study's build_assignment()."""
+    Preliminary Study's build_assignment().
+
+    condition: "ai" (default) or "expert" -- see pilot_config.CONDITIONS.
+    Does not affect trial/target/distractor selection at all, only frozen
+    into the plan so the data collection panel knows whether to show
+    expert-derived ratios alongside targets/distractors."""
     rng = random.Random(seed)
     if cluster_used_sets is None:
         cluster_used_sets = {}
@@ -232,6 +238,7 @@ def build_participant_plan(seq_index: int, target_tally: dict, distractor_tally:
         "seq_index": seq_index,
         "feedback_type": feedback_type_for_participant(seq_index),
         "odorant_set": ODORANT_SET_ID,
+        "condition": condition or DEFAULT_CONDITION,
         "trials": build_trials(target_tally, distractor_tally, rng, cluster_used_sets),
     }
 
