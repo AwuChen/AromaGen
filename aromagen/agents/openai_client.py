@@ -440,7 +440,9 @@ def compose_with_openai(
     cartridge_status: Optional[Dict[str, Any]] = None,
 ) -> ComposeResponse:
     learned_examples = find_similar(sentence)
-    interaction_precedent = get_top_k_blocks(sentence)
+    interaction_precedent = (
+        get_top_k_blocks(sentence) if settings.interaction_retrieval_enabled else []
+    )
     system_prompt = _render_prompt(
         "system_prompt.j2",
         scents,

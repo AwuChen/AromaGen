@@ -117,7 +117,7 @@ Environment variables (`.env`, see `.env.example` for the full annotated list):
 | `ENSEMBLE_ENABLED` | `true` | Self-consistency ensemble for concrete-smell requests |
 | `PULSE_SECONDS` / `PULSE_ROUNDS` | `1` / `8` | Interleaved hardware pulse-train timing |
 | `INTERACTION_LOG_APPS_SCRIPT_URL` / `INTERACTION_LOG_TOKEN` | — | **Optional, per-installation.** Frontend "Log"/"Open Log Sheet" buttons; points at a private Google Sheet you deploy yourself (see `aromagen/production_logging/apps_script/`). Leave unset and those controls auto-hide — no error, nothing to configure unless you want this feature. |
-| `INTERACTION_RETRIEVAL_ENABLED` | `true` | Inject precedent from the interaction log above into the initial compose call (no-op if the log above isn't configured/populated) |
+| `INTERACTION_RETRIEVAL_ENABLED` | `false` | Inject precedent from the interaction log above into the initial compose call (no-op if the log above isn't configured/populated) |
 | `VALIDATION_LAYER_ENABLED` | `false` | Extra relevance-validation pass after compose |
 
 ---

@@ -59,7 +59,7 @@ class Settings:
     interaction_log_embeddings_path: Path = Path(
         os.getenv("INTERACTION_LOG_EMBEDDINGS_PATH", DATA_ROOT / "interaction_log_embeddings.json")
     )
-    interaction_retrieval_enabled: bool = os.getenv("INTERACTION_RETRIEVAL_ENABLED", "true").lower() == "true"
+    interaction_retrieval_enabled: bool = os.getenv("INTERACTION_RETRIEVAL_ENABLED", "false").lower() == "true"
     interaction_retrieval_top_k: int = int(os.getenv("INTERACTION_RETRIEVAL_TOP_K", "5"))
     interaction_retrieval_embedding_model: str = os.getenv(
         "INTERACTION_RETRIEVAL_EMBEDDING_MODEL", "text-embedding-3-small"
