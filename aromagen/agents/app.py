@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
@@ -29,7 +28,11 @@ from .openai_client import (
     validate_relevance_with_openai,
 )
 from .rag_compose import compose_with_rag_or_llm
-from .image_gen import build_scene_image_prompt, generate_scent_scene_image
+from .image_gen import (
+    build_scene_image_prompt,
+    get_generated_image_status,
+    schedule_scene_image_generation,
+)
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
 from .interaction_retrieval import append_local_log
@@ -208,6 +211,7 @@ def compose(request: ComposeRequest) -> ComposeResponse:
         session_id = new_session_id()
         image_prompt: Optional[str] = None
         generated_image_url: Optional[str] = None
+        image_status = "skipped"
 
         run_image = (
             request.include_generated_image
@@ -215,23 +219,15 @@ def compose(request: ComposeRequest) -> ComposeResponse:
         )
         if run_image:
             image_prompt = build_scene_image_prompt(request.sentence)
+            schedule_scene_image_generation(request.sentence, session_id)
+            image_status = "pending"
 
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            compose_future = pool.submit(
-                compose_with_rag_or_llm,
-                request.sentence,
-                catalog,
-                narrowed_catalog,
-                cartridge_status,
-            )
-            image_future = (
-                pool.submit(generate_scent_scene_image, request.sentence, session_id)
-                if run_image
-                else None
-            )
-            result, rag_metadata = compose_future.result()
-            if image_future is not None:
-                generated_image_url = image_future.result()
+        result, rag_metadata = compose_with_rag_or_llm(
+            request.sentence,
+            catalog,
+            narrowed_catalog,
+            cartridge_status,
+        )
 
         validate_composition(result.scent_sequence, catalog)
         extra = _validate_and_expand(
@@ -241,7 +237,8 @@ def compose(request: ComposeRequest) -> ComposeResponse:
             update={
                 "session_id": session_id,
                 "generated_image_url": generated_image_url,
-                "generated_image_prompt": image_prompt if generated_image_url else None,
+                "generated_image_prompt": image_prompt,
+                "generated_image_status": image_status,
                 "rag_metadata": rag_metadata,
                 **extra,
             }
@@ -257,6 +254,12 @@ def compose(request: ComposeRequest) -> ComposeResponse:
     except Exception as e:
         log.error("compose failed for sentence=%r: %s", request.sentence, e, exc_info=True)
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.get("/generated_image/{session_id}")
+def generated_image_status(session_id: str) -> Dict[str, Any]:
+    """Poll async scene image generation started by POST /compose."""
+    return get_generated_image_status(session_id)
 
 
 @app.post("/feedback", response_model=FeedbackResponse)

@@ -77,7 +77,8 @@ Or run separately:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/compose` | POST | `{ "sentence": "...", "include_generated_image": true }` → scent sequence, optional generated scene image, RAG metadata |
+| `/compose` | POST | `{ "sentence": "...", "include_generated_image": true }` → scent sequence immediately; scene image generates in background when enabled |
+| `/generated_image/{session_id}` | GET | Poll async scene image: `pending` / `ready` / `failed` |
 | `/feedback` | POST | Refine sequence from user feedback |
 | `/accept` | POST | Save accepted composition to example bank |
 | `/transcribe` | POST | Audio → text (multipart) |

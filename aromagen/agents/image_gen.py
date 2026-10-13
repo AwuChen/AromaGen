@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import Any, Dict, Optional
+import threading
+from typing import Any, Dict, Optional, Set
 
 import httpx
 from openai import OpenAI
@@ -11,6 +12,10 @@ from openai import OpenAI
 from .settings import settings
 
 log = logging.getLogger(__name__)
+
+_pending_sessions: Set[str] = set()
+_failed_sessions: Set[str] = set()
+_image_job_lock = threading.Lock()
 
 SCENE_IMAGE_PROMPT = (
     "Photorealistic still-life or environment scene that strongly evokes this smell: "
@@ -75,3 +80,43 @@ def generate_scent_scene_image(sentence: str, session_id: str) -> Optional[str]:
     except Exception as e:
         log.warning("Scene image generation failed for session %s: %s", session_id, e)
         return None
+
+
+def schedule_scene_image_generation(sentence: str, session_id: str) -> None:
+    """Run image generation in a background thread (compose does not wait)."""
+
+    def _worker() -> None:
+        try:
+            url = generate_scent_scene_image(sentence, session_id)
+            if not url:
+                with _image_job_lock:
+                    _failed_sessions.add(session_id)
+        finally:
+            with _image_job_lock:
+                _pending_sessions.discard(session_id)
+
+    with _image_job_lock:
+        _pending_sessions.add(session_id)
+        _failed_sessions.discard(session_id)
+    thread = threading.Thread(
+        target=_worker,
+        daemon=True,
+        name=f"scene-image-{session_id[:8]}",
+    )
+    thread.start()
+
+
+def get_generated_image_status(session_id: str) -> Dict[str, Any]:
+    """Poll-friendly status for async scene images."""
+    out_path = settings.generated_images_dir / f"{session_id}.png"
+    if out_path.is_file():
+        return {
+            "status": "ready",
+            "url": f"/generated_images/{session_id}.png",
+        }
+    with _image_job_lock:
+        if session_id in _pending_sessions:
+            return {"status": "pending"}
+        if session_id in _failed_sessions:
+            return {"status": "failed"}
+    return {"status": "not_found"}

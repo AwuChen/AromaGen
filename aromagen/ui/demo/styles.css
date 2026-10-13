@@ -526,24 +526,21 @@ body {
 }
 
 .generated-scene-wrap {
+  width: 100%;
   margin: 0 0 1rem;
-  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .generated-scene-img {
   display: block;
-  width: 100%;
-  max-width: 420px;
+  width: auto;
+  max-width: min(420px, 100%);
   max-height: 280px;
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
-}
-
-.generated-scene-caption {
-  margin-top: 0.35rem;
-  font-size: 0.75rem;
-  opacity: 0.75;
 }
 
 .frequency-transcription-text {

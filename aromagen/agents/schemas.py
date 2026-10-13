@@ -41,6 +41,7 @@ class ComposeResponse(BaseModel):
     session_id: str = ""
     generated_image_url: Optional[str] = None
     generated_image_prompt: Optional[str] = None
+    generated_image_status: Optional[str] = None
     rag_metadata: Optional[Dict[str, Any]] = None
 
 

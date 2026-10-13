@@ -1,4 +1,21 @@
 const API_BASE = window.FREQUENCY_API_BASE || 'http://localhost:8000';
+const SCENE_IMAGE_PREF_KEY = 'aromagen_scene_image_enabled';
+
+function isSceneImageEnabled() {
+  var stored = localStorage.getItem(SCENE_IMAGE_PREF_KEY);
+  if (stored === null) return true;
+  return stored === 'true';
+}
+
+function setSceneImageEnabled(enabled) {
+  localStorage.setItem(SCENE_IMAGE_PREF_KEY, enabled ? 'true' : 'false');
+  var btn = document.getElementById('sceneImageToggleBtn');
+  if (btn) btn.classList.toggle('is-active', enabled);
+  if (!enabled) {
+    cancelSceneImagePoll();
+    showGeneratedSceneImage(null);
+  }
+}
 
 const LOG_SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1TBswegffpBQL_AAeMdSgM6qz9V1eC9aK09OAR_m5Ys4/edit';
 
@@ -210,8 +227,12 @@ function bindImageUploadHandler(onImageSelected) {
         currentSequence = sequence;
         renderProfile(sequence);
         recordHistoryEntry(trimmedText, sequence, currentPulseSequence);
-        updateProgress('Complete', 100);
-        setTimeout(hideProgress, 800);
+        if (window.composeAwaitingSceneImage) {
+          updateProgress('Generating image', 85);
+        } else {
+          updateProgress('Complete', 100);
+          setTimeout(hideProgress, 800);
+        }
         return Promise.resolve();
       }
 
@@ -432,6 +453,16 @@ function bindImageUploadHandler(onImageSelected) {
       }
     });
   }
+
+  window.aromaFrequencyProgress = {
+    update: updateProgress,
+    show: showProgress,
+    hide: hideProgress,
+    finishComplete: function () {
+      updateProgress('Complete', 100);
+      setTimeout(hideProgress, 800);
+    },
+  };
 })();
 
 /*
@@ -511,10 +542,27 @@ function handleComposeResponse(data) {
   }
   console.log('[Compose] Pulse sequence:', data.pulse_sequence);
   currentPulseSequence = data.pulse_sequence || null;
-  showGeneratedSceneImage(data.generated_image_url);
+  window.composeAwaitingSceneImage = false;
+  if (data.generated_image_url) {
+    showGeneratedSceneImage(data.generated_image_url);
+  } else if (data.generated_image_status === 'pending' && data.session_id && isSceneImageEnabled()) {
+    window.composeAwaitingSceneImage = true;
+    beginSceneImagePoll(data.session_id);
+  } else if (data.generated_image_status === 'skipped' || !isSceneImageEnabled()) {
+    showGeneratedSceneImage(null);
+  }
   return (data.validated_sequence && data.validated_sequence.length > 0)
     ? data.validated_sequence
     : (data.scent_sequence || null);
+}
+
+var sceneImagePollTimer = null;
+
+function cancelSceneImagePoll() {
+  if (sceneImagePollTimer) {
+    clearTimeout(sceneImagePollTimer);
+    sceneImagePollTimer = null;
+  }
 }
 
 function showGeneratedSceneImage(relativeUrl) {
@@ -524,10 +572,59 @@ function showGeneratedSceneImage(relativeUrl) {
   if (!relativeUrl) {
     wrap.style.display = 'none';
     img.removeAttribute('src');
+    img.alt = '';
     return;
   }
   img.src = API_BASE + relativeUrl;
-  wrap.style.display = 'block';
+  img.alt = 'Generated scene for this smell request';
+  wrap.style.display = 'flex';
+}
+
+function beginSceneImagePoll(sessionId) {
+  cancelSceneImagePoll();
+  showGeneratedSceneImage(null);
+  var progress = window.aromaFrequencyProgress;
+  if (progress) {
+    progress.update('Generating image', 85);
+  }
+
+  var attempts = 0;
+  var maxAttempts = 60;
+
+  function poll() {
+    attempts += 1;
+    if (progress) {
+      var pct = Math.min(95, 85 + Math.floor(attempts * 1.5));
+      progress.update('Generating image', pct);
+    }
+    fetch(API_BASE + '/generated_image/' + encodeURIComponent(sessionId))
+      .then(function (res) { return res.json(); })
+      .then(function (body) {
+        if (body.status === 'ready' && body.url) {
+          cancelSceneImagePoll();
+          window.composeAwaitingSceneImage = false;
+          showGeneratedSceneImage(body.url);
+          if (progress) progress.finishComplete();
+          return;
+        }
+        if (body.status === 'failed' || body.status === 'not_found' || attempts >= maxAttempts) {
+          cancelSceneImagePoll();
+          window.composeAwaitingSceneImage = false;
+          if (progress) progress.finishComplete();
+          return;
+        }
+        sceneImagePollTimer = setTimeout(poll, 2000);
+      })
+      .catch(function () {
+        if (attempts >= maxAttempts) {
+          window.composeAwaitingSceneImage = false;
+          if (progress) progress.finishComplete();
+          return;
+        }
+        sceneImagePollTimer = setTimeout(poll, 3000);
+      });
+  }
+  poll();
 }
 
 async function composeScent(sentence) {
@@ -535,7 +632,10 @@ async function composeScent(sentence) {
     const res = await fetch(API_BASE + '/compose', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sentence })
+      body: JSON.stringify({
+        sentence: sentence,
+        include_generated_image: isSceneImageEnabled()
+      })
     });
     if (!res.ok) {
       const msg = await res.text();
@@ -975,3 +1075,12 @@ async function testBLEConnection() {
     setLoading(false);
   }
 }
+
+(function initSceneImageToggle() {
+  var btn = document.getElementById('sceneImageToggleBtn');
+  if (!btn) return;
+  setSceneImageEnabled(isSceneImageEnabled());
+  btn.addEventListener('click', function () {
+    setSceneImageEnabled(!isSceneImageEnabled());
+  });
+})();

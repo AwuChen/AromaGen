@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div class="page">
@@ -161,8 +161,7 @@
 
       <div class="frequency-controls" id="frequencyControls" aria-live="polite">
         <figure class="generated-scene-wrap" id="generatedSceneWrap" style="display: none;">
-          <img id="generatedSceneImg" class="generated-scene-img" alt="AI-generated scene for this smell request" />
-          <figcaption class="generated-scene-caption">Generated scene (shown with your scent composition)</figcaption>
+          <img id="generatedSceneImg" class="generated-scene-img" alt="" />
         </figure>
         <p class="frequency-transcription-text" id="frequencyTranscriptionText"></p>
         <p class="frequency-transcription-status" id="frequencyTranscriptionStatus"></p>
@@ -195,6 +194,7 @@
           <button type="button" id="textualFeedbackToggleBtn" class="frequency-control-btn">Textual feedback</button>
           <button type="button" id="historyToggleBtn" class="frequency-control-btn" onclick="toggleHistoryPanel()">History</button>
           <button type="button" id="durationToggleBtn" class="frequency-control-btn">Duration</button>
+          <button type="button" id="sceneImageToggleBtn" class="frequency-control-btn">IMAGE GEN</button>
           <button type="button" id="openLogSheetBtn" class="frequency-control-btn" onclick="openLogSheet()">Open Log Sheet</button>
           <button type="button" id="logInteractionToggleBtn" class="frequency-control-btn">Log</button>
           <button type="button" id="acceptSequenceBtn" class="frequency-control-btn frequency-control-btn-primary">This works</button>
@@ -273,6 +273,6 @@
     <div class="history-list" id="historyList"></div>
   </aside>
 
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
