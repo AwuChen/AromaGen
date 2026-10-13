@@ -27,7 +27,17 @@ class RagHit:
     rank_score: float
     scent_sequence: List[ScentItem]
     best_similarity: Optional[float] = None
+    accept_rating: Optional[int] = None
     example_id: Optional[str] = None
+
+
+def _quality_score(hit: RagHit) -> float:
+    """Interaction-log similarity is 1–7; learned-example accept ratings are 1–5."""
+    if hit.best_similarity is not None:
+        return float(hit.best_similarity)
+    if hit.accept_rating is not None:
+        return float(hit.accept_rating) * 7.0 / 5.0
+    return 0.0
 
 
 def _ratio_string_to_sequence(ratio_str: str, catalog: Dict[str, Any]) -> List[ScentItem]:
@@ -103,14 +113,12 @@ def retrieve_best_rag_hit(sentence: str, catalog: Dict[str, Any]) -> Optional[Ra
         if not sequence:
             continue
         embed_sim = float(block.get("similarity_to_current_request") or 0.0)
-        qual = (float(block["best_similarity"]) / 7.0) if block.get("best_similarity") else 0.0
-        rank = embed_sim * 0.65 + qual * 0.35
         candidates.append(
             RagHit(
                 source="interaction_log",
                 matched_text=block.get("target_smell", ""),
                 embedding_similarity=embed_sim,
-                rank_score=rank,
+                rank_score=embed_sim,
                 scent_sequence=sequence,
                 best_similarity=block.get("best_similarity"),
             )
@@ -128,27 +136,35 @@ def retrieve_best_rag_hit(sentence: str, catalog: Dict[str, Any]) -> Optional[Ra
             sequence = _learned_example_to_sequence(ex, catalog)
             if not sequence:
                 continue
-            rating = ex.get("rating")
-            qual = (float(rating) / 5.0) if isinstance(rating, (int, float)) else 0.5
-            rank = embed_sim * 0.75 + qual * 0.25
+            rating = ex.get("rating") if isinstance(ex.get("rating"), int) else None
             candidates.append(
                 RagHit(
                     source="learned_example",
                     matched_text=text,
                     embedding_similarity=embed_sim,
-                    rank_score=rank,
+                    rank_score=embed_sim,
                     scent_sequence=sequence,
+                    accept_rating=rating,
                     example_id=ex.get("id"),
                 )
             )
 
-    if not candidates:
+    eligible = [
+        hit for hit in candidates
+        if hit.embedding_similarity >= settings.rag_compose_min_similarity
+    ]
+    if not eligible:
         return None
 
-    candidates.sort(key=lambda hit: hit.rank_score, reverse=True)
-    best = candidates[0]
-    if best.embedding_similarity < settings.rag_compose_min_similarity:
-        return None
+    # Each interaction-log block already stores the mixture from that session's
+    # highest similarity round (_group_into_blocks). Among semantically eligible
+    # matches, prefer the highest logged quality, then embedding similarity.
+    eligible.sort(
+        key=lambda hit: (_quality_score(hit), hit.embedding_similarity),
+        reverse=True,
+    )
+    best = eligible[0]
+    best.rank_score = round(_quality_score(best), 4)
     return best
 
 
@@ -158,8 +174,9 @@ def _rag_metadata(hit: RagHit) -> Dict[str, Any]:
         "source": hit.source,
         "matched_text": hit.matched_text,
         "embedding_similarity": round(hit.embedding_similarity, 4),
-        "rank_score": round(hit.rank_score, 4),
+        "rank_score": hit.rank_score,
         "best_similarity": hit.best_similarity,
+        "accept_rating": hit.accept_rating,
         "example_id": hit.example_id,
     }
 

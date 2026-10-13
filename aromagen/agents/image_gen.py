@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
+import httpx
 from openai import OpenAI
 
 from .settings import settings
@@ -23,6 +24,26 @@ def build_scene_image_prompt(sentence: str) -> str:
     return SCENE_IMAGE_PROMPT.format(sentence=sentence.strip())
 
 
+def _image_generate_kwargs(prompt: str) -> Dict[str, Any]:
+    model = settings.openai_image_model
+    kwargs: Dict[str, Any] = {
+        "model": model,
+        "prompt": prompt,
+        "n": 1,
+    }
+    if settings.openai_image_size:
+        kwargs["size"] = settings.openai_image_size
+    # Optional quality is only supported on DALL·E 3; newer image models reject it.
+    if model == "dall-e-3" and settings.openai_image_quality:
+        kwargs["quality"] = settings.openai_image_quality
+    return kwargs
+
+
+def _persist_image_bytes(out_path, data: bytes) -> str:
+    out_path.write_bytes(data)
+    return f"/generated_images/{out_path.name}"
+
+
 def generate_scent_scene_image(sentence: str, session_id: str) -> Optional[str]:
     """
     Generate and persist a PNG for this session. Returns a URL path served by
@@ -38,20 +59,19 @@ def generate_scent_scene_image(sentence: str, session_id: str) -> Optional[str]:
 
     try:
         client = OpenAI(api_key=settings.openai_api_key)
-        response = client.images.generate(
-            model=settings.openai_image_model,
-            prompt=prompt,
-            size=settings.openai_image_size,
-            quality=settings.openai_image_quality,
-            n=1,
-            response_format="b64_json",
-        )
-        b64 = response.data[0].b64_json
-        if not b64:
-            log.warning("Image API returned no b64_json for session %s", session_id)
-            return None
-        out_path.write_bytes(base64.standard_b64decode(b64))
-        return f"/generated_images/{session_id}.png"
+        response = client.images.generate(**_image_generate_kwargs(prompt))
+        item = response.data[0]
+        if getattr(item, "b64_json", None):
+            return _persist_image_bytes(
+                out_path, base64.standard_b64decode(item.b64_json)
+            )
+        if getattr(item, "url", None):
+            with httpx.Client(follow_redirects=True, timeout=120) as http:
+                img_resp = http.get(item.url)
+                img_resp.raise_for_status()
+            return _persist_image_bytes(out_path, img_resp.content)
+        log.warning("Image API returned no url or b64_json for session %s", session_id)
+        return None
     except Exception as e:
         log.warning("Scene image generation failed for session %s: %s", session_id, e)
         return None

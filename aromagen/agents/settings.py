@@ -79,7 +79,7 @@ class Settings:
 
     # Parallel scene image generation at compose time (OpenAI Images API).
     image_gen_enabled: bool = os.getenv("IMAGE_GEN_ENABLED", "true").lower() == "true"
-    openai_image_model: str = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
+    openai_image_model: str = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
     openai_image_size: str = os.getenv("OPENAI_IMAGE_SIZE", "1024x1024")
     openai_image_quality: str = os.getenv("OPENAI_IMAGE_QUALITY", "standard")
     generated_images_dir: Path = Path(

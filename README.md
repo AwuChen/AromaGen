@@ -121,7 +121,7 @@ Environment variables (`.env`, see `.env.example` for the full annotated list):
 | `RAG_COMPOSE_ENABLED` | `true` | When similarity is high enough, reuse the best logged mixture instead of a fresh LLM compose |
 | `RAG_COMPOSE_MIN_SIMILARITY` | `0.78` | Embedding cosine threshold for RAG compose |
 | `IMAGE_GEN_ENABLED` | `true` | Generate a scene image in parallel with `/compose` |
-| `OPENAI_IMAGE_MODEL` | `dall-e-3` | OpenAI Images model |
+| `OPENAI_IMAGE_MODEL` | `gpt-image-1` | OpenAI Images model |
 | `VALIDATION_LAYER_ENABLED` | `false` | Extra relevance-validation pass after compose |
 
 ---
