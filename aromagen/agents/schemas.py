@@ -13,6 +13,7 @@ SCENT_DURATION_MAX = settings.scent_duration_max
 
 class ComposeRequest(BaseModel):
     sentence: str = Field(min_length=1)
+    include_generated_image: bool = True
 
 
 def scent_name_literal(choices: list[str]):
@@ -38,6 +39,9 @@ class ComposeResponse(BaseModel):
     request_category: str = ""
     ensemble_stability: Optional[Dict[str, Any]] = None
     session_id: str = ""
+    generated_image_url: Optional[str] = None
+    generated_image_prompt: Optional[str] = None
+    rag_metadata: Optional[Dict[str, Any]] = None
 
 
 class FeedbackRound(BaseModel):

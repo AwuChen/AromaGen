@@ -502,15 +502,32 @@ let currentPulseSequence = null; // Interleaved hardware pulse train from the la
 function handleComposeResponse(data) {
   if (data.session_id) sessionId = data.session_id;
   console.log('[Compose] Justification:', data.justification);
+  if (data.rag_metadata) {
+    console.log('[Compose] RAG:', data.rag_metadata);
+  }
   console.log('[Compose] Validation:', data.validation_reasoning, 'removed:', data.removed_scents);
   if (data.compatibility_warnings && data.compatibility_warnings.length) {
     console.warn('[Compose] Compatibility warnings:', data.compatibility_warnings);
   }
   console.log('[Compose] Pulse sequence:', data.pulse_sequence);
   currentPulseSequence = data.pulse_sequence || null;
+  showGeneratedSceneImage(data.generated_image_url);
   return (data.validated_sequence && data.validated_sequence.length > 0)
     ? data.validated_sequence
     : (data.scent_sequence || null);
+}
+
+function showGeneratedSceneImage(relativeUrl) {
+  var wrap = document.getElementById('generatedSceneWrap');
+  var img = document.getElementById('generatedSceneImg');
+  if (!wrap || !img) return;
+  if (!relativeUrl) {
+    wrap.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+  img.src = API_BASE + relativeUrl;
+  wrap.style.display = 'block';
 }
 
 async function composeScent(sentence) {

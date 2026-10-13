@@ -73,5 +73,18 @@ class Settings:
     ensemble_weak_threshold: int = int(os.getenv("ENSEMBLE_WEAK_THRESHOLD", "3"))
     ensemble_retry_predictor_count: int = int(os.getenv("ENSEMBLE_RETRY_PREDICTOR_COUNT", "5"))
 
+    # RAG-first compose: reuse best interaction-log / learned-example mixture when similar.
+    rag_compose_enabled: bool = os.getenv("RAG_COMPOSE_ENABLED", "true").lower() == "true"
+    rag_compose_min_similarity: float = float(os.getenv("RAG_COMPOSE_MIN_SIMILARITY", "0.78"))
+
+    # Parallel scene image generation at compose time (OpenAI Images API).
+    image_gen_enabled: bool = os.getenv("IMAGE_GEN_ENABLED", "true").lower() == "true"
+    openai_image_model: str = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
+    openai_image_size: str = os.getenv("OPENAI_IMAGE_SIZE", "1024x1024")
+    openai_image_quality: str = os.getenv("OPENAI_IMAGE_QUALITY", "standard")
+    generated_images_dir: Path = Path(
+        os.getenv("GENERATED_IMAGES_DIR", DATA_ROOT / "generated_images")
+    )
+
 
 settings = Settings()

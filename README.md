@@ -77,7 +77,7 @@ Or run separately:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/compose` | POST | `{ "sentence": "..." }` → scent sequence |
+| `/compose` | POST | `{ "sentence": "...", "include_generated_image": true }` → scent sequence, optional generated scene image, RAG metadata |
 | `/feedback` | POST | Refine sequence from user feedback |
 | `/accept` | POST | Save accepted composition to example bank |
 | `/transcribe` | POST | Audio → text (multipart) |
@@ -118,6 +118,10 @@ Environment variables (`.env`, see `.env.example` for the full annotated list):
 | `PULSE_SECONDS` / `PULSE_ROUNDS` | `1` / `8` | Interleaved hardware pulse-train timing |
 | `INTERACTION_LOG_APPS_SCRIPT_URL` / `INTERACTION_LOG_TOKEN` | — | **Optional, per-installation.** Frontend "Log"/"Open Log Sheet" buttons; points at a private Google Sheet you deploy yourself (see `aromagen/production_logging/apps_script/`). Leave unset and those controls auto-hide — no error, nothing to configure unless you want this feature. |
 | `INTERACTION_RETRIEVAL_ENABLED` | `true` | Inject precedent from the interaction log above into the initial compose call (no-op if the log above isn't configured/populated) |
+| `RAG_COMPOSE_ENABLED` | `true` | When similarity is high enough, reuse the best logged mixture instead of a fresh LLM compose |
+| `RAG_COMPOSE_MIN_SIMILARITY` | `0.78` | Embedding cosine threshold for RAG compose |
+| `IMAGE_GEN_ENABLED` | `true` | Generate a scene image in parallel with `/compose` |
+| `OPENAI_IMAGE_MODEL` | `dall-e-3` | OpenAI Images model |
 | `VALIDATION_LAYER_ENABLED` | `false` | Extra relevance-validation pass after compose |
 
 ---

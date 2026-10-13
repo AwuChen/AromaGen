@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .schemas import (
     AcceptRequest,
@@ -20,15 +22,14 @@ from .schemas import (
 )
 from .settings import settings
 from .openai_client import (
-    classify_request_with_openai,
-    compose_with_ensemble,
-    compose_with_openai,
     describe_image,
     expand_to_pulse_sequence,
     refine_with_openai,
     transcribe_audio,
     validate_relevance_with_openai,
 )
+from .rag_compose import compose_with_rag_or_llm
+from .image_gen import build_scene_image_prompt, generate_scent_scene_image
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
 from .interaction_retrieval import append_local_log
@@ -143,6 +144,13 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+settings.generated_images_dir.mkdir(parents=True, exist_ok=True)
+app.mount(
+    "/generated_images",
+    StaticFiles(directory=str(settings.generated_images_dir)),
+    name="generated_images",
+)
+
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
@@ -197,28 +205,47 @@ def compose(request: ComposeRequest) -> ComposeResponse:
         narrowed_catalog = filter_relevant_scents(
             request.sentence, catalog, settings.descriptor_filter_top_k
         )
-
-        # Concrete real-world smells ("strawberry", "sweaty") should compose
-        # consistently across runs; abstract requests ("nostalgia") benefit
-        # from run-to-run variability, so only concrete requests take the
-        # (slower, costlier) self-consistency ensemble path.
-        category = "abstract"
-        if settings.ensemble_enabled:
-            try:
-                category = classify_request_with_openai(request.sentence).category
-            except Exception as e:
-                log.warning("Request classification failed (%s); defaulting to single-shot compose", e)
-
-        if category == "concrete" and settings.ensemble_enabled:
-            result = compose_with_ensemble(request.sentence, narrowed_catalog, cartridge_status)
-        else:
-            result = compose_with_openai(request.sentence, narrowed_catalog, cartridge_status)
-        result = result.model_copy(update={"request_category": category})
-
-        validate_composition(result.scent_sequence, narrowed_catalog)
         session_id = new_session_id()
-        extra = _validate_and_expand(request.sentence, result.scent_sequence, narrowed_catalog, result.justification)
-        output = result.model_copy(update={"session_id": session_id, **extra})
+        image_prompt: Optional[str] = None
+        generated_image_url: Optional[str] = None
+
+        run_image = (
+            request.include_generated_image
+            and settings.image_gen_enabled
+        )
+        if run_image:
+            image_prompt = build_scene_image_prompt(request.sentence)
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            compose_future = pool.submit(
+                compose_with_rag_or_llm,
+                request.sentence,
+                catalog,
+                narrowed_catalog,
+                cartridge_status,
+            )
+            image_future = (
+                pool.submit(generate_scent_scene_image, request.sentence, session_id)
+                if run_image
+                else None
+            )
+            result, rag_metadata = compose_future.result()
+            if image_future is not None:
+                generated_image_url = image_future.result()
+
+        validate_composition(result.scent_sequence, catalog)
+        extra = _validate_and_expand(
+            request.sentence, result.scent_sequence, catalog, result.justification
+        )
+        output = result.model_copy(
+            update={
+                "session_id": session_id,
+                "generated_image_url": generated_image_url,
+                "generated_image_prompt": image_prompt if generated_image_url else None,
+                "rag_metadata": rag_metadata,
+                **extra,
+            }
+        )
         append_event(
             "compose",
             session_id=session_id,

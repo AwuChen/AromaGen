@@ -214,11 +214,28 @@ def _get_embeddings(texts: List[str], client: OpenAI) -> Dict[str, List[float]]:
     return {t: cache[t] for t in unique_texts if t in cache}
 
 
-def get_top_k_blocks(user_input: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
+def parse_aromagen_ratio(ratio_str: str) -> List[tuple[str, float]]:
+    """Parse a canonicalized ratio string into (odorant_name, percent) pairs."""
+    canonical = _canonicalize_ratio(ratio_str or "")
+    pairs: List[tuple[str, float]] = []
+    for match in _RATIO_NAME_PATTERN.finditer(canonical):
+        name = LEGACY_ODORANT_NAMES.get(match.group(1), match.group(1))
+        pairs.append((name, float(match.group(2))))
+    return pairs
+
+
+def get_top_k_blocks(
+    user_input: str,
+    k: Optional[int] = None,
+    *,
+    ignore_enabled_flag: bool = False,
+) -> List[Dict[str, Any]]:
     """Top-k past session blocks whose target_smell is semantically closest
     to user_input, each with the ratio/feedback/rating that mattered most
     (highest-scoring round). Returns [] on any failure or if disabled/empty."""
-    if not settings.interaction_retrieval_enabled or not settings.openai_api_key:
+    if not settings.openai_api_key:
+        return []
+    if not ignore_enabled_flag and not settings.interaction_retrieval_enabled:
         return []
     top_k = k if k is not None else settings.interaction_retrieval_top_k
 

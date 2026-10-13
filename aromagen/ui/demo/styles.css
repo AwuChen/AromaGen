@@ -525,6 +525,27 @@ body {
   pointer-events: auto;
 }
 
+.generated-scene-wrap {
+  margin: 0 0 1rem;
+  max-width: 100%;
+}
+
+.generated-scene-img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  max-height: 280px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.generated-scene-caption {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
 .frequency-transcription-text {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(0.82rem, 1.8vw, 0.95rem);
