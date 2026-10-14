@@ -160,6 +160,9 @@
       </div>
 
       <div class="frequency-controls" id="frequencyControls" aria-live="polite">
+        <figure class="generated-scene-wrap uploaded-scene-wrap" id="uploadedImageWrap" style="display: none;">
+          <img id="uploadedSceneImg" class="generated-scene-img" alt="Uploaded image" />
+        </figure>
         <figure class="generated-scene-wrap" id="generatedSceneWrap" style="display: none;">
           <img id="generatedSceneImg" class="generated-scene-img" alt="" />
         </figure>
@@ -176,6 +179,7 @@
               accept="image/*"
             >
           </label>
+          <button type="button" id="imageTranscriptToggleBtn" class="frequency-control-btn">IMAGE TEXT</button>
         </div>
 
         <div class="frequency-controls-row">
@@ -273,6 +277,6 @@
     <div class="history-list" id="historyList"></div>
   </aside>
 
-  <script src="script.js?v=10"></script>
+  <script src="script.js?v=11"></script>
 </body>
 </html>

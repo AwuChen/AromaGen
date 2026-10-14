@@ -1,6 +1,10 @@
 const API_BASE = window.FREQUENCY_API_BASE || 'http://localhost:8000';
 const SCENE_IMAGE_PREF_KEY = 'aromagen_scene_image_enabled';
 
+var uploadedImageObjectUrl = null;
+var transcriptHiddenForImageUpload = false;
+var imageTranscriptVisible = false;
+
 function isSceneImageEnabled() {
   var stored = localStorage.getItem(SCENE_IMAGE_PREF_KEY);
   if (stored === null) return true;
@@ -156,8 +160,49 @@ function bindImageUploadHandler(onImageSelected) {
     statusEl.style.color = isError ? 'rgba(255, 120, 120, 0.9)' : 'rgba(255, 255, 255, 0.5)';
   }
 
-  function setTranscription(text) {
-    if (transcriptionEl) transcriptionEl.textContent = text || '';
+  function updateImageTranscriptToggleBtn() {
+    var btn = document.getElementById('imageTranscriptToggleBtn');
+    if (!btn) return;
+    btn.classList.toggle('is-active', imageTranscriptVisible);
+    btn.style.display = transcriptHiddenForImageUpload ? '' : 'none';
+  }
+
+  function updateTranscriptionVisibility() {
+    if (!transcriptionEl) return;
+    if (transcriptHiddenForImageUpload && !imageTranscriptVisible) {
+      transcriptionEl.style.display = 'none';
+    } else if (transcriptionEl.textContent) {
+      transcriptionEl.style.display = '';
+    } else {
+      transcriptionEl.style.display = 'none';
+    }
+  }
+
+  function setTranscription(text, opts) {
+    if (!transcriptionEl) return;
+    var options = opts || {};
+    transcriptionEl.textContent = text || '';
+    if (options.fromImageUpload) {
+      transcriptHiddenForImageUpload = true;
+      imageTranscriptVisible = false;
+    } else if (text) {
+      transcriptHiddenForImageUpload = false;
+      imageTranscriptVisible = false;
+    }
+    updateImageTranscriptToggleBtn();
+    updateTranscriptionVisibility();
+  }
+
+  function showUploadedImagePreview(file) {
+    var wrap = document.getElementById('uploadedImageWrap');
+    var img = document.getElementById('uploadedSceneImg');
+    if (!wrap || !img || !file) return;
+    if (uploadedImageObjectUrl) {
+      URL.revokeObjectURL(uploadedImageObjectUrl);
+    }
+    uploadedImageObjectUrl = URL.createObjectURL(file);
+    img.src = uploadedImageObjectUrl;
+    wrap.style.display = 'flex';
   }
 
   function showProgress(label, percent) {
@@ -202,7 +247,7 @@ function bindImageUploadHandler(onImageSelected) {
       return Promise.resolve();
     }
 
-    setTranscription(trimmedText);
+    setTranscription(trimmedText, options.fromImageUpload ? { fromImageUpload: true } : undefined);
     updateProgress('Fetching database', 45);
 
     var scentPromise;
@@ -272,9 +317,10 @@ function bindImageUploadHandler(onImageSelected) {
   }
 
   function sendImageForDescription(file) {
+    showUploadedImagePreview(file);
     showProgress('Describing image', 20);
     setStatus('Analyzing image...');
-    setTranscription('');
+    setTranscription('', { fromImageUpload: true });
     var form = new FormData();
     form.append('image', file, file.name || 'upload.jpg');
     if (sessionId) form.append('session_id', sessionId);
@@ -295,7 +341,7 @@ function bindImageUploadHandler(onImageSelected) {
         if (!isInFeedbackMode) {
           renderProfile([]);
         }
-        return processInputText(text, { forceCompose: true });
+        return processInputText(text, { forceCompose: true, fromImageUpload: true });
       })
       .catch(function (err) {
         setStatus('Image description failed: ' + (err.message || err), true);
@@ -452,6 +498,17 @@ function bindImageUploadHandler(onImageSelected) {
         textualFeedbackSubmitBtnEl.click();
       }
     });
+  }
+
+  var imageTranscriptToggleBtnEl = document.getElementById('imageTranscriptToggleBtn');
+  if (imageTranscriptToggleBtnEl) {
+    imageTranscriptToggleBtnEl.addEventListener('click', function () {
+      if (!transcriptHiddenForImageUpload) return;
+      imageTranscriptVisible = !imageTranscriptVisible;
+      updateImageTranscriptToggleBtn();
+      updateTranscriptionVisibility();
+    });
+    updateImageTranscriptToggleBtn();
   }
 
   window.aromaFrequencyProgress = {

@@ -141,10 +141,17 @@ def transcribe_audio(audio_bytes: bytes, filename: str = "audio.webm") -> str:
 
 
 IMAGE_DESCRIPTION_PROMPT = (
-    "Describe this image as sensory prose suitable for composing a scent experience. "
-    "Focus on smells, atmosphere, mood, textures, food, nature, and emotional tone. "
-    "Write 1-3 short sentences in evocative descriptive language. "
-    "Do not mention that this is an image."
+    "Describe only olfactory content implied by this scene—concrete smell sources "
+    "(food, drinks, plants, smoke, wood, fabric, soil, animals, cleaning products, etc.). "
+    "Do not discuss mood, atmosphere, emotions, lighting, architecture for its own sake, "
+    "or any non-smell visuals.\n\n"
+    "For each smell source you name, state how strong its presence should be in the overall "
+    "mix using visual cues: apparent size in the frame, distance (near vs far), whether it is "
+    "in the foreground or background, and how much of the scene it occupies. Larger, closer, "
+    "or more central sources should be dominant or strong; small, distant, or peripheral "
+    "sources should be moderate, faint, or trace.\n\n"
+    "Write 2-4 short sentences (or a compact list) that a perfumer could treat as mixing "
+    "guidance. Do not mention that this is an image or photograph."
 )
 
 
