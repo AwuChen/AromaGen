@@ -543,6 +543,39 @@ body {
   border-radius: 4px;
 }
 
+.video-clip-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.video-clip-player {
+  width: 100%;
+  max-width: min(420px, 100%);
+  max-height: 280px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #000;
+}
+
+.video-clip-nav {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.video-clip-counter {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+  min-width: 6rem;
+  text-align: center;
+}
+
 .frequency-transcription-text {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(0.82rem, 1.8vw, 0.95rem);

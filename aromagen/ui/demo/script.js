@@ -135,7 +135,6 @@ function bindImageUploadHandler(onImageSelected) {
   var logFeedbackInputEl = document.getElementById('logFeedbackInput');
   var logInteractionSubmitBtnEl = document.getElementById('logInteractionSubmitBtn');
   var logInteractionStatusEl = document.getElementById('logInteractionStatus');
-  if (!recordBtn) return;
 
   var micIcon = recordBtn.querySelector('.record-mic-icon');
   var stopIcon = recordBtn.querySelector('.record-stop-icon');
@@ -194,14 +193,20 @@ function bindImageUploadHandler(onImageSelected) {
   }
 
   function showUploadedImagePreview(file) {
+    if (!file) return;
+    showUploadedImagePreviewFromBlob(file, file.name || 'frame.jpg');
+  }
+
+  function showUploadedImagePreviewFromBlob(blob, filename) {
     var wrap = document.getElementById('uploadedImageWrap');
     var img = document.getElementById('uploadedSceneImg');
-    if (!wrap || !img || !file) return;
+    if (!wrap || !img || !blob) return;
     if (uploadedImageObjectUrl) {
       URL.revokeObjectURL(uploadedImageObjectUrl);
     }
-    uploadedImageObjectUrl = URL.createObjectURL(file);
+    uploadedImageObjectUrl = URL.createObjectURL(blob);
     img.src = uploadedImageObjectUrl;
+    img.alt = filename ? 'Analyzed frame: ' + filename : 'Analyzed video frame';
     wrap.style.display = 'flex';
   }
 
@@ -316,16 +321,97 @@ function bindImageUploadHandler(onImageSelected) {
       });
   }
 
-  function sendImageForDescription(file) {
-    showUploadedImagePreview(file);
-    showProgress('Describing image', 20);
-    setStatus('Analyzing image...');
+  function hideUploadedImagePreview() {
+    var wrap = document.getElementById('uploadedImageWrap');
+    var img = document.getElementById('uploadedSceneImg');
+    if (wrap) wrap.style.display = 'none';
+    if (img) img.removeAttribute('src');
+    if (uploadedImageObjectUrl) {
+      URL.revokeObjectURL(uploadedImageObjectUrl);
+      uploadedImageObjectUrl = null;
+    }
+  }
+
+  function getCachedGeneratedSceneImagePath() {
+    var img = document.getElementById('generatedSceneImg');
+    var wrap = document.getElementById('generatedSceneWrap');
+    if (!img || !wrap || wrap.style.display === 'none' || !img.src) return null;
+    if (img.src.indexOf(API_BASE) === 0) return img.src.slice(API_BASE.length);
+    return null;
+  }
+
+  function saveVideoClipAnalysisResult(clipIndex, descriptionText) {
+    var clip = videoClips[clipIndex];
+    if (!clip || !currentSequence || !currentSequence.length) return;
+    clip.analysisResult = {
+      descriptionText: descriptionText || '',
+      sequence: JSON.parse(JSON.stringify(currentSequence)),
+      pulseSequence: currentPulseSequence ? JSON.parse(JSON.stringify(currentPulseSequence)) : null,
+      sessionId: sessionId,
+      sessionOriginalSentence: sessionOriginalSentence,
+      sessionOriginalSequence: sessionOriginalSequence
+        ? JSON.parse(JSON.stringify(sessionOriginalSequence))
+        : null,
+      sessionHistory: JSON.parse(JSON.stringify(sessionHistory)),
+      isInFeedbackMode: isInFeedbackMode,
+      generatedImageUrl: getCachedGeneratedSceneImagePath()
+    };
+  }
+
+  function restoreVideoClipAnalysisResult(clip) {
+    var result = clip && clip.analysisResult;
+    if (!result || !result.sequence || !result.sequence.length) return false;
+
+    cancelSceneImagePoll();
+    window.composeAwaitingSceneImage = false;
+    setTranscription(result.descriptionText || '', { fromImageUpload: true });
+    sessionId = result.sessionId;
+    sessionOriginalSentence = result.sessionOriginalSentence;
+    sessionOriginalSequence = result.sessionOriginalSequence
+      ? JSON.parse(JSON.stringify(result.sessionOriginalSequence))
+      : null;
+    sessionHistory = result.sessionHistory ? JSON.parse(JSON.stringify(result.sessionHistory)) : [];
+    isInFeedbackMode = !!result.isInFeedbackMode;
+    currentSequence = JSON.parse(JSON.stringify(result.sequence));
+    currentPulseSequence = result.pulseSequence
+      ? JSON.parse(JSON.stringify(result.pulseSequence))
+      : null;
+    renderProfile(currentSequence);
+    showGeneratedSceneImage(result.generatedImageUrl || null);
+    setStatus('Clip restored — using previous analysis and scent.');
+    hideProgress();
+    return true;
+  }
+
+  window.persistVideoClipSceneImageForSession = function (composeSessionId, relativeUrl) {
+    if (!composeSessionId) return;
+    for (var i = 0; i < videoClips.length; i++) {
+      var cached = videoClips[i].analysisResult;
+      if (cached && cached.sessionId === composeSessionId) {
+        cached.generatedImageUrl = relativeUrl || null;
+        if (i === videoClipIndex) {
+          showGeneratedSceneImage(relativeUrl || null);
+        }
+        break;
+      }
+    }
+  };
+
+  function sendFrameForDescription(imageBlob, filename, opts) {
+    var options = opts || {};
+    if (options.hidePreview) {
+      hideUploadedImagePreview();
+    } else {
+      showUploadedImagePreviewFromBlob(imageBlob, filename);
+    }
+    showProgress('Analyzing frame', 20);
+    setStatus('Analyzing visual smell cues...');
     setTranscription('', { fromImageUpload: true });
     var form = new FormData();
-    form.append('image', file, file.name || 'upload.jpg');
+    form.append('image', imageBlob, filename || 'frame.jpg');
     if (sessionId) form.append('session_id', sessionId);
 
-    fetch(API_BASE + '/describe_image', {
+    return fetch(API_BASE + '/describe_image', {
       method: 'POST',
       body: form
     })
@@ -341,18 +427,418 @@ function bindImageUploadHandler(onImageSelected) {
         if (!isInFeedbackMode) {
           renderProfile([]);
         }
-        return processInputText(text, { forceCompose: true, fromImageUpload: true });
+        return processInputText(text, { forceCompose: true, fromImageUpload: true }).then(function () {
+          if (typeof options.clipIndex === 'number') {
+            saveVideoClipAnalysisResult(options.clipIndex, text.trim());
+          }
+        });
       })
       .catch(function (err) {
-        setStatus('Image description failed: ' + (err.message || err), true);
+        setStatus('Frame analysis failed: ' + (err.message || err), true);
         setTranscription('');
         hideProgress();
       });
   }
 
+  function sendVideoFileForDescription(file, opts) {
+    var options = opts || {};
+    showProgress('Extracting frame', 25);
+    setStatus('Server extracting mid-clip frame...');
+    setTranscription('', { fromImageUpload: true });
+    var form = new FormData();
+    form.append('video', file, file.name || 'clip.mp4');
+    if (sessionId) form.append('session_id', sessionId);
+
+    return fetch(API_BASE + '/describe_video', { method: 'POST', body: form })
+      .then(function (res) {
+        if (!res.ok) return res.json().then(function (body) { throw new Error(body.detail || res.statusText); });
+        return res.json();
+      })
+      .then(function (data) {
+        var text = data.text || '';
+        if (!text) throw new Error('No description returned');
+        if (!isInFeedbackMode) renderProfile([]);
+        return processInputText(text, { forceCompose: true, fromImageUpload: true }).then(function () {
+          if (typeof options.clipIndex === 'number') {
+            saveVideoClipAnalysisResult(options.clipIndex, text.trim());
+          }
+        });
+      });
+  }
+
+  function sendImageForDescription(file) {
+    clearVideoClipQueue();
+    hideVideoClipPanel();
+    sendFrameForDescription(file, file.name || 'upload.jpg');
+  }
+
   bindImageUploadHandler(sendImageForDescription);
 
-  recordBtn.addEventListener('click', function (e) {
+  var videoClips = [];
+  var videoClipIndex = 0;
+  var videoClipUrls = [];
+  var videoClipAnalyzing = false;
+  var videoClipLoadTimeout = null;
+  var videoClipAnalyzeGeneration = 0;
+  var hiddenVideoCaptureEl = null;
+  var VIDEO_SERVER_FRAME_BYTES = 28 * 1024 * 1024;
+
+  function getHiddenVideoCaptureElement() {
+    if (!hiddenVideoCaptureEl) {
+      hiddenVideoCaptureEl = document.createElement('video');
+      hiddenVideoCaptureEl.setAttribute('playsinline', '');
+      hiddenVideoCaptureEl.muted = true;
+      hiddenVideoCaptureEl.preload = 'auto';
+      hiddenVideoCaptureEl.setAttribute('aria-hidden', 'true');
+      hiddenVideoCaptureEl.style.cssText =
+        'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:0';
+      document.body.appendChild(hiddenVideoCaptureEl);
+    }
+    return hiddenVideoCaptureEl;
+  }
+
+  function resetHiddenVideoCaptureElement(video) {
+    if (!video) return;
+    try {
+      video.pause();
+    } catch (e) { /* ignore */ }
+    video.removeAttribute('src');
+    try {
+      video.load();
+    } catch (e2) { /* ignore */ }
+  }
+
+  function isVideoFile(file) {
+    if (!file) return false;
+    if (file.type && file.type.indexOf('video/') === 0) return true;
+    var name = (file.name || '').toLowerCase();
+    return /\.(mp4|webm|mov|m4v|mkv|avi)$/.test(name);
+  }
+
+  function hideVideoClipPanel() {
+    var panel = document.getElementById('videoClipPanel');
+    var player = document.getElementById('videoClipPlayer');
+    if (player) {
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+    }
+    if (panel) panel.style.display = 'none';
+  }
+
+  function showVideoClipPanel() {
+    var panel = document.getElementById('videoClipPanel');
+    if (panel) panel.style.display = 'flex';
+  }
+
+  function clearVideoClipQueue() {
+    videoClips = [];
+    videoClipIndex = 0;
+    videoClipUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+    videoClipUrls = [];
+    var counter = document.getElementById('videoClipCounter');
+    if (counter) counter.textContent = '';
+  }
+
+  function updateVideoClipCounter() {
+    var counter = document.getElementById('videoClipCounter');
+    if (!counter) return;
+    if (!videoClips.length) {
+      counter.textContent = '';
+      return;
+    }
+    counter.textContent = 'Clip ' + (videoClipIndex + 1) + ' / ' + videoClips.length;
+  }
+
+  function midFrameSampleTimes(video) {
+    var d = video && video.duration;
+    if (d && isFinite(d) && d > 0.15) {
+      var mid = d / 2;
+      var lo = 0.05;
+      var hi = Math.max(lo, d - 0.05);
+      return [
+        mid,
+        Math.max(lo, mid - 0.033),
+        Math.min(hi, mid + 0.033),
+        Math.max(lo, mid - 0.1),
+        Math.min(hi, mid + 0.1)
+      ];
+    }
+    return [0.5, 1, 2, 0.25];
+  }
+
+  function captureMidFrameFromVideo(video) {
+    var sampleTimes = midFrameSampleTimes(video);
+    var timeIdx = 0;
+
+    return new Promise(function (resolve, reject) {
+      if (!video || !video.videoWidth) {
+        reject(new Error('Video not ready for frame capture'));
+        return;
+      }
+
+      function tryNextTime() {
+        if (timeIdx >= sampleTimes.length) {
+          reject(new Error('Could not capture a frame from this clip'));
+          return;
+        }
+        var target = sampleTimes[timeIdx++];
+
+        function onSeeked() {
+          video.removeEventListener('seeked', onSeeked);
+          var canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          var ctx = canvas.getContext('2d');
+          if (!ctx) {
+            tryNextTime();
+            return;
+          }
+          ctx.drawImage(video, 0, 0);
+          canvas.toBlob(function (blob) {
+            if (blob && blob.size > 400) {
+              resolve(blob);
+            } else {
+              tryNextTime();
+            }
+          }, 'image/jpeg', 0.92);
+        }
+
+        video.addEventListener('seeked', onSeeked);
+        try {
+          video.currentTime = target;
+        } catch (e) {
+          video.removeEventListener('seeked', onSeeked);
+          tryNextTime();
+        }
+      }
+
+      tryNextTime();
+    });
+  }
+
+  function captureMidFrameFromClipUrl(url) {
+    var video = getHiddenVideoCaptureElement();
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+
+      function finish(err, blob) {
+        if (settled) return;
+        settled = true;
+        video.removeEventListener('loadeddata', onReady);
+        video.removeEventListener('error', onError);
+        resetHiddenVideoCaptureElement(video);
+        if (err) reject(err);
+        else resolve(blob);
+      }
+
+      function onError() {
+        finish(new Error('Could not load video for frame capture'));
+      }
+
+      function onReady() {
+        if (!video.videoWidth) return;
+        captureMidFrameFromVideo(video)
+          .then(function (blob) { finish(null, blob); })
+          .catch(function (err) { finish(err); });
+      }
+
+      resetHiddenVideoCaptureElement(video);
+      video.addEventListener('error', onError);
+      video.addEventListener('loadeddata', onReady);
+      video.src = url;
+      video.load();
+    });
+  }
+
+  function analyzeCurrentVideoClip() {
+    if (!videoClips.length || videoClipAnalyzing) return;
+    var clipIndex = videoClipIndex;
+    var clip = videoClips[clipIndex];
+    if (!clip || !clip.url) return;
+    if (clip.analysisResult && clip.analysisResult.sequence && clip.analysisResult.sequence.length) {
+      return;
+    }
+
+    videoClipAnalyzing = true;
+    var generation = ++videoClipAnalyzeGeneration;
+    setStatus('Analyzing clip ' + (clipIndex + 1) + ' in the background…');
+
+    captureMidFrameFromClipUrl(clip.url)
+      .then(function (blob) {
+        if (generation !== videoClipAnalyzeGeneration || clipIndex !== videoClipIndex) return;
+        var frameName = (clip.name || 'clip').replace(/\.[^.]+$/, '') + '_frame.jpg';
+        return sendFrameForDescription(blob, frameName, {
+          hidePreview: true,
+          clipIndex: clipIndex
+        });
+      })
+      .catch(function (err) {
+        if (generation !== videoClipAnalyzeGeneration || clipIndex !== videoClipIndex) return;
+        return sendVideoFileForDescription(clip.file, { clipIndex: clipIndex }).catch(function (serverErr) {
+          setStatus(
+            'Video frame capture failed: ' + (err.message || err) +
+            (serverErr ? ' (' + serverErr.message + ')' : ''),
+            true
+          );
+          hideProgress();
+        });
+      })
+      .finally(function () {
+        if (generation === videoClipAnalyzeGeneration) {
+          videoClipAnalyzing = false;
+        }
+      });
+  }
+
+  function loadVideoClip(index) {
+    var player = document.getElementById('videoClipPlayer');
+    if (!player || !videoClips.length) return;
+    if (index < 0 || index >= videoClips.length) return;
+
+    if (videoClipLoadTimeout) {
+      clearTimeout(videoClipLoadTimeout);
+      videoClipLoadTimeout = null;
+    }
+
+    videoClipIndex = index;
+    updateVideoClipCounter();
+
+    var clip = videoClips[videoClipIndex];
+    showProgress('Loading video clip', 12);
+    setStatus('Loading clip ' + (videoClipIndex + 1) + '…');
+
+    if (clip.file && clip.file.size >= VIDEO_SERVER_FRAME_BYTES) {
+      showVideoClipPanel();
+      if (restoreVideoClipAnalysisResult(clip)) {
+        return;
+      }
+      setStatus('Large clip — extracting frame on server…');
+      sendVideoFileForDescription(clip.file, { clipIndex: videoClipIndex }).catch(function (err) {
+        setStatus('Video failed: ' + (err.message || err), true);
+        hideProgress();
+      });
+      return;
+    }
+
+    player.onerror = function () {
+      if (clip.analysisResult && clip.analysisResult.sequence) return;
+      setStatus('Browser could not play this clip; trying server extraction…', true);
+      sendVideoFileForDescription(clip.file, { clipIndex: videoClipIndex }).catch(function (err) {
+        setStatus('Video failed: ' + (err.message || err), true);
+        hideProgress();
+      });
+    };
+
+    showVideoClipPanel();
+    player.src = clip.url;
+    player.load();
+
+    var started = false;
+    var onReady = function () {
+      if (started) return;
+      started = true;
+      player.removeEventListener('loadedmetadata', onReady);
+      player.removeEventListener('loadeddata', onReady);
+      if (videoClipLoadTimeout) {
+        clearTimeout(videoClipLoadTimeout);
+        videoClipLoadTimeout = null;
+      }
+      player.currentTime = 0;
+      var playPromise = player.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function () { /* autoplay blocked — user can press play */ });
+      }
+      if (restoreVideoClipAnalysisResult(clip)) {
+        return;
+      }
+      updateProgress('Extracting frame', 35);
+      analyzeCurrentVideoClip();
+    };
+
+    player.addEventListener('loadedmetadata', onReady);
+    player.addEventListener('loadeddata', onReady);
+
+    videoClipLoadTimeout = setTimeout(function () {
+      videoClipLoadTimeout = null;
+      if (clip.analysisResult && clip.analysisResult.sequence) return;
+      setStatus('Clip is taking long to load; trying server extraction…', true);
+      sendVideoFileForDescription(clip.file, { clipIndex: videoClipIndex }).catch(function (err) {
+        setStatus('Video failed: ' + (err.message || err), true);
+        hideProgress();
+      });
+    }, 45000);
+  }
+
+  function enqueueVideoFiles(fileList) {
+    if (!fileList || !fileList.length) return;
+    showProgress('Reading videos', 8);
+    setStatus('Adding video clips…');
+    var controls = document.getElementById('frequencyControls');
+    if (controls && controls.scrollIntoView) {
+      controls.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    clearVideoClipQueue();
+    hideVideoClipPanel();
+    hideUploadedImagePreview();
+
+    for (var i = 0; i < fileList.length; i++) {
+      var file = fileList[i];
+      if (!isVideoFile(file)) continue;
+      var url = URL.createObjectURL(file);
+      videoClipUrls.push(url);
+      videoClips.push({ file: file, url: url, name: file.name || 'clip.mp4' });
+    }
+
+    if (!videoClips.length) {
+      setStatus('No supported video files (try MP4, MOV, or WebM).', true);
+      hideProgress();
+      return;
+    }
+
+    showVideoClipPanel();
+    var panel = document.getElementById('videoClipPanel');
+    if (panel && panel.scrollIntoView) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    if (!isInFeedbackMode) {
+      renderProfile([]);
+    }
+    loadVideoClip(0);
+  }
+
+  function bindVideoUploadHandler() {
+    var videoInputEl = document.getElementById('frequencyVideoInput');
+    if (!videoInputEl || videoInputEl.dataset.bound === 'true') return;
+    videoInputEl.dataset.bound = 'true';
+    videoInputEl.addEventListener('change', function () {
+      var files = Array.from(videoInputEl.files || []);
+      videoInputEl.value = '';
+      enqueueVideoFiles(files);
+    });
+
+    var prevBtn = document.getElementById('videoClipPrevBtn');
+    var nextBtn = document.getElementById('videoClipNextBtn');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        if (!videoClips.length) return;
+        var nextIndex = videoClipIndex - 1;
+        if (nextIndex < 0) nextIndex = videoClips.length - 1;
+        loadVideoClip(nextIndex);
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        if (!videoClips.length) return;
+        var nextIndex = (videoClipIndex + 1) % videoClips.length;
+        loadVideoClip(nextIndex);
+      });
+    }
+  }
+
+  bindVideoUploadHandler();
+
+  if (recordBtn) recordBtn.addEventListener('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
     if (recordBtn.classList.contains('recording')) {
@@ -661,6 +1147,9 @@ function beginSceneImagePoll(sessionId) {
           cancelSceneImagePoll();
           window.composeAwaitingSceneImage = false;
           showGeneratedSceneImage(body.url);
+          if (typeof window.persistVideoClipSceneImageForSession === 'function') {
+            window.persistVideoClipSceneImageForSession(sessionId, body.url);
+          }
           if (progress) progress.finishComplete();
           return;
         }

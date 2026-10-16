@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="page">
@@ -160,8 +160,24 @@
       </div>
 
       <div class="frequency-controls" id="frequencyControls" aria-live="polite">
+        <div class="video-clip-panel" id="videoClipPanel" style="display: none;">
+          <video
+            id="videoClipPlayer"
+            class="video-clip-player"
+            playsinline
+            muted
+            loop
+            controls
+            preload="metadata"
+          ></video>
+          <div class="frequency-controls-row video-clip-nav">
+            <button type="button" id="videoClipPrevBtn" class="frequency-control-btn">Prev clip</button>
+            <span class="video-clip-counter" id="videoClipCounter"></span>
+            <button type="button" id="videoClipNextBtn" class="frequency-control-btn">Next clip</button>
+          </div>
+        </div>
         <figure class="generated-scene-wrap uploaded-scene-wrap" id="uploadedImageWrap" style="display: none;">
-          <img id="uploadedSceneImg" class="generated-scene-img" alt="Uploaded image" />
+          <img id="uploadedSceneImg" class="generated-scene-img" alt="Frame analyzed for scent" />
         </figure>
         <figure class="generated-scene-wrap" id="generatedSceneWrap" style="display: none;">
           <img id="generatedSceneImg" class="generated-scene-img" alt="" />
@@ -180,6 +196,16 @@
             >
           </label>
           <button type="button" id="imageTranscriptToggleBtn" class="frequency-control-btn">IMAGE TEXT</button>
+          <label class="frequency-control-btn frequency-image-upload-label">
+            Upload videos
+            <input
+              type="file"
+              id="frequencyVideoInput"
+              class="frequency-image-input"
+              accept="video/mp4,video/webm,video/quicktime,video/*"
+              multiple
+            >
+          </label>
         </div>
 
         <div class="frequency-controls-row">
@@ -277,6 +303,6 @@
     <div class="history-list" id="historyList"></div>
   </aside>
 
-  <script src="script.js?v=11"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>

@@ -83,6 +83,8 @@ Or run separately:
 | `/accept` | POST | Save accepted composition to example bank |
 | `/transcribe` | POST | Audio → text (multipart) |
 | `/describe_image` | POST | Image → sensory text (multipart) |
+| `/describe_video` | POST | Short video → mid-clip frame → sensory text (requires `ffmpeg` on server) |
+| `/video/support` | GET | Whether server-side `ffmpeg` extraction is available |
 
 Interactive docs: http://localhost:8000/docs
 

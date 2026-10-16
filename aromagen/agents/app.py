@@ -33,6 +33,7 @@ from .image_gen import (
     get_generated_image_status,
     schedule_scene_image_generation,
 )
+from .video_frames import extract_early_video_frame, ffmpeg_available
 from .conversation_logger import append_event, new_session_id
 from .example_bank import add_example
 from .interaction_retrieval import append_local_log
@@ -402,6 +403,14 @@ ALLOWED_IMAGE_TYPES = {
     "image/jpg",
 }
 
+ALLOWED_VIDEO_TYPES = {
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/x-m4v",
+    "video/mpeg",
+}
+
 
 @app.post("/describe_image")
 async def describe_image_route(
@@ -427,3 +436,50 @@ async def describe_image_route(
     except Exception as e:
         log.error("describe_image failed: %s", e, exc_info=True)
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.get("/video/support")
+def video_support() -> Dict[str, Any]:
+    return {"ffmpeg_available": ffmpeg_available()}
+
+
+@app.post("/describe_video")
+async def describe_video_route(
+    video: UploadFile = File(...),
+    session_id: Optional[str] = Form(None),
+) -> Dict[str, Any]:
+    """Extract a mid-clip frame from a short video, then run vision smell analysis."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+    if not video.content_type or video.content_type not in ALLOWED_VIDEO_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Expected MP4, WebM, or QuickTime video",
+        )
+    try:
+        content = await video.read()
+        frame_bytes, frame_mime, sample_time = extract_early_video_frame(
+            content, video.filename or "clip.mp4"
+        )
+        text = describe_image(frame_bytes, frame_mime)
+        append_event(
+            "describe_video",
+            session_id=session_id,
+            human_input=text,
+            request={
+                "filename": video.filename,
+                "content_type": video.content_type,
+                "frame_sample_time_sec": sample_time,
+            },
+            response={"text": text},
+        )
+        return {
+            "text": text,
+            "frame_sample_time_sec": sample_time,
+            "frame_content_type": frame_mime,
+        }
+    except RuntimeError as e:
+        raise HTTPException(status_code=501, detail=str(e)) from e
+    except Exception as e:
+        log.error("describe_video failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=422, detail=str(e)) from e
