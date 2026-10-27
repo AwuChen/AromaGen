@@ -214,6 +214,47 @@ def _get_embeddings(texts: List[str], client: OpenAI) -> Dict[str, List[float]]:
     return {t: cache[t] for t in unique_texts if t in cache}
 
 
+def parse_ratio_string(raw: str, pulse_seconds: float = 1.0) -> List[Dict[str, Any]]:
+    """Parse a logged aromagen_ratio string into scent_sequence dicts."""
+    from .schemas import ScentItem  # local import avoids circular dependency at module load
+
+    canonical = _canonicalize_ratio(raw or "")
+    merged: Dict[str, float] = {}
+    order: List[str] = []
+    for m in _RATIO_NAME_PATTERN.finditer(canonical):
+        name = LEGACY_ODORANT_NAMES.get(m.group(1), m.group(1))
+        pct = float(m.group(2))
+        if name not in merged:
+            order.append(name)
+            merged[name] = 0.0
+        merged[name] += pct
+    if not merged:
+        return []
+    total = sum(merged.values())
+    sequence: List[Dict[str, Any]] = []
+    for name in order:
+        ratio = merged[name] / total if total > 0 else 0.0
+        item = ScentItem(scent_name=name, scent_duration=pulse_seconds, ratio=ratio)
+        sequence.append(item.model_dump())
+    return sequence
+
+
+def get_all_session_blocks() -> List[Dict[str, Any]]:
+    """All interaction-log blocks (one per session_id), in log order."""
+    return _group_into_blocks(_load_rows())
+
+
+def find_exact_session_block(target: str) -> Optional[Dict[str, Any]]:
+    """Case-insensitive exact match on target_smell, else None."""
+    needle = (target or "").strip().lower()
+    if not needle:
+        return None
+    for block in get_all_session_blocks():
+        if (block.get("target_smell") or "").strip().lower() == needle:
+            return block
+    return None
+
+
 def get_top_k_blocks(user_input: str, k: Optional[int] = None) -> List[Dict[str, Any]]:
     """Top-k past session blocks whose target_smell is semantically closest
     to user_input, each with the ratio/feedback/rating that mattered most

@@ -25,6 +25,7 @@ from .schemas import (
     SimplexPrepareAnchorsRequest,
     DevicePlaySequenceRequest,
 )
+from .simplex_triangle import prepare_triangle
 from .simplex import (
     DEFAULT_ANCHOR_PRESETS,
     blend_vectors,
@@ -384,6 +385,32 @@ def simplex_prepare_anchors(request: SimplexPrepareAnchorsRequest) -> Dict[str, 
             }
         )
     return {"target": target, "anchors": anchors}
+
+
+@app.post("/simplex/prepare_triangle")
+def simplex_prepare_triangle(request: SimplexPrepareAnchorsRequest) -> Dict[str, Any]:
+    """RAG-informed center + three spread corners pushed from that center."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+    try:
+        config, catalog = _cartridge_context()
+        cartridge_status = get_cartridge_status(config)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    try:
+        return prepare_triangle(
+            request.target,
+            catalog,
+            cartridge_status,
+            corner_mode=request.corner_mode,
+            neutral_labels=request.neutral_labels,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        log.error("prepare_triangle failed for target=%r: %s", request.target, e, exc_info=True)
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @app.post("/compose", response_model=ComposeResponse)

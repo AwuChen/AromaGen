@@ -25,9 +25,25 @@
       <div class="row">
         <input id="targetInput" type="text" placeholder="grandma's perfume" autocomplete="off">
         <button type="button" id="loadPresetsBtn" class="secondary">Load demo anchors</button>
-        <button type="button" id="generateAnchorsBtn">Generate anchors (LLM)</button>
+        <button type="button" id="prepareTriangleBtn" class="primary">Prepare triangle (RAG center)</button>
+        <button type="button" id="generateAnchorsBtn" class="secondary">Legacy: 3 facet LLM corners</button>
       </div>
+      <fieldset class="corner-options">
+        <legend>Corner options (before Prepare triangle)</legend>
+        <p class="hint">Center always uses log/RAG. Choose how the three corners branch from that center.</p>
+        <label class="radio"><input type="radio" name="cornerMode" value="preset"> Demo preset axes (floral / gourmand / woody)</label>
+        <label class="radio"><input type="radio" name="cornerMode" value="cluster" checked> Palette clusters (target-relevant categories)</label>
+        <label class="radio"><input type="radio" name="cornerMode" value="llm"> LLM target-specific directions (3 composes)</label>
+        <label class="checkbox corner-neutral"><input type="checkbox" id="neutralLabels"> Neutral labels only (Token A / B / C)</label>
+      </fieldset>
       <p id="statusLine" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel center-panel" id="centerPanel" hidden>
+      <h2>Center smell</h2>
+      <p id="centerMeta" class="hint"></p>
+      <pre id="centerRecipe" class="recipe">—</pre>
+      <button type="button" id="smellCenterBtn">Smell center</button>
     </section>
 
     <section class="anchors-grid" id="anchorsGrid" aria-label="Anchor compositions"></section>
@@ -72,6 +88,6 @@
       <p id="corpusNote" class="hint"></p>
     </section>
   </div>
-  <script src="simplex.js?v=3"></script>
+  <script src="simplex.js?v=5"></script>
 </body>
 </html>

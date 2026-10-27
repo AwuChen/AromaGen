@@ -52,6 +52,7 @@ function snapToCorner(px, py) {
 }
 
 let anchors = [];
+let centerSmell = null;
 let scentsData = {};
 let currentBlend = null;
 let dragActive = false;
@@ -285,8 +286,107 @@ async function loadPresets() {
   if (!res.ok) throw new Error(await res.text());
   const data = await res.json();
   anchors = data.anchors || [];
+  centerSmell = null;
+  renderCenter();
   renderAnchors();
   setStatus('Demo anchors ready. Smell A, B, C, then place your dot.');
+}
+
+function formatCenterSource(source, metadata) {
+  const labels = {
+    exact_log: 'Exact match in interaction log (best similarity round)',
+    retrieved_log: 'Retrieved neighbor in log (highest similarity score)',
+    retrieved_log_nearest: 'Retrieved neighbor in log (embedding match)',
+    learned_example: 'Accept-bank example',
+    composed_rag: 'New LLM compose with RAG (no strong log match)',
+  };
+  let text = labels[source] || source;
+  if (metadata && metadata.matched_target) {
+    text += ' · precedent: “' + metadata.matched_target + '”';
+  }
+  if (metadata && metadata.best_similarity != null) {
+    text += ' · similarity ' + metadata.best_similarity;
+  }
+  return text;
+}
+
+function renderCenter() {
+  const panel = document.getElementById('centerPanel');
+  const metaEl = document.getElementById('centerMeta');
+  const recipeEl = document.getElementById('centerRecipe');
+  if (!centerSmell || !centerSmell.scent_sequence) {
+    if (panel) panel.hidden = true;
+    return;
+  }
+  if (panel) panel.hidden = false;
+  if (metaEl) {
+    metaEl.textContent = formatCenterSource(centerSmell.source, centerSmell.metadata || {});
+  }
+  if (recipeEl) {
+    recipeEl.textContent = summarizeRecipe(centerSmell.scent_sequence);
+  }
+}
+
+function getPrepareTriangleOptions() {
+  const modeEl = document.querySelector('input[name="cornerMode"]:checked');
+  const neutralEl = document.getElementById('neutralLabels');
+  return {
+    corner_mode: (modeEl && modeEl.value) || 'cluster',
+    neutral_labels: !!(neutralEl && neutralEl.checked),
+  };
+}
+
+async function prepareTriangle() {
+  const target = (els.targetInput && els.targetInput.value.trim()) || '';
+  if (!target) {
+    setStatus('Enter a target smell first.', true);
+    return;
+  }
+  const opts = getPrepareTriangleOptions();
+  const btn = document.getElementById('prepareTriangleBtn');
+  if (btn) btn.disabled = true;
+  setStatus('Resolving center from log/RAG and building corners (' + opts.corner_mode + ')…');
+  try {
+    const res = await fetch(API_BASE + '/simplex/prepare_triangle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target: target,
+        corner_mode: opts.corner_mode,
+        neutral_labels: opts.neutral_labels,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(function () { return {}; });
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+    centerSmell = data.center || null;
+    anchors = data.anchors || [];
+    renderCenter();
+    renderAnchors();
+    centerDot();
+    const spread = data.corner_min_pairwise_l2 != null ? data.corner_min_pairwise_l2 : '?';
+    setStatus(
+      'Triangle ready for “' + target + '”. Smell center, then A/B/C, then place your dot. ' +
+      '(corner spread L2≈' + spread + ')'
+    );
+  } catch (err) {
+    setStatus(explainFetchError(err, 'Prepare triangle'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function smellCenter() {
+  if (!centerSmell) return;
+  try {
+    setStatus('Playing center…');
+    await playPulseSequence(centerSmell.pulse_sequence, centerSmell.scent_sequence);
+    setStatus('Center playing.');
+  } catch (err) {
+    setStatus(explainFetchError(err, 'Smell center'), true);
+  }
 }
 
 async function generateAnchors() {
@@ -434,6 +534,8 @@ function anotherRound() {
 document.getElementById('loadPresetsBtn')?.addEventListener('click', function () {
   loadPresets().catch(function (err) { setStatus(String(err.message || err), true); });
 });
+document.getElementById('prepareTriangleBtn')?.addEventListener('click', prepareTriangle);
+document.getElementById('smellCenterBtn')?.addEventListener('click', smellCenter);
 document.getElementById('generateAnchorsBtn')?.addEventListener('click', generateAnchors);
 document.getElementById('mixPlayBtn')?.addEventListener('click', mixAndPlay);
 document.getElementById('resetDotBtn')?.addEventListener('click', centerDot);

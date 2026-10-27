@@ -134,6 +134,17 @@ class SimplexPointRequest(BaseModel):
 
 class SimplexPrepareAnchorsRequest(BaseModel):
     target: str = Field(min_length=1)
+    corner_mode: Literal["preset", "cluster", "llm"] = "preset"
+    neutral_labels: bool = False
+
+
+class TriangleDirectionItem(BaseModel):
+    short_label: str = Field(min_length=1, max_length=48)
+    facet: str = Field(min_length=1)
+
+
+class TriangleDirectionPlan(BaseModel):
+    directions: List[TriangleDirectionItem] = Field(min_length=3, max_length=3)
 
 
 class DevicePlayItem(BaseModel):
