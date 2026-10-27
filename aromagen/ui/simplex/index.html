@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AromaGen · Simplex navigation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <header>
+      <p class="eyebrow">AromaGen · MIT Media Lab</p>
+      <h1>Navigate by smell</h1>
+      <p class="lede">
+        Smell three anchor blends, then click inside the triangle where your target memory lives relative to those corners.
+        We barycentrically mix the 12-channel recipes and play the result on the wearable.
+      </p>
+    </header>
+
+    <section class="panel target-panel">
+      <label for="targetInput">Target smell (memory prompt)</label>
+      <div class="row">
+        <input id="targetInput" type="text" placeholder="grandma's perfume" autocomplete="off">
+        <button type="button" id="loadPresetsBtn" class="secondary">Load demo anchors</button>
+        <button type="button" id="generateAnchorsBtn">Generate anchors (LLM)</button>
+      </div>
+      <p id="statusLine" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="anchors-grid" id="anchorsGrid" aria-label="Anchor compositions"></section>
+
+    <section class="panel triangle-panel">
+      <div class="triangle-header">
+        <h2>Placement triangle</h2>
+        <p class="hint">Drag the dot or click inside the triangle. Weights always sum to 1.</p>
+        <p class="hint vertex-legend">Bottom corner = Token A · top-left = B · top-right = C</p>
+      </div>
+      <div class="triangle-wrap">
+        <svg id="simplexSvg" viewBox="-0.08 -0.08 1.16 0.98" role="img" aria-label="Simplex navigation triangle">
+          <polygon id="simplexFill" class="simplex-fill" points="0.5,0.866 0,0 1,0"></polygon>
+          <line class="grid-line" x1="0.5" y1="0.866" x2="0.25" y2="0.433"></line>
+          <line class="grid-line" x1="0.5" y1="0.866" x2="0.75" y2="0.433"></line>
+          <line class="grid-line" x1="0.25" y1="0.433" x2="0.75" y2="0.433"></line>
+          <circle id="blendDot" class="blend-dot" cx="0.5" cy="0.288" r="0.028"></circle>
+          <text id="labelA" class="corner-label" x="0.5" y="0.92" text-anchor="middle" font-size="0.055">A</text>
+          <text id="labelB" class="corner-label" x="0" y="-0.02" text-anchor="start" font-size="0.055">B</text>
+          <text id="labelC" class="corner-label" x="1" y="-0.02" text-anchor="end" font-size="0.055">C</text>
+        </svg>
+        <div class="weights-readout">
+          <p><span class="mono">w₁</span> <strong id="wA">0.33</strong> · Token A</p>
+          <p><span class="mono">w₂</span> <strong id="wB">0.33</strong> · Token B</p>
+          <p><span class="mono">w₃</span> <strong id="wC">0.33</strong> · Token C</p>
+        </div>
+      </div>
+      <div class="row actions">
+        <label class="checkbox">
+          <input type="checkbox" id="corpusNearest">
+          Prefer nearest saved recipe from corpus (when close)
+        </label>
+        <button type="button" id="mixPlayBtn" class="primary">Mix &amp; play on device</button>
+        <button type="button" id="anotherRoundBtn" class="secondary">Another round (keep anchors)</button>
+        <button type="button" id="resetDotBtn" class="secondary">Center dot</button>
+      </div>
+    </section>
+
+    <section class="panel result-panel">
+      <h2>Blended recipe</h2>
+      <pre id="recipeOut" class="recipe">—</pre>
+      <p id="corpusNote" class="hint"></p>
+    </section>
+  </div>
+  <script src="simplex.js?v=2"></script>
+</body>
+</html>

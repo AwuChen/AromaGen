@@ -23,4 +23,4 @@ if [ -n "$PID" ]; then
     sleep 1
 fi
 
-exec "$ROOT/scripts/start_ai_backend.sh"
+exec bash "$ROOT/scripts/start_ai_backend.sh"

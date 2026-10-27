@@ -73,5 +73,7 @@ class Settings:
     ensemble_weak_threshold: int = int(os.getenv("ENSEMBLE_WEAK_THRESHOLD", "3"))
     ensemble_retry_predictor_count: int = int(os.getenv("ENSEMBLE_RETRY_PREDICTOR_COUNT", "5"))
 
+    ble_backend_url: str = os.getenv("BLE_BACKEND_URL", "http://127.0.0.1:5001")
+
 
 settings = Settings()
