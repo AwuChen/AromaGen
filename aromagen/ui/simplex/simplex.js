@@ -161,12 +161,14 @@ function updateWeightsDisplay(weights) {
   if (els.wC) els.wC.textContent = weights[2].toFixed(2);
 }
 
+/** Map click/drag to barycentric weights, then snap the dot to the nearest point inside the triangle. */
 function setDotPosition(px, py) {
-  if (els.blendDot) {
-    els.blendDot.setAttribute('cx', px);
-    els.blendDot.setAttribute('cy', py);
-  }
   const weights = barycentricFromPoint(px, py);
+  const constrained = pointFromBarycentric(weights);
+  if (els.blendDot) {
+    els.blendDot.setAttribute('cx', constrained.x);
+    els.blendDot.setAttribute('cy', constrained.y);
+  }
   updateWeightsDisplay(weights);
   return weights;
 }
@@ -364,35 +366,54 @@ async function mixAndPlay() {
   }
 }
 
+function releasePointerIfCaptured(evt) {
+  const svg = els.simplexSvg;
+  if (!svg || !evt || evt.pointerId == null) return;
+  try {
+    if (svg.hasPointerCapture && svg.hasPointerCapture(evt.pointerId)) {
+      svg.releasePointerCapture(evt.pointerId);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function finishTriangleDrag(evt) {
+  if (!dragActive) return;
+  dragActive = false;
+  releasePointerIfCaptured(evt);
+  if (!evt) return;
+  const raw = svgPointFromEvent(evt);
+  const snapped = snapToCorner(raw.x, raw.y);
+  setDotPosition(snapped.x, snapped.y);
+}
+
 function bindTriangle() {
   if (!els.simplexSvg) return;
+  const svg = els.simplexSvg;
 
   function onPointerDown(evt) {
+    if (evt.button !== 0) return;
     dragActive = true;
-    els.simplexSvg.setPointerCapture(evt.pointerId);
-    onPointerMove(evt);
+    svg.setPointerCapture(evt.pointerId);
+    const raw = svgPointFromEvent(evt);
+    setDotPosition(raw.x, raw.y);
   }
 
   function onPointerMove(evt) {
-    if (!dragActive && evt.type === 'pointermove') return;
-    const p = svgPointFromEvent(evt);
-    setDotPosition(p.x, p.y);
-  }
-
-  function onPointerUp(evt) {
-    dragActive = false;
-    try {
-      els.simplexSvg.releasePointerCapture(evt.pointerId);
-    } catch (e) { /* ignore */ }
+    if (!dragActive) return;
+    if ((evt.buttons & 1) === 0) {
+      finishTriangleDrag(evt);
+      return;
+    }
     const raw = svgPointFromEvent(evt);
-    const p = snapToCorner(raw.x, raw.y);
-    setDotPosition(p.x, p.y);
+    setDotPosition(raw.x, raw.y);
   }
 
-  els.simplexSvg.addEventListener('pointerdown', onPointerDown);
-  els.simplexSvg.addEventListener('pointermove', onPointerMove);
-  els.simplexSvg.addEventListener('pointerup', onPointerUp);
-  els.simplexSvg.addEventListener('pointerleave', onPointerUp);
+  svg.addEventListener('pointerdown', onPointerDown);
+  svg.addEventListener('pointermove', onPointerMove);
+  svg.addEventListener('pointerup', finishTriangleDrag);
+  svg.addEventListener('pointercancel', finishTriangleDrag);
+  window.addEventListener('pointerup', finishTriangleDrag);
+  window.addEventListener('pointercancel', finishTriangleDrag);
 
   setDotPosition(0.5, 0.288);
 }
