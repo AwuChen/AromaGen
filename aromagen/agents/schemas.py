@@ -112,3 +112,46 @@ class LogInteractionRequest(BaseModel):
 class LogInteractionResponse(BaseModel):
     success: bool = True
 
+
+class SimplexAnchor(BaseModel):
+    token: str = Field(min_length=1, max_length=8)
+    label: str = ""
+    scent_sequence: List[ScentItem] = Field(min_length=1)
+
+
+class SimplexInterpolateRequest(BaseModel):
+    anchors: List[SimplexAnchor] = Field(min_length=3, max_length=3)
+    weights: List[float] = Field(min_length=3, max_length=3)
+    use_corpus_nearest: bool = False
+
+
+class SimplexPointRequest(BaseModel):
+    anchors: List[SimplexAnchor] = Field(min_length=3, max_length=3)
+    point_x: float
+    point_y: float
+    use_corpus_nearest: bool = False
+
+
+class SimplexPrepareAnchorsRequest(BaseModel):
+    target: str = Field(min_length=1)
+
+
+class DevicePlayItem(BaseModel):
+    scent_id: int = Field(ge=1, le=12)
+    duration: float = Field(gt=0, le=60)
+
+
+class DevicePlaySequenceRequest(BaseModel):
+    sequence: List[DevicePlayItem] = Field(min_length=1)
+
+
+class SimplexBlendResponse(BaseModel):
+    weights: List[float]
+    scent_sequence: List[ScentItem]
+    validated_sequence: List[ScentItem] = []
+    pulse_sequence: List[ScentItem] = []
+    vector: Dict[str, float] = {}
+    compatibility_warnings: List[str] = []
+    corpus_match: Optional[Dict[str, Any]] = None
+    source: Literal["blend", "corpus"] = "blend"
+

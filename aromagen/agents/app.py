@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
@@ -17,6 +18,21 @@ from .schemas import (
     LogInteractionRequest,
     LogInteractionResponse,
     ScentItem,
+    SimplexAnchor,
+    SimplexBlendResponse,
+    SimplexInterpolateRequest,
+    SimplexPointRequest,
+    SimplexPrepareAnchorsRequest,
+    DevicePlaySequenceRequest,
+)
+from .simplex import (
+    DEFAULT_ANCHOR_PRESETS,
+    blend_vectors,
+    barycentric_from_point,
+    load_corpus_vectors,
+    nearest_corpus_recipe,
+    sequence_to_vector,
+    vector_to_sequence,
 )
 from .settings import settings
 from .openai_client import (
@@ -127,6 +143,58 @@ def _cartridge_context() -> Tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]:
     return config, catalog
 
 
+def _simplex_blend_from_weights(
+    anchors: List[SimplexAnchor],
+    weights: List[float],
+    *,
+    use_corpus_nearest: bool,
+) -> SimplexBlendResponse:
+    try:
+        _, catalog = _cartridge_context()
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    odorant_names = list(catalog.keys())
+    sequences = [anchor.scent_sequence for anchor in anchors]
+    for seq in sequences:
+        validate_composition(seq, catalog)
+
+    vectors = [sequence_to_vector(seq, odorant_names) for seq in sequences]
+    blended = blend_vectors(vectors[0], vectors[1], vectors[2], (weights[0], weights[1], weights[2]))
+    corpus = load_corpus_vectors(settings.learned_examples_path, odorant_names)
+    corpus_match = nearest_corpus_recipe(blended, corpus) if use_corpus_nearest else None
+    corpus_max_distance = 0.35
+
+    if (
+        use_corpus_nearest
+        and corpus_match
+        and corpus_match.get("scent_sequence")
+        and float(corpus_match.get("distance", 1.0)) <= corpus_max_distance
+    ):
+        sequence = corpus_match["scent_sequence"]
+        source = "corpus"
+    else:
+        sequence = vector_to_sequence(blended, pulse_seconds=settings.pulse_seconds)
+        source = "blend"
+
+    validate_composition(sequence, catalog)
+    compatibility_warnings = check_compatibility_warnings(sequence, catalog)
+    pulse_sequence = expand_to_pulse_sequence(sequence, settings.pulse_seconds, settings.pulse_rounds)
+    w_sum = sum(weights)
+    norm_weights = [w / w_sum for w in weights] if w_sum > 0 else [1 / 3, 1 / 3, 1 / 3]
+
+    return SimplexBlendResponse(
+        weights=norm_weights,
+        scent_sequence=sequence,
+        validated_sequence=sequence,
+        pulse_sequence=pulse_sequence,
+        vector=blended,
+        compatibility_warnings=compatibility_warnings,
+        corpus_match=corpus_match,
+        source=source,
+    )
+
+
 def load_scents() -> Dict[str, Any]:
     """Return the full (fixed, 12-odorant) scent catalog for AI composition."""
     _, catalog = _cartridge_context()
@@ -146,12 +214,52 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
+    ble_ok = False
+    try:
+        with httpx.Client(timeout=2.0) as client:
+            resp = client.get(f"{settings.ble_backend_url.rstrip('/')}/health")
+            ble_ok = resp.status_code == 200
+    except Exception:
+        ble_ok = False
     return {
         "status": "ok",
+        "ble_backend_url": settings.ble_backend_url,
+        "ble_backend_reachable": ble_ok,
         "interaction_logging_configured": bool(
             settings.interaction_log_apps_script_url and settings.interaction_log_token
         ),
     }
+
+
+@app.post("/device/play_sequence")
+async def device_play_sequence(request: DevicePlaySequenceRequest) -> Dict[str, Any]:
+    """Forward pulse train to the Flask BLE backend (browser only talks to :8000)."""
+    url = f"{settings.ble_backend_url.rstrip('/')}/play_sequence"
+    payload = {"sequence": [item.model_dump() for item in request.sequence]}
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            resp = await client.post(url, json=payload)
+    except httpx.ConnectError:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"BLE backend not reachable at {settings.ble_backend_url}. "
+                "Start it with ./start_ble_backend.sh or the BLE tab from ./start_all.sh."
+            ),
+        )
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"BLE backend request failed: {e}")
+
+    try:
+        body = resp.json()
+    except ValueError:
+        raise HTTPException(
+            status_code=502,
+            detail=f"BLE backend returned non-JSON (HTTP {resp.status_code})",
+        )
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=resp.status_code, detail=body.get("message") or body)
+    return body
 
 
 @app.get("/cartridge/status")
@@ -180,6 +288,102 @@ def cartridge_active() -> Dict[str, Any]:
         "status": get_cartridge_status(config),
         "scents": catalog,
     }
+
+
+@app.get("/simplex/presets")
+def simplex_presets() -> Dict[str, Any]:
+    """Fixed token-labeled anchor recipes for offline triangle navigation."""
+    anchors: List[Dict[str, Any]] = []
+    for preset in DEFAULT_ANCHOR_PRESETS:
+        sequence = [ScentItem(**item) for item in preset["scent_sequence"]]
+        pulse = expand_to_pulse_sequence(sequence, settings.pulse_seconds, settings.pulse_rounds)
+        anchors.append(
+            {
+                **preset,
+                "scent_sequence": [item.model_dump() for item in sequence],
+                "pulse_sequence": [item.model_dump() for item in pulse],
+            }
+        )
+    return {"anchors": anchors}
+
+
+@app.post("/simplex/interpolate", response_model=SimplexBlendResponse)
+def simplex_interpolate(request: SimplexInterpolateRequest) -> SimplexBlendResponse:
+    try:
+        return _simplex_blend_from_weights(
+            request.anchors,
+            request.weights,
+            use_corpus_nearest=request.use_corpus_nearest,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.post("/simplex/from_point", response_model=SimplexBlendResponse)
+def simplex_from_point(request: SimplexPointRequest) -> SimplexBlendResponse:
+    """Map a click in normalized triangle space to barycentric weights, then blend."""
+    # UI uses A top, B bottom-left, C bottom-right in unit coordinates.
+    ax, ay = 0.5, math.sqrt(3) / 2
+    bx, by = 0.0, 0.0
+    cx, cy = 1.0, 0.0
+    weights = barycentric_from_point(
+        request.point_x,
+        request.point_y,
+        ax,
+        ay,
+        bx,
+        by,
+        cx,
+        cy,
+    )
+    try:
+        return _simplex_blend_from_weights(
+            request.anchors,
+            list(weights),
+            use_corpus_nearest=request.use_corpus_nearest,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.post("/simplex/prepare_anchors")
+def simplex_prepare_anchors(request: SimplexPrepareAnchorsRequest) -> Dict[str, Any]:
+    """Compose three diverse anchor blends for a target smell phrase (3 LLM calls)."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+    try:
+        config, catalog = _cartridge_context()
+        cartridge_status = get_cartridge_status(config)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    target = request.target.strip()
+    corner_specs = [
+        ("A", "bright citrus, herbal, or airy facets"),
+        ("B", "sweet, gourmand, powdery, or comforting facets"),
+        ("C", "woody, resinous, smoky, or dry facets"),
+    ]
+    anchors: List[Dict[str, Any]] = []
+    for token, facet in corner_specs:
+        sentence = (
+            f"{target} — emphasize {facet}. "
+            "This is one corner anchor in a 3-point smell navigation triangle; "
+            "make it clearly distinct from the other corners while still evoking the target."
+        )
+        narrowed = filter_relevant_scents(sentence, catalog, settings.descriptor_filter_top_k)
+        result = compose_with_openai(sentence, narrowed, cartridge_status)
+        validate_composition(result.scent_sequence, catalog)
+        extra = _validate_and_expand(sentence, result.scent_sequence, narrowed, result.justification)
+        anchors.append(
+            {
+                "token": token,
+                "label": f"Token {token}",
+                "scent_sequence": [item.model_dump() for item in extra["validated_sequence"]],
+                "pulse_sequence": [item.model_dump() for item in extra["pulse_sequence"]],
+                "justification": extra["justification"],
+            }
+        )
+    return {"target": target, "anchors": anchors}
 
 
 @app.post("/compose", response_model=ComposeResponse)
