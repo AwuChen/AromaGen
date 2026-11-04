@@ -25,7 +25,8 @@ Playback goes through the AI backend (`POST /device/play_sequence`), which forwa
 | Route | Purpose |
 |-------|---------|
 | `GET /simplex/presets` | Demo anchor recipes |
-| `POST /simplex/prepare_anchors` | `{ "target": "grandma's perfume" }` → 3 composed anchors |
+| `POST /simplex/prepare_triangle` | RAG/log center + corners. Body: `corner_mode`: `preset` \| `cluster` \| `llm`, `neutral_labels`: bool |
+| `POST /simplex/prepare_anchors` | Legacy: 3 independent facet LLM corners (no shared center) |
 | `POST /simplex/from_point` | Anchors + click `(point_x, point_y)` → blend + pulse train |
 | `POST /simplex/interpolate` | Anchors + explicit `[w1,w2,w3]` |
 | `POST /device/play_sequence` | `{ "sequence": [{ "scent_id", "duration" }] }` → BLE backend |

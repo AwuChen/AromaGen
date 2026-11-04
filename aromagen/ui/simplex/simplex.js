@@ -52,6 +52,7 @@ function snapToCorner(px, py) {
 }
 
 let anchors = [];
+let centerSmell = null;
 let scentsData = {};
 let currentBlend = null;
 let dragActive = false;
@@ -161,12 +162,14 @@ function updateWeightsDisplay(weights) {
   if (els.wC) els.wC.textContent = weights[2].toFixed(2);
 }
 
+/** Map click/drag to barycentric weights, then snap the dot to the nearest point inside the triangle. */
 function setDotPosition(px, py) {
-  if (els.blendDot) {
-    els.blendDot.setAttribute('cx', px);
-    els.blendDot.setAttribute('cy', py);
-  }
   const weights = barycentricFromPoint(px, py);
+  const constrained = pointFromBarycentric(weights);
+  if (els.blendDot) {
+    els.blendDot.setAttribute('cx', constrained.x);
+    els.blendDot.setAttribute('cy', constrained.y);
+  }
   updateWeightsDisplay(weights);
   return weights;
 }
@@ -283,8 +286,107 @@ async function loadPresets() {
   if (!res.ok) throw new Error(await res.text());
   const data = await res.json();
   anchors = data.anchors || [];
+  centerSmell = null;
+  renderCenter();
   renderAnchors();
   setStatus('Demo anchors ready. Smell A, B, C, then place your dot.');
+}
+
+function formatCenterSource(source, metadata) {
+  const labels = {
+    exact_log: 'Exact match in interaction log (best similarity round)',
+    retrieved_log: 'Retrieved neighbor in log (highest similarity score)',
+    retrieved_log_nearest: 'Retrieved neighbor in log (embedding match)',
+    learned_example: 'Accept-bank example',
+    composed_rag: 'New LLM compose with RAG (no strong log match)',
+  };
+  let text = labels[source] || source;
+  if (metadata && metadata.matched_target) {
+    text += ' · precedent: “' + metadata.matched_target + '”';
+  }
+  if (metadata && metadata.best_similarity != null) {
+    text += ' · similarity ' + metadata.best_similarity;
+  }
+  return text;
+}
+
+function renderCenter() {
+  const panel = document.getElementById('centerPanel');
+  const metaEl = document.getElementById('centerMeta');
+  const recipeEl = document.getElementById('centerRecipe');
+  if (!centerSmell || !centerSmell.scent_sequence) {
+    if (panel) panel.hidden = true;
+    return;
+  }
+  if (panel) panel.hidden = false;
+  if (metaEl) {
+    metaEl.textContent = formatCenterSource(centerSmell.source, centerSmell.metadata || {});
+  }
+  if (recipeEl) {
+    recipeEl.textContent = summarizeRecipe(centerSmell.scent_sequence);
+  }
+}
+
+function getPrepareTriangleOptions() {
+  const modeEl = document.querySelector('input[name="cornerMode"]:checked');
+  const neutralEl = document.getElementById('neutralLabels');
+  return {
+    corner_mode: (modeEl && modeEl.value) || 'cluster',
+    neutral_labels: !!(neutralEl && neutralEl.checked),
+  };
+}
+
+async function prepareTriangle() {
+  const target = (els.targetInput && els.targetInput.value.trim()) || '';
+  if (!target) {
+    setStatus('Enter a target smell first.', true);
+    return;
+  }
+  const opts = getPrepareTriangleOptions();
+  const btn = document.getElementById('prepareTriangleBtn');
+  if (btn) btn.disabled = true;
+  setStatus('Resolving center from log/RAG and building corners (' + opts.corner_mode + ')…');
+  try {
+    const res = await fetch(API_BASE + '/simplex/prepare_triangle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target: target,
+        corner_mode: opts.corner_mode,
+        neutral_labels: opts.neutral_labels,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(function () { return {}; });
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+    centerSmell = data.center || null;
+    anchors = data.anchors || [];
+    renderCenter();
+    renderAnchors();
+    centerDot();
+    const spread = data.corner_min_pairwise_l2 != null ? data.corner_min_pairwise_l2 : '?';
+    setStatus(
+      'Triangle ready for “' + target + '”. Smell center, then A/B/C, then place your dot. ' +
+      '(corner spread L2≈' + spread + ')'
+    );
+  } catch (err) {
+    setStatus(explainFetchError(err, 'Prepare triangle'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function smellCenter() {
+  if (!centerSmell) return;
+  try {
+    setStatus('Playing center…');
+    await playPulseSequence(centerSmell.pulse_sequence, centerSmell.scent_sequence);
+    setStatus('Center playing.');
+  } catch (err) {
+    setStatus(explainFetchError(err, 'Smell center'), true);
+  }
 }
 
 async function generateAnchors() {
@@ -364,35 +466,54 @@ async function mixAndPlay() {
   }
 }
 
+function releasePointerIfCaptured(evt) {
+  const svg = els.simplexSvg;
+  if (!svg || !evt || evt.pointerId == null) return;
+  try {
+    if (svg.hasPointerCapture && svg.hasPointerCapture(evt.pointerId)) {
+      svg.releasePointerCapture(evt.pointerId);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function finishTriangleDrag(evt) {
+  if (!dragActive) return;
+  dragActive = false;
+  releasePointerIfCaptured(evt);
+  if (!evt) return;
+  const raw = svgPointFromEvent(evt);
+  const snapped = snapToCorner(raw.x, raw.y);
+  setDotPosition(snapped.x, snapped.y);
+}
+
 function bindTriangle() {
   if (!els.simplexSvg) return;
+  const svg = els.simplexSvg;
 
   function onPointerDown(evt) {
+    if (evt.button !== 0) return;
     dragActive = true;
-    els.simplexSvg.setPointerCapture(evt.pointerId);
-    onPointerMove(evt);
+    svg.setPointerCapture(evt.pointerId);
+    const raw = svgPointFromEvent(evt);
+    setDotPosition(raw.x, raw.y);
   }
 
   function onPointerMove(evt) {
-    if (!dragActive && evt.type === 'pointermove') return;
-    const p = svgPointFromEvent(evt);
-    setDotPosition(p.x, p.y);
-  }
-
-  function onPointerUp(evt) {
-    dragActive = false;
-    try {
-      els.simplexSvg.releasePointerCapture(evt.pointerId);
-    } catch (e) { /* ignore */ }
+    if (!dragActive) return;
+    if ((evt.buttons & 1) === 0) {
+      finishTriangleDrag(evt);
+      return;
+    }
     const raw = svgPointFromEvent(evt);
-    const p = snapToCorner(raw.x, raw.y);
-    setDotPosition(p.x, p.y);
+    setDotPosition(raw.x, raw.y);
   }
 
-  els.simplexSvg.addEventListener('pointerdown', onPointerDown);
-  els.simplexSvg.addEventListener('pointermove', onPointerMove);
-  els.simplexSvg.addEventListener('pointerup', onPointerUp);
-  els.simplexSvg.addEventListener('pointerleave', onPointerUp);
+  svg.addEventListener('pointerdown', onPointerDown);
+  svg.addEventListener('pointermove', onPointerMove);
+  svg.addEventListener('pointerup', finishTriangleDrag);
+  svg.addEventListener('pointercancel', finishTriangleDrag);
+  window.addEventListener('pointerup', finishTriangleDrag);
+  window.addEventListener('pointercancel', finishTriangleDrag);
 
   setDotPosition(0.5, 0.288);
 }
@@ -413,6 +534,8 @@ function anotherRound() {
 document.getElementById('loadPresetsBtn')?.addEventListener('click', function () {
   loadPresets().catch(function (err) { setStatus(String(err.message || err), true); });
 });
+document.getElementById('prepareTriangleBtn')?.addEventListener('click', prepareTriangle);
+document.getElementById('smellCenterBtn')?.addEventListener('click', smellCenter);
 document.getElementById('generateAnchorsBtn')?.addEventListener('click', generateAnchors);
 document.getElementById('mixPlayBtn')?.addEventListener('click', mixAndPlay);
 document.getElementById('resetDotBtn')?.addEventListener('click', centerDot);

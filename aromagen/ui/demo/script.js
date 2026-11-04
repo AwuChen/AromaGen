@@ -1,9 +1,13 @@
 const API_BASE = window.FREQUENCY_API_BASE || 'http://localhost:8000';
 
-const LOG_SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1TBswegffpBQL_AAeMdSgM6qz9V1eC9aK09OAR_m5Ys4/edit';
+let interactionLogSheetUrl = (window.AROMAGEN_LOG_SHEET_URL || '').trim();
 
 function openLogSheet() {
-  window.open(LOG_SPREADSHEET_URL, '_blank', 'noopener');
+  if (!interactionLogSheetUrl) {
+    alert('Log sheet URL is not configured. Set INTERACTION_LOG_SHEET_URL in .env on the AI backend.');
+    return;
+  }
+  window.open(interactionLogSheetUrl, '_blank', 'noopener');
 }
 
 async function submitLogInteraction() {
@@ -494,7 +498,12 @@ function applyInteractionLoggingAvailability(configured) {
 
 fetch(API_BASE + '/health')
   .then(function (r) { return r.ok ? r.json() : { interaction_logging_configured: false }; })
-  .then(function (data) { applyInteractionLoggingAvailability(!!data.interaction_logging_configured); })
+  .then(function (data) {
+    if (data.interaction_log_sheet_url) {
+      interactionLogSheetUrl = data.interaction_log_sheet_url;
+    }
+    applyInteractionLoggingAvailability(!!data.interaction_logging_configured);
+  })
   .catch(function () { applyInteractionLoggingAvailability(false); });
 
 let currentPulseSequence = null; // Interleaved hardware pulse train from the last compose/feedback call

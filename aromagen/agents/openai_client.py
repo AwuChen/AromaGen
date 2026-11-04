@@ -20,6 +20,7 @@ from .schemas import (
     FeedbackRequest,
     FeedbackResponse,
     ScentItem,
+    TriangleDirectionPlan,
     ValidationResponse,
 )
 from .settings import settings
@@ -868,4 +869,31 @@ def refine_with_openai(
         schema=schema,
         schema_name="ScentRevision",
         max_completion_tokens=4096,
+    )
+
+
+def plan_triangle_directions(target: str, center_summary: str) -> TriangleDirectionPlan:
+    """Propose three target-specific perceptual directions for simplex corners."""
+    client = OpenAI(api_key=settings.openai_api_key)
+    system_prompt = (
+        "You design a 3-corner smell navigation triangle around a central blend. "
+        "Given a target smell and the center recipe, return exactly three DISTINCT "
+        "perceptual directions that plausibly branch from that center. "
+        "Use short_label for UI (2–4 words). Use facet as a phrase for a composer "
+        "(what to emphasize). Do not default to floral/gourmand/woody unless they fit the target."
+    )
+    user_message = (
+        f"Target smell: {target}\n"
+        f"Center recipe (12-cartridge mix): {center_summary}\n"
+        "Propose three corners that cover different plausible facets of this target."
+    )
+    schema = TriangleDirectionPlan.model_json_schema()
+    return _complete_structured(
+        client,
+        system_prompt=system_prompt,
+        user_message=user_message,
+        response_model=TriangleDirectionPlan,
+        schema=schema,
+        schema_name="TriangleDirectionPlan",
+        max_completion_tokens=512,
     )
