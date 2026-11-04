@@ -222,14 +222,18 @@ def health() -> Dict[str, Any]:
             ble_ok = resp.status_code == 200
     except Exception:
         ble_ok = False
-    return {
+    logging_configured = bool(
+        settings.interaction_log_apps_script_url and settings.interaction_log_token
+    )
+    payload: Dict[str, Any] = {
         "status": "ok",
         "ble_backend_url": settings.ble_backend_url,
         "ble_backend_reachable": ble_ok,
-        "interaction_logging_configured": bool(
-            settings.interaction_log_apps_script_url and settings.interaction_log_token
-        ),
+        "interaction_logging_configured": logging_configured,
     }
+    if logging_configured and settings.interaction_log_sheet_url:
+        payload["interaction_log_sheet_url"] = settings.interaction_log_sheet_url
+    return payload
 
 
 @app.post("/device/play_sequence")

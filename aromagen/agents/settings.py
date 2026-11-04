@@ -49,6 +49,8 @@ class Settings:
 
     interaction_log_apps_script_url: str = os.getenv("INTERACTION_LOG_APPS_SCRIPT_URL", "")
     interaction_log_token: str = os.getenv("INTERACTION_LOG_TOKEN", "")
+    # Optional: human-readable link for demo UI "Open Log Sheet" (not used by the API).
+    interaction_log_sheet_url: str = os.getenv("INTERACTION_LOG_SHEET_URL", "")
 
     # Local copy of the interaction log (fast read-path for retrieval-augmented
     # composition, dual-written alongside the Apps Script/Sheet on every /log_interaction
